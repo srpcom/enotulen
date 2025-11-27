@@ -11,7 +11,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- ExcelJS & FileSaver (Export Excel) -->
+    <!-- ExcelJS & FileSaver (Untuk Export Excel dengan Gambar) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
@@ -182,9 +182,30 @@
                 <!-- DASHBOARD -->
                 <div id="view-dashboard" class="page-view animate-fade-in max-w-6xl mx-auto space-y-6">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2"><div><h1 class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">Dashboard Overview</h1><p class="text-slate-500 dark:text-slate-400 text-sm">Selamat datang kembali, mari produktif hari ini.</p></div></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Card Buat Jadwal -->
                         <div onclick="navTo('create')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden"><div class="flex items-center gap-5 relative z-10"><div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-green-500/30 group-hover:rotate-6 transition"><i class="fa-solid fa-plus text-2xl"></i></div><div><h3 class="font-bold text-xl text-slate-800 dark:text-white">Buat Jadwal Rapat</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Jadwalkan rapat baru dan undang peserta.</p></div></div></div>
+                        
+                        <!-- Card Arsip Notulen -->
                         <div onclick="navTo('list')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden"><div class="flex items-center gap-5 relative z-10"><div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:rotate-6 transition"><i class="fa-solid fa-folder-open text-2xl"></i></div><div><h3 class="font-bold text-xl text-slate-800 dark:text-white">Arsip Notulen</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Anda memiliki <span id="dash-total-count" class="font-bold text-blue-500">...</span> dokumen tersimpan.</p></div></div></div>
+                        
+                        <!-- Card Booking Ruang Rapat (BARU) -->
+                        <div onclick="window.open('https://sibora.tubankab.cloud/', '_blank')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden">
+                            <div class="absolute right-0 top-0 w-32 h-32 bg-red-400/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                            <div class="flex items-center gap-5 relative z-10">
+                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white shadow-lg shadow-red-500/30 group-hover:rotate-6 transition">
+                                    <i class="fa-solid fa-calendar-check text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-xl text-slate-800 dark:text-white">Booking Ruang</h3>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Reservasi ruang rapat via SIBORA.</p>
+                                </div>
+                                <div class="ml-auto text-slate-300 dark:text-slate-600 group-hover:text-red-500 transition">
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -425,6 +446,8 @@
             document.getElementById('att-modal-title').textContent = title;
             document.getElementById('att-table-body').innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Mengambil data...</td></tr>';
             document.getElementById('btn-download-att').classList.add('hidden');
+            
+            // Simpan Info Global untuk Header Excel
             currentMeetingTitle = title;
             currentMeetingDate = date;
             currentMeetingTime = time;
@@ -459,6 +482,7 @@
 
         async function downloadAttendanceWithImages() {
             if (!currentAttendanceData || currentAttendanceData.length === 0) return;
+            
             const btn = document.getElementById('btn-download-att');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyusun Excel...';
@@ -467,31 +491,37 @@
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Daftar Hadir');
 
-            worksheet.columns = [
-                { header: 'No', key: 'no', width: 5 },
-                { header: 'Waktu Absen', key: 'waktu', width: 25 },
-                { header: 'Nama Peserta', key: 'nama', width: 35 },
-                { header: 'Nomor HP', key: 'hp', width: 25 },
-                { header: 'Tanda Tangan', key: 'ttd', width: 25 } 
-            ];
+            // Atur Lebar Kolom (Width Increased for Date)
+            worksheet.getColumn(1).width = 5;  // No
+            worksheet.getColumn(2).width = 25; // Waktu (Increased from 20)
+            worksheet.getColumn(3).width = 35; // Nama
+            worksheet.getColumn(4).width = 25; // HP
+            worksheet.getColumn(5).width = 25; // TTD
 
+            // --- HEADER CUSTOM (MERGED CELLS) ---
+            
+            // Baris 1: Judul Utama
             const titleRow = worksheet.addRow(['DAFTAR HADIR']);
             titleRow.font = { size: 14, bold: true };
             titleRow.alignment = { vertical: 'middle', horizontal: 'center' };
             worksheet.mergeCells('A1:E1');
 
+            // Baris 2: Judul Rapat
             const agendaRow = worksheet.addRow([currentMeetingTitle]);
             agendaRow.font = { size: 12, bold: true };
             agendaRow.alignment = { vertical: 'middle', horizontal: 'center' };
             worksheet.mergeCells('A2:E2');
 
+            // Baris 3: Tanggal & Waktu
             const dateRow = worksheet.addRow([`Pelaksanaan: ${currentMeetingDate} - Pukul ${currentMeetingTime}`]);
             dateRow.font = { size: 11, italic: true };
             dateRow.alignment = { vertical: 'middle', horizontal: 'center' };
             worksheet.mergeCells('A3:E3');
 
+            // Baris 4: Spasi Kosong
             worksheet.addRow([]);
 
+            // Baris 5: Header Tabel
             const headerRow = worksheet.addRow(['No', 'Waktu Absen', 'Nama Peserta', 'Nomor HP', 'Tanda Tangan']);
             headerRow.height = 25;
             headerRow.eachCell((cell) => {
@@ -501,20 +531,41 @@
                 cell.alignment = { vertical: 'middle', horizontal: 'center' };
             });
 
+            // --- ISI DATA ---
             for (let i = 0; i < currentAttendanceData.length; i++) {
                 const rowData = currentAttendanceData[i];
-                const row = worksheet.addRow([ i + 1, rowData.waktu, rowData.nama, rowData.hp, '' ]);
-                row.height = 50; 
+                const row = worksheet.addRow([
+                    i + 1,
+                    rowData.waktu,
+                    rowData.nama,
+                    rowData.hp,
+                    '' // Placeholder TTD
+                ]);
+                
+                row.height = 50; // Tinggi baris untuk gambar
+                
+                // Border untuk setiap sel data
                 row.eachCell({ includeEmpty: true }, (cell) => {
                     cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
                     cell.alignment = { vertical: 'middle', horizontal: 'left' };
                 });
+                
+                // Center alignment untuk No dan Waktu
                 row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
                 row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
 
+                // Insert Image
                 if (rowData.ttdBase64) {
-                    const imageId = workbook.addImage({ base64: rowData.ttdBase64, extension: 'png' });
-                    worksheet.addImage(imageId, { tl: { col: 4.1, row: row.number - 1.1 }, ext: { width: 80, height: 40 }, editAs: 'oneCell' });
+                    const imageId = workbook.addImage({
+                        base64: rowData.ttdBase64,
+                        extension: 'png',
+                    });
+
+                    worksheet.addImage(imageId, {
+                        tl: { col: 4.1, row: row.number - 1.1 }, // Posisi sedikit geser agar di tengah
+                        ext: { width: 80, height: 40 },
+                        editAs: 'oneCell'
+                    });
                 }
             }
 
