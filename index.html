@@ -384,8 +384,12 @@
         let filteredData = [];
         let currentPage = 1;
         const itemsPerPage = 15;
+        
+        // --- DATA ATTENDANCE UNTUK DOWNLOAD ---
         let currentAttendanceData = [];
         let currentMeetingTitle = "";
+        let currentMeetingDate = "";
+        let currentMeetingTime = "";
 
         function handleCredentialResponse(response) {
             const payload = JSON.parse(decodeURIComponent(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
@@ -433,19 +437,23 @@
 
         function logout() { localStorage.removeItem('rsud_user_pro_v2'); location.reload(); }
 
-        // --- VIEW ATTENDANCE (Updated) ---
+        // --- NEW: View & Download Attendance Logic ---
         function copyAbsensiLink(id) {
             const baseUrl = window.location.href.split('?')[0];
             const fullUrl = `${baseUrl}?v=absensi&id=${id}`;
             navigator.clipboard.writeText(fullUrl).then(() => { alert("Link Absensi Berhasil Disalin!"); });
         }
 
-        function viewAttendance(id, title) {
+        function viewAttendance(id, title, date, time) {
             document.getElementById('modal-attendance').classList.remove('hidden');
             document.getElementById('att-modal-title').textContent = title;
             document.getElementById('att-table-body').innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Mengambil data...</td></tr>';
             document.getElementById('btn-download-att').classList.add('hidden');
+            
+            // Simpan Info Global untuk Header Excel
             currentMeetingTitle = title;
+            currentMeetingDate = date;
+            currentMeetingTime = time;
 
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getAttendance', meetingId: id }) })
             .then(res => res.json())
@@ -478,7 +486,6 @@
         async function downloadAttendanceWithImages() {
             if (!currentAttendanceData || currentAttendanceData.length === 0) return;
             
-            // Show loader locally
             const btn = document.getElementById('btn-download-att');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyusun Excel...';
@@ -487,30 +494,70 @@
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Daftar Hadir');
 
-            // Set Columns
-            worksheet.columns = [
-                { header: 'No', key: 'no', width: 5 },
-                { header: 'Waktu Absen', key: 'waktu', width: 20 },
-                { header: 'Nama Peserta', key: 'nama', width: 30 },
-                { header: 'Nomor HP', key: 'hp', width: 20 },
-                { header: 'Tanda Tangan', key: 'ttd', width: 20 } 
-            ];
+            // Atur Lebar Kolom
+            worksheet.getColumn(1).width = 5;  // No
+            worksheet.getColumn(2).width = 20; // Waktu
+            worksheet.getColumn(3).width = 35; // Nama
+            worksheet.getColumn(4).width = 25; // HP
+            worksheet.getColumn(5).width = 25; // TTD
 
-            // Add Data Rows
+            // --- HEADER CUSTOM (MERGED CELLS) ---
+            
+            // Baris 1: Judul Utama
+            const titleRow = worksheet.addRow(['DAFTAR HADIR']);
+            titleRow.font = { size: 14, bold: true };
+            titleRow.alignment = { vertical: 'middle', horizontal: 'center' };
+            worksheet.mergeCells('A1:E1');
+
+            // Baris 2: Judul Rapat
+            const agendaRow = worksheet.addRow([currentMeetingTitle]);
+            agendaRow.font = { size: 12, bold: true };
+            agendaRow.alignment = { vertical: 'middle', horizontal: 'center' };
+            worksheet.mergeCells('A2:E2');
+
+            // Baris 3: Tanggal & Waktu
+            const dateRow = worksheet.addRow([`Pelaksanaan: ${currentMeetingDate} - Pukul ${currentMeetingTime}`]);
+            dateRow.font = { size: 11, italic: true };
+            dateRow.alignment = { vertical: 'middle', horizontal: 'center' };
+            worksheet.mergeCells('A3:E3');
+
+            // Baris 4: Spasi Kosong
+            worksheet.addRow([]);
+
+            // Baris 5: Header Tabel
+            const headerRow = worksheet.addRow(['No', 'Waktu Absen', 'Nama Peserta', 'Nomor HP', 'Tanda Tangan']);
+            headerRow.height = 25;
+            headerRow.eachCell((cell) => {
+                cell.font = { bold: true };
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
+                cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            });
+
+            // --- ISI DATA ---
             for (let i = 0; i < currentAttendanceData.length; i++) {
                 const rowData = currentAttendanceData[i];
-                const row = worksheet.addRow({
-                    no: i + 1,
-                    waktu: rowData.waktu,
-                    nama: rowData.nama,
-                    hp: rowData.hp,
-                    ttd: '' // Placeholder for image
+                const row = worksheet.addRow([
+                    i + 1,
+                    rowData.waktu,
+                    rowData.nama,
+                    rowData.hp,
+                    '' // Placeholder TTD
+                ]);
+                
+                row.height = 50; // Tinggi baris untuk gambar
+                
+                // Border untuk setiap sel data
+                row.eachCell({ includeEmpty: true }, (cell) => {
+                    cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                    cell.alignment = { vertical: 'middle', horizontal: 'left' };
                 });
                 
-                // Adjust row height for image
-                row.height = 60; 
+                // Center alignment untuk No dan Waktu
+                row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
+                row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
 
-                // Insert Image if Base64 exists
+                // Insert Image
                 if (rowData.ttdBase64) {
                     const imageId = workbook.addImage({
                         base64: rowData.ttdBase64,
@@ -518,23 +565,17 @@
                     });
 
                     worksheet.addImage(imageId, {
-                        tl: { col: 4, row: row.number - 1 }, // Column 4 (0-index is 4 for 5th col), Row index
-                        ext: { width: 100, height: 50 },
+                        tl: { col: 4.1, row: row.number - 1.1 }, // Posisi sedikit geser agar di tengah
+                        ext: { width: 80, height: 40 },
                         editAs: 'oneCell'
                     });
                 }
             }
 
-            // Styling Header
-            worksheet.getRow(1).font = { bold: true };
-            worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
-
-            // Generate & Download
             const buffer = await workbook.xlsx.writeBuffer();
             const safeTitle = (currentMeetingTitle || "Rapat").replace(/[^a-zA-Z0-9]/g, "_");
             saveAs(new Blob([buffer]), `Absensi_${safeTitle}.xlsx`);
 
-            // Restore Button
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
@@ -579,7 +620,8 @@
                 if(canEdit) {
                     btn = `<div class="flex items-center justify-center gap-2">
                         <button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-green-600 dark:text-slate-500 dark:hover:text-emerald-400 text-lg transition" title="Salin Link Absensi"><i class="fa-solid fa-qrcode"></i></button>
-                        <button onclick="viewAttendance('${item.id}', '${item.agenda}')" class="text-slate-400 hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400 text-lg transition" title="Lihat Daftar Hadir"><i class="fa-solid fa-users"></i></button>
+                        <!-- Update Call with Date/Time -->
+                        <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}')" class="text-slate-400 hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400 text-lg transition" title="Lihat Daftar Hadir"><i class="fa-solid fa-users"></i></button>
                         <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 dark:text-blue-400 font-bold text-xs border border-blue-200 dark:border-blue-800 px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">EDIT</button>
                     </div>`;
                 }
