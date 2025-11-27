@@ -61,8 +61,15 @@
         .nav-item.active { background: rgba(22, 163, 74, 0.1); color: #15803d; border-right: 3px solid #15803d; }
         .dark .nav-item.active { background: rgba(52, 211, 153, 0.15); color: #34d399; border-right: 3px solid #34d399; }
 
-        /* Signature Canvas */
-        #signature-pad { touch-action: none; background-color: white; cursor: crosshair; }
+        /* Signature Canvas CSS Fix */
+        #signature-pad { 
+            touch-action: none; 
+            background-color: white; 
+            cursor: crosshair; 
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body class="am-bg h-screen flex overflow-hidden text-slate-800 dark:text-slate-200">
@@ -119,13 +126,17 @@
                     
                     <div>
                         <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Tanda Tangan Digital</label>
-                        <div class="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden bg-white touch-none h-40">
-                            <canvas id="signature-pad" class="w-full h-full"></canvas>
+                        <!-- Container Canvas -->
+                        <div class="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden bg-white touch-none h-48 w-full">
+                            <canvas id="signature-pad"></canvas>
                             <div class="absolute bottom-2 right-2 flex gap-2">
-                                <button type="button" onclick="clearSignature()" class="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200">Hapus</button>
+                                <button type="button" onclick="clearSignature()" class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-lg hover:bg-red-200 font-semibold shadow-sm border border-red-200">
+                                    <i class="fa-solid fa-eraser mr-1"></i> Hapus
+                                </button>
                             </div>
-                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none text-slate-200 text-sm font-bold">Area Tanda Tangan</div>
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none text-slate-200 text-sm font-bold opacity-50">Area Tanda Tangan</div>
                         </div>
+                        <p class="text-[10px] text-slate-400 mt-1">*Coretkan tanda tangan pada kotak di atas.</p>
                     </div>
 
                     <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-green-500/30 transform active:scale-95 transition">
@@ -334,7 +345,7 @@
     </div>
 
     <script>
-        // --- 1. SIGNATURE PAD LOGIC ---
+        // --- 1. SIGNATURE PAD LOGIC (FIXED) ---
         let isDrawing = false;
         let lastX = 0;
         let lastY = 0;
@@ -342,49 +353,98 @@
         const ctx = canvas.getContext('2d');
 
         function resizeCanvas() {
+            // Adjust canvas resolution for high DPI displays and responsive width
             const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            
+            // Set "internal" size (resolution)
             canvas.width = canvas.offsetWidth * ratio;
             canvas.height = canvas.offsetHeight * ratio;
+            
+            // Set line style defaults again because resizing clears context
             ctx.scale(ratio, ratio);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
         }
+
+        // Listen for window resize to fix canvas resolution
         window.addEventListener("resize", resizeCanvas);
-        resizeCanvas();
+        // Call once on load (and slightly delayed to ensure layout is ready)
+        setTimeout(resizeCanvas, 100);
+
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX, clientY;
+
+            if (e.changedTouches && e.changedTouches.length > 0) {
+                // Touch event
+                clientX = e.changedTouches[0].clientX;
+                clientY = e.changedTouches[0].clientY;
+            } else {
+                // Mouse event
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            return [clientX - rect.left, clientY - rect.top];
+        }
 
         function startDrawing(e) {
+            // Prevent scrolling on touch devices
+            if (e.type === 'touchstart') {
+                e.preventDefault(); 
+            }
+            
             isDrawing = true;
             [lastX, lastY] = getCoords(e);
         }
 
         function draw(e) {
             if (!isDrawing) return;
-            e.preventDefault(); 
+            
+            if (e.type === 'touchmove') {
+                e.preventDefault(); // Stop scrolling while drawing
+            }
+
             const [x, y] = getCoords(e);
+            
             ctx.beginPath();
             ctx.moveTo(lastX, lastY);
             ctx.lineTo(x, y);
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
             ctx.stroke();
+            
             [lastX, lastY] = [x, y];
         }
 
-        function stopDrawing() { isDrawing = false; }
-        function getCoords(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return [clientX - rect.left, clientY - rect.top];
+        function stopDrawing(e) {
+            if (isDrawing) {
+                if (e.type === 'touchend') {
+                    // Draw one last dot if it was just a tap
+                    draw(e); 
+                }
+                isDrawing = false;
+            }
         }
-        function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
+        function clearSignature() {
+            // Clear entire canvas based on its internal resolution
+            ctx.clearRect(0, 0, canvas.width / (window.devicePixelRatio||1), canvas.height / (window.devicePixelRatio||1));
+            // Or simpler: just reset width (but need to re-scale)
+            resizeCanvas();
+        }
+
+        // Event Listeners - Important: Passive false for touch
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', stopDrawing);
         canvas.addEventListener('mouseout', stopDrawing);
-        canvas.addEventListener('touchstart', startDrawing);
-        canvas.addEventListener('touchmove', draw);
-        canvas.addEventListener('touchend', stopDrawing);
+
+        // Touch events with { passive: false } to allow preventDefault
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing, { passive: false });
+
 
         // --- 2. INIT APPLICATION ---
         updateTheme();
@@ -399,6 +459,8 @@
             document.getElementById('app-admin').classList.add('hidden');
             document.getElementById('app-absensi').classList.remove('hidden');
             loadMeetingInfo(meetingId);
+            // Re-calc canvas size after it becomes visible
+            setTimeout(resizeCanvas, 300);
         } else {
             // MODE: ADMIN (DEFAULT)
             document.getElementById('app-absensi').classList.add('hidden');
@@ -440,8 +502,10 @@
             // Get Signature Image
             const signatureData = canvas.toDataURL('image/png');
             
-            // Check if empty canvas (simple check by length or pixel check, assuming length for now)
-            if(signatureData.length < 3000) { // arbitrary small size for empty canvas
+            // Check if empty canvas (simple check by length)
+            // A blank canvas is usually very small in data size. 
+            // A safer check is to see if any drawing happened, but length check works for now.
+            if(signatureData.length < 3000) { 
                 toggleLoader(false);
                 alert("Mohon tanda tangan terlebih dahulu.");
                 return;
