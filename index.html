@@ -19,9 +19,10 @@
 <body class="text-gray-800 h-screen flex overflow-hidden bg-gray-50">
 
     <script>
-        // URL SCRIPT ANDA
+        // URL SCRIPT (Pastikan URL ini sama dengan Web App URL dari deployment terbaru Anda)
         const API_URL = "https://script.google.com/macros/s/AKfycbzj1mWjE3EC2KmtKbaHoz8yNEcnNFffDKXJ2xQg0mAKsSBB9QWGtIfwDw65z0OnnHWV/exec"; 
-        // CLIENT ID
+        
+        // CLIENT ID GOOGLE
         const CLIENT_ID = "783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com";
     </script>
 
@@ -160,7 +161,9 @@
             <div id="view-list" class="page-view hidden fade-in max-w-6xl mx-auto">
                 <div class="flex justify-between items-center mb-6">
                     <h1 class="text-2xl font-bold text-gray-800">Daftar Notulen</h1>
-                    <button onclick="loadData()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-600 text-sm font-medium"><i class="fa-solid fa-rotate mr-1"></i> Refresh</button>
+                    <button onclick="loadData()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-600 text-sm font-medium hover:bg-gray-50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate"></i> Refresh
+                    </button>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="overflow-x-auto">
@@ -186,7 +189,7 @@
             <div id="view-users" class="page-view hidden fade-in max-w-5xl mx-auto">
                 <div class="flex justify-between items-center mb-6">
                     <h1 class="text-2xl font-bold text-gray-800">Manajemen Pengguna</h1>
-                    <button onclick="loadUsers()" class="text-sm text-green-600 underline">Refresh</button>
+                    <button onclick="loadUsers()" class="text-sm text-green-600 underline hover:text-green-800">Refresh Data</button>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <table class="w-full text-left text-sm text-gray-600">
@@ -266,19 +269,36 @@
 
         function logout() { localStorage.removeItem('rsud_user_pro'); location.reload(); }
 
-        // --- MODIFIKASI LOAD DATA (MENGIRIM EMAIL USER) ---
+        // --- PERBAIKAN FUNGSI REFRESH DATA (LOAD DATA) ---
         function loadData() {
-            // Gunakan POST untuk mengirim email user saat request data
+            if (!currentUser) return;
+            
+            // Tampilkan spinner agar user tahu proses sedang berjalan
+            toggleLoader(true);
+            
             fetch(API_URL, {
                 method: 'POST',
                 body: JSON.stringify({
                     action: 'read',
-                    email: currentUser.email // Kirim email untuk filtering di backend
+                    email: currentUser.email // Kirim email untuk filtering
                 })
             })
             .then(res => res.json())
             .then(resp => {
-                if(resp.status === 'success') { allData = resp.data; renderTable(allData); renderDashboard(); }
+                toggleLoader(false); // Matikan spinner
+                if(resp.status === 'success') { 
+                    allData = resp.data; 
+                    renderTable(allData); 
+                    renderDashboard(); 
+                } else {
+                    // Tampilkan error jika gagal
+                    alert("Gagal memuat data: " + resp.message);
+                }
+            })
+            .catch(err => {
+                toggleLoader(false);
+                console.error(err);
+                alert("Terjadi kesalahan jaringan saat refresh data.");
             });
         }
 
@@ -297,7 +317,7 @@
 
         function renderDashboard() {
             const recent = allData.slice(0, 3);
-            // Dashboard logic
+            // Logic dashboard jika diperlukan
         }
 
         function resetForm() {
@@ -357,21 +377,36 @@
 
         const toBase64 = file => new Promise((r, j) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => r(reader.result); reader.onerror = j; });
 
+        // --- PERBAIKAN FUNGSI REFRESH USER (LOAD USERS) ---
         function loadUsers() {
             if(currentUser.role !== 'ADMIN') return;
+            
+            toggleLoader(true); // Tampilkan spinner
+            
             fetch(API_URL, { 
                 method: 'POST', 
                 body: JSON.stringify({ 
                     action: 'getUsers',
-                    requesterEmail: currentUser.email // Kirim email admin
+                    requesterEmail: currentUser.email 
                 }) 
-            }).then(res => res.json()).then(resp => {
-                const tbody = document.getElementById('users-table-body'); tbody.innerHTML = '';
-                resp.data.forEach(u => {
-                    const isSuper = u.email === "ridwankoramil9@gmail.com";
-                    let btn = isSuper ? "SUPER ADMIN" : `<button onclick="changeRole('${u.email}', '${u.role==='ADMIN'?'USER':'ADMIN'}')" class="text-xs bg-gray-100 px-2 py-1 rounded">Ubah Role</button>`;
-                    tbody.innerHTML += `<tr class="border-b"><td class="px-6 py-4">${u.name}</td><td class="px-6 py-4 text-xs">${u.email}</td><td class="px-6 py-4">${u.role}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`;
-                });
+            })
+            .then(res => res.json())
+            .then(resp => {
+                toggleLoader(false); // Matikan spinner
+                if(resp.status === 'success') {
+                    const tbody = document.getElementById('users-table-body'); tbody.innerHTML = '';
+                    resp.data.forEach(u => {
+                        const isSuper = u.email === "ridwankoramil9@gmail.com";
+                        let btn = isSuper ? "SUPER ADMIN" : `<button onclick="changeRole('${u.email}', '${u.role==='ADMIN'?'USER':'ADMIN'}')" class="text-xs bg-gray-100 px-2 py-1 rounded">Ubah Role</button>`;
+                        tbody.innerHTML += `<tr class="border-b"><td class="px-6 py-4">${u.name}</td><td class="px-6 py-4 text-xs">${u.email}</td><td class="px-6 py-4">${u.role}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`;
+                    });
+                } else {
+                    alert("Gagal memuat user: " + resp.message);
+                }
+            })
+            .catch(err => {
+                toggleLoader(false);
+                alert("Gagal koneksi server saat memuat user.");
             });
         }
 
