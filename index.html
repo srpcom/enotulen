@@ -10,6 +10,10 @@
 
     <!-- Tailwind CSS & Config -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SheetJS (Library untuk Export Excel) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -380,8 +384,8 @@
                 </table>
             </div>
             <div class="p-4 border-t border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-900/30 flex justify-between items-center">
-                <button onclick="downloadAttendanceCSV()" id="btn-download-att" class="hidden px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 shadow-sm flex items-center gap-2">
-                    <i class="fa-solid fa-file-csv"></i> Download Excel (.csv)
+                <button onclick="downloadAttendanceXLSX()" id="btn-download-att" class="hidden px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel"></i> Download Excel (.xlsx)
                 </button>
                 <button onclick="closeAttendanceModal()" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition">Tutup</button>
             </div>
@@ -632,31 +636,40 @@
             });
         }
 
-        function downloadAttendanceCSV() {
+        function downloadAttendanceXLSX() {
             if (!currentAttendanceData || currentAttendanceData.length === 0) return;
 
-            // 1. Buat Header CSV
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "No,Waktu,Nama Peserta,No HP,Link Tanda Tangan\n";
+            // 1. Format Data untuk Excel (Lebih rapi dari CSV)
+            const sheetData = currentAttendanceData.map((row, index) => ({
+                "No": index + 1,
+                "Waktu Absen": row.waktu,
+                "Nama Peserta": row.nama,
+                "Nomor HP": row.hp,
+                "Link Tanda Tangan": row.ttd
+            }));
 
-            // 2. Isi Data
-            currentAttendanceData.forEach((row, index) => {
-                let rowString = `${index + 1},"${row.waktu}","${row.nama}","${row.hp}","${row.ttd}"`;
-                csvContent += rowString + "\n";
-            });
+            // 2. Buat Worksheet
+            const worksheet = XLSX.utils.json_to_sheet(sheetData);
 
-            // 3. Buat Elemen Link Virtual
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
+            // 3. Atur Lebar Kolom (Agar siap print)
+            const wscols = [
+                { wch: 5 },  // No
+                { wch: 15 }, // Waktu
+                { wch: 35 }, // Nama
+                { wch: 20 }, // HP
+                { wch: 50 }  // Link TTD
+            ];
+            worksheet['!cols'] = wscols;
+
+            // 4. Buat Workbook
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Daftar Hadir");
+
+            // 5. Generate Filename yang Aman
+            const safeTitle = (currentMeetingTitle || "Rapat").replace(/[^a-zA-Z0-9]/g, "_");
             
-            // Format Filename: Absensi_JudulRapat.csv
-            const safeTitle = currentMeetingTitle.replace(/[^a-zA-Z0-9]/g, "_");
-            link.setAttribute("download", `Absensi_${safeTitle}.csv`);
-            
-            document.body.appendChild(link); // Required for FF
-            link.click(); // Trigger Download
-            document.body.removeChild(link); // Clean up
+            // 6. Download File .xlsx
+            XLSX.writeFile(workbook, `Absensi_${safeTitle}.xlsx`);
         }
 
         function closeAttendanceModal() {
