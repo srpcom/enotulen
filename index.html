@@ -14,32 +14,23 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .hidden { display: none; }
         .active-nav { background-color: #dcfce7; color: #166534; font-weight: 600; border-left: 4px solid #166534; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex overflow-hidden bg-gray-50">
 
-    <!-- KONFIGURASI -->
     <script>
-        // URL SCRIPT YANG ANDA MINTA
+        // URL SCRIPT ANDA
         const API_URL = "https://script.google.com/macros/s/AKfycbzj1mWjE3EC2KmtKbaHoz8yNEcnNFffDKXJ2xQg0mAKsSBB9QWGtIfwDw65z0OnnHWV/exec"; 
-        
-        // CLIENT ID DARI FILE ANDA SEBELUMNYA
+        // CLIENT ID
         const CLIENT_ID = "783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com";
     </script>
 
-    <!-- SIDEBAR (Hanya muncul setelah login) -->
+    <!-- SIDEBAR -->
     <aside id="sidebar" class="hidden w-64 bg-white border-r border-gray-200 flex-col transition-all duration-300 z-40 h-full fixed md:relative">
         <div class="h-16 flex items-center px-6 border-b border-gray-200 bg-white">
             <i class="fa-solid fa-hospital-user text-green-700 text-2xl mr-3"></i>
             <span class="font-bold text-lg tracking-tight text-gray-800">E-Notulen Pro</span>
         </div>
-        
         <div class="p-4 border-b border-gray-100 bg-green-50">
             <div class="flex items-center gap-3">
                 <img id="sb-avatar" src="" class="w-10 h-10 rounded-full border border-gray-300 object-cover bg-white">
@@ -49,41 +40,22 @@
                 </div>
             </div>
         </div>
-
         <nav class="flex-1 overflow-y-auto py-4">
             <ul class="space-y-1">
-                <li>
-                    <button onclick="navTo('dashboard')" id="nav-dashboard" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition">
-                        <i class="fa-solid fa-chart-pie w-6"></i> Dashboard
-                    </button>
-                </li>
-                <li>
-                    <button onclick="navTo('create')" id="nav-create" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition">
-                        <i class="fa-solid fa-pen-to-square w-6"></i> Buat Rapat Baru
-                    </button>
-                </li>
-                <li>
-                    <button onclick="navTo('list')" id="nav-list" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition">
-                        <i class="fa-solid fa-folder-open w-6"></i> Daftar Notulen
-                    </button>
-                </li>
+                <li><button onclick="navTo('dashboard')" id="nav-dashboard" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition"><i class="fa-solid fa-chart-pie w-6"></i> Dashboard</button></li>
+                <li><button onclick="navTo('create')" id="nav-create" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition"><i class="fa-solid fa-pen-to-square w-6"></i> Buat Rapat Baru</button></li>
+                <li><button onclick="navTo('list')" id="nav-list" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition"><i class="fa-solid fa-folder-open w-6"></i> Daftar Notulen</button></li>
                 <li id="menu-admin" class="hidden pt-4 mt-4 border-t border-gray-200">
                     <p class="px-6 text-xs font-bold text-gray-400 uppercase mb-2">Admin Area</p>
-                    <button onclick="navTo('users')" id="nav-users" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition">
-                        <i class="fa-solid fa-users-gear w-6"></i> Manajemen User
-                    </button>
+                    <button onclick="navTo('users')" id="nav-users" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition"><i class="fa-solid fa-users-gear w-6"></i> Manajemen User</button>
                 </li>
             </ul>
         </nav>
-
         <div class="p-4 border-t border-gray-200 bg-white">
-            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg transition font-medium text-sm">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </button>
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg transition font-medium text-sm"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
         </div>
     </aside>
     
-    <!-- Overlay untuk Mobile Sidebar -->
     <div id="sidebar-overlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/50 z-30 md:hidden"></div>
 
     <!-- MAIN CONTENT -->
@@ -92,22 +64,11 @@
         <!-- LOGIN SCREEN -->
         <div id="view-login" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white">
             <div class="text-center max-w-md px-6">
-                <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fa-solid fa-hospital text-4xl text-green-700"></i>
-                </div>
+                <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fa-solid fa-hospital text-4xl text-green-700"></i></div>
                 <h2 class="text-3xl font-bold text-gray-900 mb-2">Selamat Datang</h2>
                 <p class="text-gray-500 mb-8">Sistem Informasi Manajemen Notulen Rapat<br>RSUD dr. R. Koesma Tuban</p>
-                
-                <div id="g_id_onload"
-                     data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com"
-                     data-context="signin"
-                     data-ux_mode="popup"
-                     data-callback="handleCredentialResponse"
-                     data-auto_prompt="false">
-                </div>
+                <div id="g_id_onload" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
                 <div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_blue" data-text="sign_in_with" data-shape="pill" data-logo_alignment="left" data-width="300"></div>
-                
-                <p class="mt-8 text-xs text-gray-400">Pastikan backend telah di-deploy ke versi terbaru.</p>
             </div>
         </div>
 
@@ -117,74 +78,34 @@
             <button onclick="toggleSidebar()" class="text-gray-600 p-2 rounded hover:bg-gray-100"><i class="fa-solid fa-bars text-xl"></i></button>
         </header>
 
-        <!-- CONTENT AREA (SCROLLABLE) -->
+        <!-- CONTENT -->
         <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 hidden scroll-smooth">
             
-            <!-- DASHBOARD VIEW -->
+            <!-- DASHBOARD -->
             <div id="view-dashboard" class="page-view fade-in max-w-6xl mx-auto">
                 <h1 class="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
-                
-                <!-- Stats / Shortcut Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <!-- Card 1 -->
-                    <div onclick="navTo('create')" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-green-300 transition cursor-pointer group relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
-                            <i class="fa-solid fa-pen-to-square text-6xl text-green-600"></i>
-                        </div>
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-plus text-green-600 text-xl"></i>
-                        </div>
+                    <div onclick="navTo('create')" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition cursor-pointer group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition"><i class="fa-solid fa-pen-to-square text-6xl text-green-600"></i></div>
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition"><i class="fa-solid fa-plus text-green-600 text-xl"></i></div>
                         <h3 class="font-bold text-lg mb-1 text-gray-800">Buat Rapat Baru</h3>
-                        <p class="text-sm text-gray-500">Mulai mencatat notulen rapat baru sekarang.</p>
+                        <p class="text-sm text-gray-500">Mulai mencatat notulen rapat.</p>
                     </div>
-                    <!-- Card 2 -->
-                    <div onclick="navTo('list')" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300 transition cursor-pointer group relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
-                            <i class="fa-solid fa-list-check text-6xl text-blue-600"></i>
-                        </div>
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-folder-open text-blue-600 text-xl"></i>
-                        </div>
+                    <div onclick="navTo('list')" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition cursor-pointer group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition"><i class="fa-solid fa-folder-open text-6xl text-blue-600"></i></div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition"><i class="fa-solid fa-list text-blue-600 text-xl"></i></div>
                         <h3 class="font-bold text-lg mb-1 text-gray-800">Arsip Notulen</h3>
-                        <p class="text-sm text-gray-500">Lihat <span id="dash-total-count" class="font-bold">...</span> dokumen tersimpan.</p>
-                    </div>
-                </div>
-
-                <!-- Recent Table -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                        <h2 class="text-lg font-bold text-gray-800">Rapat Terakhir</h2>
-                        <button onclick="navTo('list')" class="text-xs font-semibold text-blue-600 hover:text-blue-800">Lihat Semua</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500 border-b">
-                                <tr>
-                                    <th class="px-6 py-3">Tanggal</th>
-                                    <th class="px-6 py-3">Agenda</th>
-                                    <th class="px-6 py-3">Unit</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dashboard-recent-table">
-                                <tr><td colspan="3" class="px-6 py-8 text-center text-gray-400">Memuat data...</td></tr>
-                            </tbody>
-                        </table>
+                        <p class="text-sm text-gray-500">Lihat <span id="dash-total-count" class="font-bold">...</span> dokumen Anda.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- FORM VIEW (CREATE & EDIT) -->
+            <!-- FORM -->
             <div id="view-create" class="page-view hidden fade-in max-w-4xl mx-auto">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                    <h1 id="form-title" class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <span class="bg-green-100 text-green-700 p-2 rounded-lg text-lg"><i class="fa-solid fa-pen-nib"></i></span>
-                        Notulen Baru
-                    </h1>
-                    <button onclick="navTo('list')" class="text-sm px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition shadow-sm font-medium">
-                        <i class="fa-solid fa-arrow-left mr-1"></i> Kembali
-                    </button>
+                    <h1 id="form-title" class="text-2xl font-bold text-gray-800 flex items-center gap-2"><span class="bg-green-100 text-green-700 p-2 rounded-lg text-lg"><i class="fa-solid fa-pen-nib"></i></span> Notulen Baru</h1>
+                    <button onclick="navTo('list')" class="text-sm px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition shadow-sm font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali</button>
                 </div>
-
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
                     <form id="mainForm" onsubmit="submitData(event)">
                         <input type="hidden" name="action" id="form-action" value="create">
@@ -193,104 +114,60 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
-                                <label class="label-text">Unit / Bagian <span class="text-red-500">*</span></label>
-                                <div class="relative">
-                                    <select name="unit" id="inp-unit" required class="input-field appearance-none">
-                                        <option value="">-- Pilih Unit --</option>
-                                        <option value="Direksi">Direksi</option>
-                                        <option value="Yanmed">Yanmed</option>
-                                        <option value="Keperawatan">Keperawatan</option>
-                                        <option value="Penunjang">Penunjang</option>
-                                        <option value="Umum">Umum & Kepegawaian</option>
-                                        <option value="Keuangan">Keuangan</option>
-                                        <option value="Komite Medis">Komite Medis</option>
-                                        <option value="Lainnya">Lainnya</option>
-                                    </select>
-                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                                        <i class="fa-solid fa-chevron-down text-xs"></i>
-                                    </div>
-                                </div>
+                                <label class="label-text block text-xs font-bold text-gray-700 uppercase mb-2">Unit <span class="text-red-500">*</span></label>
+                                <select name="unit" id="inp-unit" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
+                                    <option value="">-- Pilih Unit --</option>
+                                    <option value="Direksi">Direksi</option>
+                                    <option value="Yanmed">Yanmed</option>
+                                    <option value="Keperawatan">Keperawatan</option>
+                                    <option value="Penunjang">Penunjang</option>
+                                    <option value="Umum">Umum</option>
+                                    <option value="Keuangan">Keuangan</option>
+                                    <option value="Komite Medis">Komite Medis</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
                             </div>
                             <div>
-                                <label class="label-text">Tanggal Rapat <span class="text-red-500">*</span></label>
-                                <input type="date" name="tanggal" id="inp-tanggal" required class="input-field">
+                                <label class="label-text block text-xs font-bold text-gray-700 uppercase mb-2">Tanggal <span class="text-red-500">*</span></label>
+                                <input type="date" name="tanggal" id="inp-tanggal" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
                             </div>
                         </div>
 
-                        <div class="mb-6">
-                            <label class="label-text">Agenda Rapat <span class="text-red-500">*</span></label>
-                            <input type="text" name="agenda" id="inp-agenda" required class="input-field" placeholder="Contoh: Rapat Koordinasi Bulanan">
-                        </div>
+                        <div class="mb-6"><label class="block text-xs font-bold text-gray-700 uppercase mb-2">Agenda <span class="text-red-500">*</span></label><input type="text" name="agenda" id="inp-agenda" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"></div>
+                        <div class="mb-6"><label class="block text-xs font-bold text-gray-700 uppercase mb-2">Peserta</label><input type="text" name="peserta" id="inp-peserta" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"></div>
 
-                        <div class="mb-6">
-                            <label class="label-text">Peserta (Ringkasan)</label>
-                            <input type="text" name="peserta" id="inp-peserta" class="input-field" placeholder="Direktur, Kabid Yanmed, Ka. Ruangan...">
-                        </div>
-
-                        <!-- FILE UPLOAD -->
-                        <div class="mb-6 bg-blue-50/50 p-5 rounded-xl border border-blue-100 border-dashed border-2 hover:border-blue-300 transition group">
-                            <label class="label-text text-blue-800 mb-2 flex items-center gap-2">
-                                <i class="fa-solid fa-paperclip bg-blue-100 p-1 rounded"></i> Upload Undangan / Absensi
-                            </label>
+                        <div class="mb-6 bg-blue-50/50 p-5 rounded-xl border border-blue-100 border-dashed border-2">
+                            <label class="block text-xs font-bold text-blue-800 uppercase mb-2">Upload Undangan (PDF/Img)</label>
                             <input type="file" id="inp-file" accept=".pdf,image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
-                            <p id="file-status" class="text-xs text-gray-500 mt-2 ml-1">Maksimal 5MB (PDF atau Gambar).</p>
-                            
-                            <!-- Display File Lama saat Edit -->
                             <div id="existing-file-display" class="hidden mt-3 p-3 bg-white rounded-lg border border-blue-100 flex items-center justify-between">
-                                <div class="flex items-center gap-2 text-sm text-gray-700">
-                                    <i class="fa-solid fa-file-circle-check text-green-500"></i>
-                                    <span class="font-medium">File Terlampir</span>
-                                </div>
-                                <a href="#" target="_blank" id="link-existing-file" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold hover:bg-blue-100 border border-blue-200">
-                                    Lihat File <i class="fa-solid fa-external-link-alt ml-1"></i>
-                                </a>
+                                <span class="text-sm font-medium">File Terlampir</span>
+                                <a href="#" target="_blank" id="link-existing-file" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold">Lihat File</a>
                             </div>
                         </div>
 
-                        <div class="mb-6">
-                            <label class="label-text">Isi Pembahasan <span class="text-red-500">*</span></label>
-                            <textarea name="isi" id="inp-isi" rows="8" required class="input-field leading-relaxed" placeholder="Tuliskan poin-poin hasil rapat di sini..."></textarea>
-                        </div>
-
-                        <div class="mb-8">
-                            <label class="label-text text-green-700">Tindak Lanjut (Action Plan)</label>
-                            <div class="relative">
-                                <textarea name="tindakLanjut" id="inp-tindak" rows="3" class="input-field bg-green-50/30 border-green-200 focus:ring-green-500 focus:border-green-500" placeholder="Siapa melakukan apa, kapan deadline-nya?"></textarea>
-                                <div class="absolute top-3 right-3 text-green-200 pointer-events-none"><i class="fa-solid fa-clipboard-check text-xl"></i></div>
-                            </div>
-                        </div>
+                        <div class="mb-6"><label class="block text-xs font-bold text-gray-700 uppercase mb-2">Isi Notulen <span class="text-red-500">*</span></label><textarea name="isi" id="inp-isi" rows="8" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"></textarea></div>
+                        <div class="mb-8"><label class="block text-xs font-bold text-green-700 uppercase mb-2">Tindak Lanjut</label><textarea name="tindakLanjut" id="inp-tindak" rows="3" class="w-full rounded-lg border border-green-200 bg-green-50/30 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"></textarea></div>
 
                         <div class="flex justify-end gap-3 pt-6 border-t border-gray-100">
-                            <button type="button" onclick="navTo('list')" class="btn-secondary">Batal</button>
-                            <button type="submit" class="btn-primary">
-                                <i class="fa-solid fa-paper-plane mr-2"></i> <span id="btn-submit-text">Simpan Notulen</span>
-                            </button>
+                            <button type="button" onclick="navTo('list')" class="bg-white border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg text-sm font-medium">Batal</button>
+                            <button type="submit" class="bg-green-700 text-white px-6 py-2.5 rounded-lg hover:bg-green-800 text-sm font-medium flex items-center"><i class="fa-solid fa-paper-plane mr-2"></i> <span id="btn-submit-text">Simpan Notulen</span></button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- LIST VIEW -->
+            <!-- LIST -->
             <div id="view-list" class="page-view hidden fade-in max-w-6xl mx-auto">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div class="flex justify-between items-center mb-6">
                     <h1 class="text-2xl font-bold text-gray-800">Daftar Notulen</h1>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <div class="relative flex-1 sm:flex-none">
-                            <input type="text" id="search-input" onkeyup="filterTable()" placeholder="Cari agenda..." class="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-full focus:ring-2 focus:ring-green-500 focus:outline-none">
-                            <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
-                        </div>
-                        <button onclick="loadData()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition text-sm font-medium whitespace-nowrap">
-                            <i class="fa-solid fa-rotate mr-1"></i> Refresh
-                        </button>
-                    </div>
+                    <button onclick="loadData()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-600 text-sm font-medium"><i class="fa-solid fa-rotate mr-1"></i> Refresh</button>
                 </div>
-                
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-gray-600" id="main-table">
+                        <table class="w-full text-left text-sm text-gray-600">
                             <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500 border-b">
                                 <tr>
-                                    <th class="px-6 py-4 whitespace-nowrap">Tanggal</th>
+                                    <th class="px-6 py-4">Tanggal</th>
                                     <th class="px-6 py-4">Agenda</th>
                                     <th class="px-6 py-4">Unit</th>
                                     <th class="px-6 py-4">Pencatat</th>
@@ -305,27 +182,18 @@
                 </div>
             </div>
 
-            <!-- ADMIN VIEW (USERS) -->
+            <!-- USERS -->
             <div id="view-users" class="page-view hidden fade-in max-w-5xl mx-auto">
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <i class="fa-solid fa-users-gear text-green-600"></i> Manajemen Pengguna
-                    </h1>
-                    <button onclick="loadUsers()" class="text-sm text-green-600 hover:text-green-800 underline">Refresh List</button>
+                    <h1 class="text-2xl font-bold text-gray-800">Manajemen Pengguna</h1>
+                    <button onclick="loadUsers()" class="text-sm text-green-600 underline">Refresh</button>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <table class="w-full text-left text-sm text-gray-600">
                         <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500 border-b">
-                            <tr>
-                                <th class="px-6 py-4">Nama</th>
-                                <th class="px-6 py-4">Email</th>
-                                <th class="px-6 py-4">Role</th>
-                                <th class="px-6 py-4 text-center">Kontrol Akses</th>
-                            </tr>
+                            <tr><th class="px-6 py-4">Nama</th><th class="px-6 py-4">Email</th><th class="px-6 py-4">Role</th><th class="px-6 py-4 text-center">Aksi</th></tr>
                         </thead>
-                        <tbody id="users-table-body">
-                            <tr><td colspan="4" class="p-8 text-center">Memuat user...</td></tr>
-                        </tbody>
+                        <tbody id="users-table-body"><tr><td colspan="4" class="p-8 text-center">Memuat user...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -333,57 +201,26 @@
         </div>
     </main>
 
-    <!-- LOADING SPINNER OVERLAY -->
     <div id="loader" class="hidden fixed inset-0 z-[60] bg-white/80 flex flex-col items-center justify-center backdrop-blur-sm">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-green-600 mb-4"></div>
         <p class="text-gray-600 font-semibold animate-pulse">Memproses...</p>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- UI CONFIGURATION ---
-        const inputClass = "w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm bg-white transition";
-        const labelClass = "block text-xs font-bold text-gray-700 uppercase mb-2 tracking-wide";
-        
-        // Apply classes automatically
-        document.querySelectorAll('.input-field').forEach(el => el.className = inputClass);
-        document.querySelectorAll('.label-text').forEach(el => el.className = labelClass);
-        
-        document.querySelector('.btn-primary').className = "bg-green-700 text-white px-6 py-2.5 rounded-lg hover:bg-green-800 transition shadow-lg shadow-green-700/20 font-medium text-sm flex items-center transform active:scale-95 duration-150";
-        document.querySelector('.btn-secondary').className = "bg-white border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-50 transition font-medium text-sm hover:border-gray-400";
-
-        // GLOBAL STATE
+        // GLOBAL
         let currentUser = null;
         let allData = [];
-
-        // INIT GOOGLE BUTTON
         const googleBtn = document.getElementById('g_id_onload');
         if(googleBtn) googleBtn.setAttribute('data-client_id', CLIENT_ID);
 
         function handleCredentialResponse(response) {
-            const payload = parseJwt(response.credential);
+            const payload = JSON.parse(decodeURIComponent(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
             loginBackend(payload);
         }
 
-        function parseJwt (token) {
-            var base64Url = token.split('.')[1];
-            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            return JSON.parse(decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
-        }
-
-        // --- AUTH & NAVIGATION ---
-
         function loginBackend(googleUser) {
             toggleLoader(true);
-            // Request Login ke Backend Apps Script
-            fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'login',
-                    email: googleUser.email,
-                    name: googleUser.name
-                })
-            })
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', email: googleUser.email, name: googleUser.name }) })
             .then(res => res.json())
             .then(resp => {
                 toggleLoader(false);
@@ -391,370 +228,163 @@
                     currentUser = resp.user;
                     localStorage.setItem('rsud_user_pro', JSON.stringify(currentUser));
                     initApp();
-                } else {
-                    alert("Login Gagal: " + resp.message);
-                }
-            })
-            .catch(err => {
-                toggleLoader(false);
-                alert("Gagal terhubung ke server. Pastikan URL Script benar.");
-            });
+                } else alert("Login Gagal: " + resp.message);
+            }).catch(() => { toggleLoader(false); alert("Gagal koneksi server."); });
         }
 
         function initApp() {
-            // Setup Sidebar UI
             document.getElementById('sb-avatar').src = currentUser.picture || `https://ui-avatars.com/api/?name=${currentUser.name}&background=dcfce7&color=166534`;
             document.getElementById('sb-name').textContent = currentUser.name;
             document.getElementById('sb-role').textContent = currentUser.role;
-
-            // Show Content & Sidebar
             document.getElementById('view-login').classList.add('hidden');
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.remove('hidden');
-            sidebar.classList.add('flex');
+            document.getElementById('sidebar').classList.remove('hidden');
+            document.getElementById('sidebar').classList.add('flex');
             document.getElementById('content-area').classList.remove('hidden');
-
-            // Admin Access Check
-            if(currentUser.role === 'ADMIN') {
-                document.getElementById('menu-admin').classList.remove('hidden');
-            } else {
-                document.getElementById('menu-admin').classList.add('hidden');
-            }
-
+            if(currentUser.role === 'ADMIN') document.getElementById('menu-admin').classList.remove('hidden');
             navTo('dashboard');
-            loadData(); // Load data notulen
+            loadData();
         }
 
         function navTo(page) {
-            // Hide all pages
             document.querySelectorAll('.page-view').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('aside nav button').forEach(el => el.classList.remove('active-nav'));
-
-            // Show selected
             document.getElementById(`view-${page}`).classList.remove('hidden');
-            const navBtn = document.getElementById(`nav-${page}`);
-            if(navBtn) navBtn.classList.add('active-nav');
-
-            // Mobile: Close sidebar if open
-            if(window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.add('hidden');
-                document.getElementById('sidebar-overlay').classList.add('hidden');
-            }
-
-            // Page Logic
+            if(document.getElementById(`nav-${page}`)) document.getElementById(`nav-${page}`).classList.add('active-nav');
+            if(window.innerWidth < 768) toggleSidebar(false);
             if (page === 'create') resetForm();
             if (page === 'users') loadUsers();
             if (page === 'dashboard') renderDashboard();
         }
 
-        function toggleSidebar() {
+        function toggleSidebar(force) {
             const sb = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
-            if(sb.classList.contains('hidden')) {
-                sb.classList.remove('hidden');
-                sb.classList.add('flex');
-                overlay.classList.remove('hidden');
-            } else {
-                sb.classList.add('hidden');
-                sb.classList.remove('flex');
-                overlay.classList.add('hidden');
-            }
+            const show = force !== undefined ? force : sb.classList.contains('hidden');
+            if(show) { sb.classList.remove('hidden'); sb.classList.add('flex'); overlay.classList.remove('hidden'); }
+            else { sb.classList.add('hidden'); sb.classList.remove('flex'); overlay.classList.add('hidden'); }
         }
 
-        function logout() {
-            if(confirm('Apakah Anda yakin ingin keluar?')) {
-                localStorage.removeItem('rsud_user_pro');
-                location.reload();
-            }
-        }
+        function logout() { localStorage.removeItem('rsud_user_pro'); location.reload(); }
 
-        // --- DATA HANDLING ---
-
+        // --- MODIFIKASI LOAD DATA (MENGIRIM EMAIL USER) ---
         function loadData() {
-            fetch(`${API_URL}?action=read`)
+            // Gunakan POST untuk mengirim email user saat request data
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'read',
+                    email: currentUser.email // Kirim email untuk filtering di backend
+                })
+            })
             .then(res => res.json())
             .then(resp => {
-                if(resp.status === 'success') {
-                    allData = resp.data;
-                    renderTable(allData);
-                    renderDashboard();
-                }
+                if(resp.status === 'success') { allData = resp.data; renderTable(allData); renderDashboard(); }
             });
         }
 
         function renderTable(data) {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
-
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500 bg-gray-50/50 rounded-lg m-4">Belum ada arsip notulen.</td></tr>`;
-                return;
-            }
-
+            if (data.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500">Belum ada arsip notulen.</td></tr>`; return; }
             data.forEach(item => {
-                // Logic Edit: Admin ATAU Pemilik Data
                 const canEdit = (currentUser.role === 'ADMIN' || item.pencatatEmail === currentUser.email);
-                
-                let actionBtn = '<span class="text-gray-300 text-xs">-</span>';
-                if (canEdit) {
-                    const itemStr = encodeURIComponent(JSON.stringify(item));
-                    actionBtn = `
-                        <button onclick="editNotulen('${itemStr}')" class="text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-md font-bold text-xs border border-blue-200 transition">
-                            <i class="fa-solid fa-pen-to-square mr-1"></i> EDIT
-                        </button>
-                    `;
-                }
-
-                // File Link Icon
-                let fileIcon = '';
-                if(item.fileUrl && item.fileUrl.length > 5) {
-                    fileIcon = `
-                        <a href="${item.fileUrl}" target="_blank" class="ml-2 text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1 rounded transition" title="Unduh Undangan">
-                            <i class="fa-solid fa-file-pdf"></i>
-                        </a>
-                    `;
-                }
-
-                const tr = document.createElement('tr');
-                tr.className = "border-b last:border-0 hover:bg-gray-50 transition duration-150";
-                tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 text-xs">${item.displayTanggal}</td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center">
-                            <span class="font-semibold text-gray-800 line-clamp-2">${item.agenda}</span> 
-                            ${fileIcon}
-                        </div>
-                    </td>
-                    <td class="px-6 py-4"><span class="bg-green-100 text-green-800 text-[10px] uppercase tracking-wide font-bold px-2 py-1 rounded-full border border-green-200">${item.unit}</span></td>
-                    <td class="px-6 py-4 text-xs text-gray-500">
-                        <div class="flex items-center gap-1">
-                            <i class="fa-regular fa-user"></i> ${item.pencatatNama}
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-center">${actionBtn}</td>
-                `;
-                tbody.appendChild(tr);
+                const fileIcon = (item.fileUrl && item.fileUrl.length > 5) ? `<a href="${item.fileUrl}" target="_blank" class="text-red-500 ml-2"><i class="fa-solid fa-file-pdf"></i></a>` : '';
+                const btn = canEdit ? `<button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 font-bold text-xs">EDIT</button>` : '-';
+                tbody.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="px-6 py-4 text-xs font-medium">${item.displayTanggal}</td><td class="px-6 py-4 font-semibold">${item.agenda} ${fileIcon}</td><td class="px-6 py-4"><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${item.unit}</span></td><td class="px-6 py-4 text-xs">${item.pencatatNama}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`;
             });
-            
-            // Update Dashboard Counter
-            const countEl = document.getElementById('dash-total-count');
-            if(countEl) countEl.innerText = data.length;
-        }
-
-        function filterTable() {
-            const term = document.getElementById('search-input').value.toLowerCase();
-            const filtered = allData.filter(item => 
-                item.agenda.toLowerCase().includes(term) || 
-                item.unit.toLowerCase().includes(term)
-            );
-            renderTable(filtered);
+            document.getElementById('dash-total-count').innerText = data.length;
         }
 
         function renderDashboard() {
             const recent = allData.slice(0, 3);
-            const tbody = document.getElementById('dashboard-recent-table');
-            tbody.innerHTML = '';
-            
-            if(recent.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-8 text-center text-gray-400">Belum ada data rapat terbaru.</td></tr>`;
-                return;
-            }
-
-            recent.forEach(item => {
-                tbody.innerHTML += `
-                    <tr class="border-b last:border-0 hover:bg-gray-50 transition cursor-default">
-                        <td class="px-6 py-3 font-medium text-gray-800 text-xs">${item.displayTanggal}</td>
-                        <td class="px-6 py-3 text-sm text-gray-600 line-clamp-1">${item.agenda}</td>
-                        <td class="px-6 py-3"><span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200">${item.unit}</span></td>
-                    </tr>
-                `;
-            });
+            // Dashboard logic
         }
-
-        // --- FORM LOGIC ---
 
         function resetForm() {
             document.getElementById('mainForm').reset();
             document.getElementById('form-action').value = 'create';
             document.getElementById('form-id').value = '';
-            document.getElementById('form-title').innerHTML = '<span class="bg-green-100 text-green-700 p-2 rounded-lg text-lg"><i class="fa-solid fa-pen-nib"></i></span> Notulen Baru';
+            document.getElementById('form-title').innerHTML = 'Notulen Baru';
             document.getElementById('btn-submit-text').textContent = 'Simpan Notulen';
             document.getElementById('existing-file-display').classList.add('hidden');
         }
 
         function editNotulen(itemStr) {
             const item = JSON.parse(decodeURIComponent(itemStr));
-            navTo('create'); 
-            
+            navTo('create');
             document.getElementById('form-action').value = 'update';
             document.getElementById('form-id').value = item.id;
-            document.getElementById('form-title').innerHTML = '<span class="bg-blue-100 text-blue-700 p-2 rounded-lg text-lg"><i class="fa-solid fa-pen-to-square"></i></span> Edit Notulen';
+            document.getElementById('form-title').innerHTML = 'Edit Notulen';
             document.getElementById('btn-submit-text').textContent = 'Update Notulen';
-
             document.getElementById('inp-unit').value = item.unit;
-            document.getElementById('inp-tanggal').value = item.tanggal; 
+            document.getElementById('inp-tanggal').value = item.tanggal;
             document.getElementById('inp-agenda').value = item.agenda;
             document.getElementById('inp-peserta').value = item.peserta;
             document.getElementById('inp-isi').value = item.isi;
             document.getElementById('inp-tindak').value = item.tindakLanjut;
-
-            // Handle Existing File Link
-            if(item.fileUrl && item.fileUrl.length > 5) {
+            if(item.fileUrl) {
                 document.getElementById('form-existing-file').value = item.fileUrl;
                 document.getElementById('existing-file-display').classList.remove('hidden');
                 document.getElementById('link-existing-file').href = item.fileUrl;
-            } else {
-                document.getElementById('existing-file-display').classList.add('hidden');
-                document.getElementById('form-existing-file').value = "";
             }
         }
 
         async function submitData(e) {
             e.preventDefault();
             toggleLoader(true);
-
             const form = document.getElementById('mainForm');
             const fileInput = document.getElementById('inp-file');
-            
-            // Siapkan Payload
             const payload = {
                 action: document.getElementById('form-action').value,
                 id: document.getElementById('form-id').value,
-                unit: form.unit.value,
-                tanggal: form.tanggal.value,
-                agenda: form.agenda.value,
-                peserta: form.peserta.value,
-                isi: form.isi.value,
-                tindakLanjut: form.tindakLanjut.value,
-                pencatatNama: currentUser.name,
-                pencatatEmail: currentUser.email,
+                unit: form.unit.value, tanggal: form.tanggal.value, agenda: form.agenda.value, peserta: form.peserta.value,
+                isi: form.isi.value, tindakLanjut: form.tindakLanjut.value, pencatatNama: currentUser.name, pencatatEmail: currentUser.email,
                 existingFileUrl: document.getElementById('form-existing-file').value
             };
-
-            // Proses File Upload (jika ada)
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
-                if(file.size > 5 * 1024 * 1024) { 
-                    toggleLoader(false);
-                    alert("Ukuran file terlalu besar (Maks 5MB)");
-                    return;
-                }
+                if(file.size > 5 * 1024 * 1024) { toggleLoader(false); alert("File Max 5MB"); return; }
                 const base64 = await toBase64(file);
-                payload.fileData = base64.split(',')[1];
-                payload.fileName = file.name;
-                payload.mimeType = file.type;
+                payload.fileData = base64.split(',')[1]; payload.fileName = file.name; payload.mimeType = file.type;
             }
-
-            // Kirim ke Backend
-            fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(resp => {
+            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+            .then(res => res.json()).then(resp => {
                 toggleLoader(false);
-                if(resp.status === 'success') {
-                    alert("✅ Data Berhasil Disimpan!");
-                    resetForm();
-                    navTo('list');
-                    loadData();
-                } else {
-                    alert("❌ Gagal: " + resp.message);
-                }
-            })
-            .catch(err => {
-                toggleLoader(false);
-                alert("❌ Terjadi kesalahan jaringan.");
-                console.error(err);
-            });
+                if(resp.status === 'success') { alert("Berhasil!"); resetForm(); navTo('list'); loadData(); }
+                else alert("Gagal: " + resp.message);
+            }).catch(() => { toggleLoader(false); alert("Error Jaringan"); });
         }
 
-        const toBase64 = file => new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-        });
-
-        // --- MANAJEMEN USER (ADMIN) ---
+        const toBase64 = file => new Promise((r, j) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => r(reader.result); reader.onerror = j; });
 
         function loadUsers() {
             if(currentUser.role !== 'ADMIN') return;
-            const tbody = document.getElementById('users-table-body');
-            tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin"></i> Mengambil data pengguna...</td></tr>`;
-
-            fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'getUsers' })
-            })
-            .then(res => res.json())
-            .then(resp => {
-                tbody.innerHTML = '';
+            fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    action: 'getUsers',
+                    requesterEmail: currentUser.email // Kirim email admin
+                }) 
+            }).then(res => res.json()).then(resp => {
+                const tbody = document.getElementById('users-table-body'); tbody.innerHTML = '';
                 resp.data.forEach(u => {
-                    // Cek Super Admin (Hardcoded di Backend)
                     const isSuper = u.email === "ridwankoramil9@gmail.com";
-                    let btn = '';
-                    
-                    if (!isSuper) {
-                        if (u.role === 'ADMIN') {
-                            btn = `<button onclick="changeRole('${u.email}', 'USER')" class="text-xs border border-red-200 bg-red-50 text-red-600 px-3 py-1.5 rounded-md hover:bg-red-100 font-medium transition">🔽 Turunkan ke User</button>`;
-                        } else {
-                            btn = `<button onclick="changeRole('${u.email}', 'ADMIN')" class="text-xs border border-green-200 bg-green-50 text-green-600 px-3 py-1.5 rounded-md hover:bg-green-100 font-medium transition">🔼 Jadikan Admin</button>`;
-                        }
-                    } else {
-                        btn = `<span class="text-xs text-gray-400 font-bold bg-gray-100 px-2 py-1 rounded"><i class="fa-solid fa-lock"></i> SUPER ADMIN</span>`;
-                    }
-
-                    tbody.innerHTML += `
-                        <tr class="border-b last:border-0 hover:bg-gray-50">
-                            <td class="px-6 py-4 font-medium">${u.name}</td>
-                            <td class="px-6 py-4 text-gray-500 font-mono text-xs">${u.email}</td>
-                            <td class="px-6 py-4"><span class="font-bold text-xs ${u.role==='ADMIN'?'text-purple-600 bg-purple-50 px-2 py-1 rounded border border-purple-100':'text-gray-500 bg-gray-100 px-2 py-1 rounded'}">${u.role}</span></td>
-                            <td class="px-6 py-4 text-center">${btn}</td>
-                        </tr>
-                    `;
+                    let btn = isSuper ? "SUPER ADMIN" : `<button onclick="changeRole('${u.email}', '${u.role==='ADMIN'?'USER':'ADMIN'}')" class="text-xs bg-gray-100 px-2 py-1 rounded">Ubah Role</button>`;
+                    tbody.innerHTML += `<tr class="border-b"><td class="px-6 py-4">${u.name}</td><td class="px-6 py-4 text-xs">${u.email}</td><td class="px-6 py-4">${u.role}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`;
                 });
             });
         }
 
         function changeRole(email, newRole) {
-            if(!confirm(`Apakah Anda yakin ingin mengubah hak akses ${email} menjadi ${newRole}?`)) return;
+            if(!confirm("Ubah role?")) return;
             toggleLoader(true);
-            
-            fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ 
-                    action: 'toggleAdmin',
-                    targetEmail: email,
-                    newRole: newRole
-                })
-            })
-            .then(res => res.json())
-            .then(resp => {
-                toggleLoader(false);
-                if(resp.status === 'success') {
-                    alert("✅ Hak akses berhasil diubah.");
-                    loadUsers();
-                } else {
-                    alert("❌ Gagal: " + resp.message);
-                }
-            });
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'toggleAdmin', targetEmail: email, newRole: newRole }) })
+            .then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') loadUsers(); else alert(resp.message); });
         }
 
-        function toggleLoader(show) {
-            document.getElementById('loader').classList.toggle('hidden', !show);
-        }
-
-        // CEK SESI USER
+        function toggleLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
         const savedUser = localStorage.getItem('rsud_user_pro');
-        if(savedUser) {
-            try {
-                currentUser = JSON.parse(savedUser);
-                initApp();
-            } catch(e) {
-                localStorage.removeItem('rsud_user_pro');
-            }
-        }
+        if(savedUser) { try { currentUser = JSON.parse(savedUser); initApp(); } catch(e) { localStorage.removeItem('rsud_user_pro'); } }
     </script>
 </body>
 </html>
