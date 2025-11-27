@@ -19,8 +19,9 @@
 <body class="text-gray-800 h-screen flex overflow-hidden bg-gray-50">
 
     <script>
-        // URL SCRIPT ANDA
+        // URL SCRIPT ANDA (PASTIKAN SUDAH DEPLOY NEW VERSION)
         const API_URL = "https://script.google.com/macros/s/AKfycbzj1mWjE3EC2KmtKbaHoz8yNEcnNFffDKXJ2xQg0mAKsSBB9QWGtIfwDw65z0OnnHWV/exec"; 
+        
         // CLIENT ID
         const CLIENT_ID = "783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com";
     </script>
@@ -31,20 +32,28 @@
             <i class="fa-solid fa-hospital-user text-green-700 text-2xl mr-3"></i>
             <span class="font-bold text-lg tracking-tight text-gray-800">E-Notulen Pro</span>
         </div>
-        <div class="p-4 border-b border-gray-100 bg-green-50">
+        
+        <!-- User Info with Link to Profile -->
+        <div onclick="navTo('profile')" class="p-4 border-b border-gray-100 bg-green-50 cursor-pointer hover:bg-green-100 transition group">
             <div class="flex items-center gap-3">
                 <img id="sb-avatar" src="" class="w-10 h-10 rounded-full border border-gray-300 object-cover bg-white">
                 <div class="overflow-hidden">
-                    <p id="sb-name" class="text-sm font-bold text-gray-900 truncate">User</p>
+                    <p id="sb-name" class="text-sm font-bold text-gray-900 truncate group-hover:text-green-800">User</p>
                     <p id="sb-role" class="text-xs font-semibold text-green-600 tracking-wider">LOADING...</p>
                 </div>
             </div>
+            <p class="text-[10px] text-green-600 mt-2 text-right"><i class="fa-solid fa-gear"></i> Edit Profil</p>
         </div>
+
         <nav class="flex-1 overflow-y-auto py-4">
             <ul class="space-y-1">
                 <li><button onclick="navTo('dashboard')" id="nav-dashboard" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition"><i class="fa-solid fa-chart-pie w-6"></i> Dashboard</button></li>
                 <li><button onclick="navTo('create')" id="nav-create" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition"><i class="fa-solid fa-calendar-plus w-6"></i> Buat Jadwal Rapat</button></li>
                 <li><button onclick="navTo('list')" id="nav-list" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition"><i class="fa-solid fa-folder-open w-6"></i> Daftar Notulen</button></li>
+                
+                <!-- Menu Profil Baru -->
+                <li><button onclick="navTo('profile')" id="nav-profile" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition"><i class="fa-solid fa-user-gear w-6"></i> Pengaturan Profil</button></li>
+
                 <li id="menu-admin" class="hidden pt-4 mt-4 border-t border-gray-200">
                     <p class="px-6 text-xs font-bold text-gray-400 uppercase mb-2">Admin Area</p>
                     <button onclick="navTo('users')" id="nav-users" class="w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 flex items-center transition"><i class="fa-solid fa-users-gear w-6"></i> Manajemen User</button>
@@ -78,7 +87,7 @@
             <button onclick="toggleSidebar()" class="text-gray-600 p-2 rounded hover:bg-gray-100"><i class="fa-solid fa-bars text-xl"></i></button>
         </header>
 
-        <!-- CONTENT -->
+        <!-- CONTENT AREA -->
         <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 hidden scroll-smooth">
             
             <!-- DASHBOARD -->
@@ -100,8 +109,67 @@
                 </div>
             </div>
 
-            <!-- FORM (CREATE JADWAL & EDIT NOTULEN) -->
+            <!-- PROFILE VIEW (BARU) -->
+            <div id="view-profile" class="page-view hidden fade-in max-w-2xl mx-auto">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <i class="fa-solid fa-user-gear text-green-600"></i> Profil Saya
+                </h1>
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+                    <div class="flex items-center gap-6 mb-8 border-b border-gray-100 pb-6">
+                        <img id="prof-img" src="" class="w-20 h-20 rounded-full border-4 border-green-50 shadow-sm">
+                        <div>
+                            <h2 id="prof-name-disp" class="text-xl font-bold text-gray-900">Nama User</h2>
+                            <p id="prof-email-disp" class="text-sm text-gray-500">email@example.com</p>
+                            <span id="prof-role-disp" class="inline-block mt-2 text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded">USER</span>
+                        </div>
+                    </div>
+
+                    <form id="profileForm" onsubmit="saveProfile(event)">
+                        <div class="grid grid-cols-1 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Email (Tidak dapat diubah)</label>
+                                <input type="text" id="prof-email" disabled class="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-gray-500 text-sm cursor-not-allowed">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Nama Lengkap</label>
+                                <input type="text" id="prof-name" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Unit / Bagian</label>
+                                <select id="prof-unit" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
+                                    <option value="">-- Pilih Unit --</option>
+                                    <option value="Direksi">Direksi</option>
+                                    <option value="Yanmed">Yanmed</option>
+                                    <option value="Keperawatan">Keperawatan</option>
+                                    <option value="Penunjang">Penunjang</option>
+                                    <option value="Umum">Umum & Kepegawaian</option>
+                                    <option value="Keuangan">Keuangan</option>
+                                    <option value="Komite Medis">Komite Medis</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Nomor HP / WhatsApp</label>
+                                <input type="tel" id="prof-phone" placeholder="Contoh: 08123456789" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
+                            </div>
+                        </div>
+
+                        <div class="mt-8 flex justify-end">
+                            <button type="submit" class="bg-green-700 text-white px-6 py-2.5 rounded-lg hover:bg-green-800 text-sm font-medium flex items-center shadow-lg shadow-green-700/20 transform active:scale-95 transition">
+                                <i class="fa-solid fa-save mr-2"></i> Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- FORM (CREATE & EDIT) -->
             <div id="view-create" class="page-view hidden fade-in max-w-4xl mx-auto">
+                <!-- ... Form Create Code Existing ... -->
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <h1 id="form-title" class="text-2xl font-bold text-gray-800 flex items-center gap-2"><span class="bg-green-100 text-green-700 p-2 rounded-lg text-lg"><i class="fa-solid fa-pen-nib"></i></span> Jadwal Baru</h1>
                     <button onclick="navTo('list')" class="text-sm px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition shadow-sm font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali</button>
@@ -112,10 +180,9 @@
                         <input type="hidden" name="id" id="form-id">
                         <input type="hidden" name="existingFileUrl" id="form-existing-file">
 
-                        <!-- BAGIAN 1: PERENCANAAN (Planning) -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                             <div class="md:col-span-1">
-                                <label class="label-text block text-xs font-bold text-gray-700 uppercase mb-2">Unit <span class="text-red-500">*</span></label>
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Unit <span class="text-red-500">*</span></label>
                                 <select name="unit" id="inp-unit" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
                                     <option value="">-- Pilih Unit --</option>
                                     <option value="Direksi">Direksi</option>
@@ -129,11 +196,11 @@
                                 </select>
                             </div>
                             <div class="md:col-span-1">
-                                <label class="label-text block text-xs font-bold text-gray-700 uppercase mb-2">Tanggal <span class="text-red-500">*</span></label>
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Tanggal <span class="text-red-500">*</span></label>
                                 <input type="date" name="tanggal" id="inp-tanggal" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
                             </div>
                             <div class="md:col-span-1">
-                                <label class="label-text block text-xs font-bold text-gray-700 uppercase mb-2">Jam <span class="text-red-500">*</span></label>
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Jam <span class="text-red-500">*</span></label>
                                 <input type="time" name="waktu" id="inp-waktu" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
                             </div>
                         </div>
@@ -141,47 +208,31 @@
                         <div class="mb-6"><label class="block text-xs font-bold text-gray-700 uppercase mb-2">Agenda <span class="text-red-500">*</span></label><input type="text" name="agenda" id="inp-agenda" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm" placeholder="Contoh: Rapat Koordinasi Bulanan"></div>
                         <div class="mb-6"><label class="block text-xs font-bold text-gray-700 uppercase mb-2">Peserta</label><input type="text" name="peserta" id="inp-peserta" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm" placeholder="Ringkasan peserta..."></div>
 
-                        <!-- FILE UPLOAD (UNDANGAN) -->
                         <div class="mb-6 bg-blue-50/50 p-5 rounded-xl border border-blue-100 border-dashed border-2">
                             <label class="block text-xs font-bold text-blue-800 uppercase mb-2">Upload Undangan (PDF/Img)</label>
                             <input type="file" id="inp-file" accept=".pdf,image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
                             
-                            <!-- FILE EXISTING DISPLAY WITH DELETE BUTTON -->
                             <div id="existing-file-display" class="hidden mt-3 p-3 bg-white rounded-lg border border-blue-100 flex items-center justify-between shadow-sm">
                                 <div class="flex items-center gap-2 overflow-hidden">
                                     <span class="text-sm font-medium text-gray-700 truncate"><i class="fa-solid fa-file-circle-check text-green-600 mr-1"></i> File Terlampir</span>
-                                    <a href="#" target="_blank" id="link-existing-file" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold hover:bg-blue-100 border border-blue-200 transition whitespace-nowrap">
-                                        Lihat File <i class="fa-solid fa-external-link-alt ml-1"></i>
-                                    </a>
+                                    <a href="#" target="_blank" id="link-existing-file" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold hover:bg-blue-100 border border-blue-200 transition whitespace-nowrap">Lihat File <i class="fa-solid fa-external-link-alt ml-1"></i></a>
                                 </div>
-                                <button type="button" onclick="deleteExistingFile()" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition" title="Hapus lampiran ini">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
+                                <button type="button" onclick="deleteExistingFile()" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition" title="Hapus lampiran ini"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
                         </div>
 
-                        <!-- BAGIAN 2: PENCATATAN (Recording) - Hidden saat Create -->
                         <div id="section-recording" class="hidden pt-6 border-t-2 border-dashed border-gray-200 mt-6">
                             <div class="mb-4 bg-green-50 p-3 rounded-lg border border-green-200">
                                 <h3 class="text-green-800 font-bold text-sm"><i class="fa-solid fa-pen-nib mr-2"></i> Area Pencatatan Notulen</h3>
                                 <p class="text-green-600 text-xs">Silakan lengkapi bagian ini setelah rapat dilaksanakan.</p>
                             </div>
-
-                            <div class="mb-6">
-                                <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Isi Notulen <span class="text-red-500">*</span></label>
-                                <textarea name="isi" id="inp-isi" rows="8" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm" placeholder="Catat hasil pembahasan rapat di sini..."></textarea>
-                            </div>
-                            <div class="mb-8">
-                                <label class="block text-xs font-bold text-green-700 uppercase mb-2">Tindak Lanjut</label>
-                                <textarea name="tindakLanjut" id="inp-tindak" rows="3" class="w-full rounded-lg border border-green-200 bg-green-50/30 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm" placeholder="Action plan..."></textarea>
-                            </div>
+                            <div class="mb-6"><label class="block text-xs font-bold text-gray-700 uppercase mb-2">Isi Notulen <span class="text-red-500">*</span></label><textarea name="isi" id="inp-isi" rows="8" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm" placeholder="Catat hasil pembahasan rapat di sini..."></textarea></div>
+                            <div class="mb-8"><label class="block text-xs font-bold text-green-700 uppercase mb-2">Tindak Lanjut</label><textarea name="tindakLanjut" id="inp-tindak" rows="3" class="w-full rounded-lg border border-green-200 bg-green-50/30 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm" placeholder="Action plan..."></textarea></div>
                         </div>
 
                         <div class="flex justify-end gap-3 pt-6 border-t border-gray-100">
                             <button type="button" onclick="navTo('list')" class="bg-white border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg text-sm font-medium">Batal</button>
-                            <button type="submit" class="bg-green-700 text-white px-6 py-2.5 rounded-lg hover:bg-green-800 text-sm font-medium flex items-center">
-                                <i class="fa-solid fa-paper-plane mr-2"></i> <span id="btn-submit-text">Simpan Jadwal</span>
-                            </button>
+                            <button type="submit" class="bg-green-700 text-white px-6 py-2.5 rounded-lg hover:bg-green-800 text-sm font-medium flex items-center"><i class="fa-solid fa-paper-plane mr-2"></i> <span id="btn-submit-text">Simpan Jadwal</span></button>
                         </div>
                     </form>
                 </div>
@@ -213,7 +264,7 @@
                 </div>
             </div>
 
-            <!-- USERS -->
+            <!-- USERS (ADMIN) -->
             <div id="view-users" class="page-view hidden fade-in max-w-5xl mx-auto">
                 <div class="flex justify-between items-center mb-6">
                     <h1 class="text-2xl font-bold text-gray-800">Manajemen Pengguna</h1>
@@ -271,7 +322,9 @@
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('sidebar').classList.add('flex');
             document.getElementById('content-area').classList.remove('hidden');
+            
             if(currentUser.role === 'ADMIN') document.getElementById('menu-admin').classList.remove('hidden');
+            
             navTo('dashboard');
             loadData();
         }
@@ -283,15 +336,17 @@
             if(document.getElementById(`nav-${page}`)) document.getElementById(`nav-${page}`).classList.add('active-nav');
             if(window.innerWidth < 768) toggleSidebar(false);
             
-            // LOGIKA TAMPILAN FORM (JADWAL vs NOTULEN)
+            // PAGE SPECIFIC LOGIC
             if (page === 'create') {
                 resetForm();
-                // Saat create (Jadwal), sembunyikan area recording
                 document.getElementById('section-recording').classList.add('hidden');
-                document.getElementById('inp-isi').removeAttribute('required'); // Tidak wajib saat jadwal
+                document.getElementById('inp-isi').removeAttribute('required');
                 document.getElementById('form-title').innerHTML = '<span class="bg-green-100 text-green-700 p-2 rounded-lg text-lg"><i class="fa-solid fa-calendar-plus"></i></span> Buat Jadwal Rapat';
                 document.getElementById('btn-submit-text').innerText = "Simpan Jadwal";
+                // Autofill Unit jika ada di profil
+                if(currentUser.unit) document.getElementById('inp-unit').value = currentUser.unit;
             }
+            if (page === 'profile') loadProfileView();
             if (page === 'users') loadUsers();
             if (page === 'dashboard') renderDashboard();
         }
@@ -306,6 +361,57 @@
 
         function logout() { localStorage.removeItem('rsud_user_pro'); location.reload(); }
 
+        // --- PROFILE LOGIC ---
+        function loadProfileView() {
+            document.getElementById('prof-img').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=dcfce7&color=166534`;
+            document.getElementById('prof-name-disp').innerText = currentUser.name;
+            document.getElementById('prof-email-disp').innerText = currentUser.email;
+            document.getElementById('prof-role-disp').innerText = currentUser.role;
+
+            document.getElementById('prof-email').value = currentUser.email;
+            document.getElementById('prof-name').value = currentUser.name;
+            document.getElementById('prof-unit').value = currentUser.unit || "";
+            document.getElementById('prof-phone').value = currentUser.phone || "";
+        }
+
+        function saveProfile(e) {
+            e.preventDefault();
+            toggleLoader(true);
+            
+            const newData = {
+                action: 'updateProfile',
+                email: currentUser.email,
+                name: document.getElementById('prof-name').value,
+                unit: document.getElementById('prof-unit').value,
+                phone: document.getElementById('prof-phone').value
+            };
+
+            fetch(API_URL, { method: 'POST', body: JSON.stringify(newData) })
+            .then(res => res.json())
+            .then(resp => {
+                toggleLoader(false);
+                if(resp.status === 'success') {
+                    alert("Profil Berhasil Diperbarui!");
+                    // Update Local Session
+                    currentUser.name = newData.name;
+                    currentUser.unit = newData.unit;
+                    currentUser.phone = newData.phone;
+                    localStorage.setItem('rsud_user_pro', JSON.stringify(currentUser));
+                    
+                    // Refresh tampilan sidebar & profil
+                    initApp(); 
+                    loadProfileView();
+                } else {
+                    alert("Gagal: " + resp.message);
+                }
+            })
+            .catch(err => {
+                toggleLoader(false);
+                alert("Error Jaringan");
+            });
+        }
+
+        // --- DATA LOAD LOGIC ---
         function loadData() {
             if(!currentUser) return;
             toggleLoader(true);
@@ -326,14 +432,11 @@
                 const canEdit = (currentUser.role === 'ADMIN' || item.pencatatEmail === currentUser.email);
                 const fileIcon = (item.fileUrl && item.fileUrl.length > 5) ? `<a href="${item.fileUrl}" target="_blank" class="text-red-500 ml-2" title="Lihat Undangan"><i class="fa-solid fa-file-pdf"></i></a>` : '';
                 
-                // Status Logic: Jika 'isi' kosong, berarti baru Jadwal. Jika ada isi, berarti Selesai.
                 let statusBadge = item.isi && item.isi.length > 5 
                     ? `<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-bold">Selesai</span>`
                     : `<span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-bold">Terjadwal</span>`;
 
                 const btn = canEdit ? `<button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 font-bold text-xs border border-blue-200 px-3 py-1 rounded hover:bg-blue-50">EDIT / ISI</button>` : '-';
-                
-                // Gabung Tanggal & Waktu
                 const timeStr = item.waktu ? `<br><span class="text-gray-400 text-[10px]"><i class="fa-regular fa-clock"></i> ${item.waktu}</span>` : '';
 
                 tbody.innerHTML += `
@@ -359,20 +462,17 @@
 
         function editNotulen(itemStr) {
             const item = JSON.parse(decodeURIComponent(itemStr));
-            navTo('create'); // Pindah ke view create
-            
-            // Tampilkan Section Recording karena ini mode Edit
+            navTo('create');
             document.getElementById('section-recording').classList.remove('hidden');
-            document.getElementById('inp-isi').setAttribute('required', 'true'); // Wajib isi hasil
+            document.getElementById('inp-isi').setAttribute('required', 'true');
             document.getElementById('form-title').innerHTML = '<span class="bg-blue-100 text-blue-700 p-2 rounded-lg text-lg"><i class="fa-solid fa-pen-to-square"></i></span> Isi Hasil Rapat';
             document.getElementById('btn-submit-text').innerText = "Simpan Hasil Notulen";
 
-            // Isi Data
             document.getElementById('form-action').value = 'update';
             document.getElementById('form-id').value = item.id;
             document.getElementById('inp-unit').value = item.unit;
             document.getElementById('inp-tanggal').value = item.tanggal;
-            document.getElementById('inp-waktu').value = item.waktu || ""; // Isi Waktu
+            document.getElementById('inp-waktu').value = item.waktu || "";
             document.getElementById('inp-agenda').value = item.agenda;
             document.getElementById('inp-peserta').value = item.peserta;
             document.getElementById('inp-isi').value = item.isi;
@@ -388,9 +488,8 @@
             }
         }
 
-        // Logic Baru: Hapus File Existing
         function deleteExistingFile() {
-            if(confirm("Apakah Anda yakin ingin menghapus file lampiran ini? (Perubahan diterapkan setelah tombol Simpan ditekan)")) {
+            if(confirm("Hapus lampiran ini? (Simpan untuk terapkan)")) {
                 document.getElementById('form-existing-file').value = "";
                 document.getElementById('existing-file-display').classList.add('hidden');
             }
@@ -406,7 +505,7 @@
                 id: document.getElementById('form-id').value,
                 unit: form.unit.value, 
                 tanggal: form.tanggal.value,
-                waktu: form.waktu.value, // Kirim Waktu
+                waktu: form.waktu.value, 
                 agenda: form.agenda.value, 
                 peserta: form.peserta.value,
                 isi: form.isi.value, 
