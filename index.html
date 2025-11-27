@@ -494,9 +494,9 @@
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Daftar Hadir');
 
-            // Atur Lebar Kolom
+            // Atur Lebar Kolom (Width Increased for Date)
             worksheet.getColumn(1).width = 5;  // No
-            worksheet.getColumn(2).width = 20; // Waktu
+            worksheet.getColumn(2).width = 25; // Waktu (Increased from 20)
             worksheet.getColumn(3).width = 35; // Nama
             worksheet.getColumn(4).width = 25; // HP
             worksheet.getColumn(5).width = 25; // TTD
@@ -620,7 +620,6 @@
                 if(canEdit) {
                     btn = `<div class="flex items-center justify-center gap-2">
                         <button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-green-600 dark:text-slate-500 dark:hover:text-emerald-400 text-lg transition" title="Salin Link Absensi"><i class="fa-solid fa-qrcode"></i></button>
-                        <!-- Update Call with Date/Time -->
                         <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}')" class="text-slate-400 hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400 text-lg transition" title="Lihat Daftar Hadir"><i class="fa-solid fa-users"></i></button>
                         <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 dark:text-blue-400 font-bold text-xs border border-blue-200 dark:border-blue-800 px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">EDIT</button>
                     </div>`;
