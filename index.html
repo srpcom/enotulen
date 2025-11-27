@@ -22,7 +22,8 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body class="min-h-screen flex flex-col overflow-hidden">
+<!-- PERBAIKAN: Menghapus class 'overflow-hidden' agar halaman bisa di-scroll -->
+<body class="min-h-screen flex flex-col">
 
     <!-- ================= LOGIN VIEW ================= -->
     <div id="login-view" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-green-100 fade-in">
@@ -36,7 +37,6 @@
             <p class="text-gray-500 mb-8 text-sm">Silakan login menggunakan akun Google Instansi atau Pribadi untuk mengakses sistem.</p>
             
             <!-- Tombol Google Login -->
-            <!-- PENTING: GANTI 'YOUR_GOOGLE_CLIENT_ID_PLACEHOLDER' DENGAN CLIENT ID ASLI ANDA -->
             <div id="g_id_onload"
                  data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com"
                  data-context="signin"
@@ -246,8 +246,8 @@
         // 1. URL Web App Google Apps Script telah dimasukkan secara otomatis:
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzj1mWjE3EC2KmtKbaHoz8yNEcnNFffDKXJ2xQg0mAKsSBB9QWGtIfwDw65z0OnnHWV/exec"; 
 
-        // 2. PENTING: Jangan lupa mengganti 'YOUR_GOOGLE_CLIENT_ID_PLACEHOLDER' 
-        //    di bagian HTML (baris ~41) dengan Client ID Google Anda sendiri.
+        // 2. Client ID sudah dimasukkan di atas (HTML tag)
+        //    783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com
 
         // ==========================================
         // LOGIC AUTHENTICATION & APP
@@ -462,5 +462,4 @@
         }
     </script>
 </body>
-
 </html>
