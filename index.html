@@ -11,9 +11,12 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- ExcelJS & FileSaver (Untuk Export Excel dengan Gambar) -->
+    <!-- ExcelJS & FileSaver (Export Excel) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <!-- SIGNATURE PAD (Natural Handwriting Library) -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -45,7 +48,16 @@
         .hidden { display: none !important; }
         .nav-item.active { background: rgba(22, 163, 74, 0.1); color: #15803d; border-right: 3px solid #15803d; }
         .dark .nav-item.active { background: rgba(52, 211, 153, 0.15); color: #34d399; border-right: 3px solid #34d399; }
-        #signature-pad { touch-action: none; background-color: white; cursor: crosshair; display: block; width: 100%; height: 100%; }
+        
+        /* Signature Canvas Style */
+        #signature-pad { 
+            touch-action: none; 
+            background-color: white; 
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.75rem; /* rounded-xl */
+        }
     </style>
 </head>
 <body class="am-bg h-screen flex overflow-hidden text-slate-800 dark:text-slate-200">
@@ -98,7 +110,7 @@
                             <div class="absolute bottom-2 right-2 flex gap-2"><button type="button" onclick="clearSignature()" class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-lg hover:bg-red-200 font-semibold shadow-sm border border-red-200"><i class="fa-solid fa-eraser mr-1"></i> Hapus</button></div>
                             <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none text-slate-200 text-sm font-bold opacity-50">Area Tanda Tangan</div>
                         </div>
-                        <p class="text-[10px] text-slate-400 mt-1">*Coretkan tanda tangan pada kotak di atas.</p>
+                        <p class="text-[10px] text-slate-400 mt-1">*Coretkan tanda tangan. Kecepatan mempengaruhi ketebalan.</p>
                     </div>
                     <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-green-500/30 transform active:scale-95 transition"><i class="fa-solid fa-check-circle mr-2"></i> Konfirmasi Kehadiran</button>
                 </form>
@@ -267,71 +279,33 @@
     </div>
 
     <script>
-        // --- 1. SIGNATURE PAD LOGIC (FIXED & SAFE) ---
-        let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
+        // --- 1. SIGNATURE PAD LOGIC ---
+        let signaturePad = null;
         const canvas = document.getElementById('signature-pad');
-        const ctx = canvas ? canvas.getContext('2d') : null;
 
         function resizeCanvas() {
-            if(!canvas || !ctx) return;
-            if(canvas.offsetParent === null) return; 
+            if (!signaturePad) return;
             const ratio = Math.max(window.devicePixelRatio || 1, 1);
             canvas.width = canvas.offsetWidth * ratio;
             canvas.height = canvas.offsetHeight * ratio;
-            ctx.scale(ratio, ratio);
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
+            canvas.getContext("2d").scale(ratio, ratio);
+            signaturePad.clear(); // Bersihkan setelah resize agar koordinat benar
         }
 
-        window.addEventListener("resize", resizeCanvas);
-        setTimeout(resizeCanvas, 500);
-
-        function getCoords(e) {
-            const rect = canvas.getBoundingClientRect();
-            let clientX, clientY;
-            if (e.changedTouches && e.changedTouches.length > 0) { clientX = e.changedTouches[0].clientX; clientY = e.changedTouches[0].clientY; } 
-            else { clientX = e.clientX; clientY = e.clientY; }
-            return [clientX - rect.left, clientY - rect.top];
-        }
-
-        function startDrawing(e) {
-            if(!canvas) return;
-            if (e.type === 'touchstart') e.preventDefault(); 
-            isDrawing = true; [lastX, lastY] = getCoords(e);
-        }
-
-        function draw(e) {
-            if (!isDrawing || !ctx) return;
-            if (e.type === 'touchmove') e.preventDefault(); 
-            const [x, y] = getCoords(e);
-            ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
-            [lastX, lastY] = [x, y];
-        }
-
-        function stopDrawing(e) {
-            if (isDrawing) { if (e.type === 'touchend') draw(e); isDrawing = false; }
+        if (canvas) {
+            // Inisialisasi SignaturePad Library dengan Setting Pena Natural
+            signaturePad = new SignaturePad(canvas, {
+                minWidth: 0.5,
+                maxWidth: 2.5,
+                throttle: 16, // Smoother drawing
+                velocityFilterWeight: 0.7
+            });
+            window.addEventListener("resize", resizeCanvas);
         }
 
         function clearSignature() {
-            if(!ctx || !canvas) return;
-            ctx.clearRect(0, 0, canvas.width / (window.devicePixelRatio||1), canvas.height / (window.devicePixelRatio||1));
-            resizeCanvas(); 
+            if (signaturePad) signaturePad.clear();
         }
-
-        if(canvas) {
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
-            canvas.addEventListener('touchstart', startDrawing, { passive: false });
-            canvas.addEventListener('touchmove', draw, { passive: false });
-            canvas.addEventListener('touchend', stopDrawing, { passive: false });
-        }
-
 
         // --- 2. INIT APPLICATION ---
         try { updateTheme(); } catch(e) {}
@@ -342,7 +316,9 @@
         if (mode === 'absensi' && meetingId) {
             const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.add('hidden');
             const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.remove('hidden');
-            loadMeetingInfo(meetingId); setTimeout(resizeCanvas, 300);
+            loadMeetingInfo(meetingId); 
+            // Delay resize agar container render dulu
+            setTimeout(resizeCanvas, 300);
         } else {
             const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.add('hidden');
             const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.remove('hidden');
@@ -363,7 +339,7 @@
                     document.getElementById('abs-agenda').textContent = resp.data.agenda;
                     document.getElementById('abs-tanggal').textContent = resp.data.tanggal;
                     document.getElementById('abs-waktu').textContent = resp.data.waktu;
-                    resizeCanvas();
+                    resizeCanvas(); // Ensure canvas size is correct
                 } else { alert("Data Rapat Tidak Ditemukan."); }
             })
             .catch(err => { document.getElementById('absensi-loading').innerHTML = '<span class="text-red-500">Gagal memuat data. Periksa koneksi.</span>'; });
@@ -371,9 +347,11 @@
 
         function submitAbsensi(e) {
             e.preventDefault(); toggleLoader(true);
-            if(!canvas) return;
-            const signatureData = canvas.toDataURL('image/png');
-            if(signatureData.length < 3000) { toggleLoader(false); alert("Mohon tanda tangan terlebih dahulu."); return; }
+            if(signaturePad.isEmpty()) { toggleLoader(false); alert("Mohon tanda tangan terlebih dahulu."); return; }
+            
+            // Get data from Library
+            const signatureData = signaturePad.toDataURL('image/png');
+            
             const payload = { action: 'submitAttendance', meetingId: document.getElementById('abs-meeting-id').value, nama: document.getElementById('abs-nama').value, phone: document.getElementById('abs-phone').value, signatureData: signatureData };
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { document.getElementById('absensi-content').classList.add('hidden'); document.getElementById('absensi-success').classList.remove('hidden'); } else { alert("Gagal: " + resp.message); } }).catch(err => { toggleLoader(false); alert("Terjadi kesalahan sistem."); });
         }
@@ -384,8 +362,6 @@
         let filteredData = [];
         let currentPage = 1;
         const itemsPerPage = 15;
-        
-        // --- DATA ATTENDANCE UNTUK DOWNLOAD ---
         let currentAttendanceData = [];
         let currentMeetingTitle = "";
         let currentMeetingDate = "";
@@ -449,8 +425,6 @@
             document.getElementById('att-modal-title').textContent = title;
             document.getElementById('att-table-body').innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Mengambil data...</td></tr>';
             document.getElementById('btn-download-att').classList.add('hidden');
-            
-            // Simpan Info Global untuk Header Excel
             currentMeetingTitle = title;
             currentMeetingDate = date;
             currentMeetingTime = time;
@@ -485,7 +459,6 @@
 
         async function downloadAttendanceWithImages() {
             if (!currentAttendanceData || currentAttendanceData.length === 0) return;
-            
             const btn = document.getElementById('btn-download-att');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyusun Excel...';
@@ -494,37 +467,31 @@
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Daftar Hadir');
 
-            // Atur Lebar Kolom (Width Increased for Date)
-            worksheet.getColumn(1).width = 5;  // No
-            worksheet.getColumn(2).width = 25; // Waktu (Increased from 20)
-            worksheet.getColumn(3).width = 35; // Nama
-            worksheet.getColumn(4).width = 25; // HP
-            worksheet.getColumn(5).width = 25; // TTD
+            worksheet.columns = [
+                { header: 'No', key: 'no', width: 5 },
+                { header: 'Waktu Absen', key: 'waktu', width: 25 },
+                { header: 'Nama Peserta', key: 'nama', width: 35 },
+                { header: 'Nomor HP', key: 'hp', width: 25 },
+                { header: 'Tanda Tangan', key: 'ttd', width: 25 } 
+            ];
 
-            // --- HEADER CUSTOM (MERGED CELLS) ---
-            
-            // Baris 1: Judul Utama
             const titleRow = worksheet.addRow(['DAFTAR HADIR']);
             titleRow.font = { size: 14, bold: true };
             titleRow.alignment = { vertical: 'middle', horizontal: 'center' };
             worksheet.mergeCells('A1:E1');
 
-            // Baris 2: Judul Rapat
             const agendaRow = worksheet.addRow([currentMeetingTitle]);
             agendaRow.font = { size: 12, bold: true };
             agendaRow.alignment = { vertical: 'middle', horizontal: 'center' };
             worksheet.mergeCells('A2:E2');
 
-            // Baris 3: Tanggal & Waktu
             const dateRow = worksheet.addRow([`Pelaksanaan: ${currentMeetingDate} - Pukul ${currentMeetingTime}`]);
             dateRow.font = { size: 11, italic: true };
             dateRow.alignment = { vertical: 'middle', horizontal: 'center' };
             worksheet.mergeCells('A3:E3');
 
-            // Baris 4: Spasi Kosong
             worksheet.addRow([]);
 
-            // Baris 5: Header Tabel
             const headerRow = worksheet.addRow(['No', 'Waktu Absen', 'Nama Peserta', 'Nomor HP', 'Tanda Tangan']);
             headerRow.height = 25;
             headerRow.eachCell((cell) => {
@@ -534,41 +501,20 @@
                 cell.alignment = { vertical: 'middle', horizontal: 'center' };
             });
 
-            // --- ISI DATA ---
             for (let i = 0; i < currentAttendanceData.length; i++) {
                 const rowData = currentAttendanceData[i];
-                const row = worksheet.addRow([
-                    i + 1,
-                    rowData.waktu,
-                    rowData.nama,
-                    rowData.hp,
-                    '' // Placeholder TTD
-                ]);
-                
-                row.height = 50; // Tinggi baris untuk gambar
-                
-                // Border untuk setiap sel data
+                const row = worksheet.addRow([ i + 1, rowData.waktu, rowData.nama, rowData.hp, '' ]);
+                row.height = 50; 
                 row.eachCell({ includeEmpty: true }, (cell) => {
                     cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
                     cell.alignment = { vertical: 'middle', horizontal: 'left' };
                 });
-                
-                // Center alignment untuk No dan Waktu
                 row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
                 row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
 
-                // Insert Image
                 if (rowData.ttdBase64) {
-                    const imageId = workbook.addImage({
-                        base64: rowData.ttdBase64,
-                        extension: 'png',
-                    });
-
-                    worksheet.addImage(imageId, {
-                        tl: { col: 4.1, row: row.number - 1.1 }, // Posisi sedikit geser agar di tengah
-                        ext: { width: 80, height: 40 },
-                        editAs: 'oneCell'
-                    });
+                    const imageId = workbook.addImage({ base64: rowData.ttdBase64, extension: 'png' });
+                    worksheet.addImage(imageId, { tl: { col: 4.1, row: row.number - 1.1 }, ext: { width: 80, height: 40 }, editAs: 'oneCell' });
                 }
             }
 
@@ -580,102 +526,20 @@
             btn.disabled = false;
         }
 
-        function closeAttendanceModal() {
-            document.getElementById('modal-attendance').classList.add('hidden');
-        }
-
-        function loadData() {
-            if(!currentUser) return;
-            toggleLoader(true);
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'read', email: currentUser.email }) })
-            .then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { allData = resp.data; handleFilter(); renderDashboard(); } else alert(resp.message); }).catch(() => { toggleLoader(false); alert("Error Jaringan"); });
-        }
-
-        function handleFilter() {
-            const searchVal = document.getElementById('search-input').value.toLowerCase();
-            const sortVal = document.getElementById('sort-select').value;
-            let temp = allData.filter(item => (item.agenda && item.agenda.toLowerCase().includes(searchVal)) || (item.unit && item.unit.toLowerCase().includes(searchVal)));
-            if (sortVal === 'newest') temp.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-            else if (sortVal === 'oldest') temp.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
-            else if (sortVal === 'az') temp.sort((a, b) => a.agenda.localeCompare(b.agenda));
-            else if (sortVal === 'za') temp.sort((a, b) => b.agenda.localeCompare(a.agenda));
-            filteredData = temp; currentPage = 1; renderPaginatedTable();
-        }
-
-        function renderPaginatedTable() {
-            const tbody = document.getElementById('table-body');
-            const footer = document.getElementById('pagination-footer');
-            tbody.innerHTML = '';
-            if (filteredData.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400">Data tidak ditemukan.</td></tr>`; footer.classList.add('hidden'); return; }
-            footer.classList.remove('hidden');
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageData = filteredData.slice(start, end);
-            pageData.forEach(item => {
-                const canEdit = (currentUser.role === 'ADMIN' || item.pencatatEmail === currentUser.email);
-                const fileIcon = (item.fileUrl && item.fileUrl.length > 5) ? `<a href="${item.fileUrl}" target="_blank" class="text-red-500 ml-2"><i class="fa-solid fa-file-pdf"></i></a>` : '';
-                let statusBadge = item.isi && item.isi.length > 5 ? `<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-200 dark:border-blue-800">Selesai</span>` : `<span class="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] px-3 py-1 rounded-full font-bold border border-amber-200 dark:border-amber-800">Terjadwal</span>`;
-                
-                let btn = '-';
-                if(canEdit) {
-                    btn = `<div class="flex items-center justify-center gap-2">
-                        <button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-green-600 dark:text-slate-500 dark:hover:text-emerald-400 text-lg transition" title="Salin Link Absensi"><i class="fa-solid fa-qrcode"></i></button>
-                        <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}')" class="text-slate-400 hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400 text-lg transition" title="Lihat Daftar Hadir"><i class="fa-solid fa-users"></i></button>
-                        <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 dark:text-blue-400 font-bold text-xs border border-blue-200 dark:border-blue-800 px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">EDIT</button>
-                    </div>`;
-                }
-
-                tbody.innerHTML += `<tr class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition"><td class="px-6 py-4"><span class="font-bold block">${item.displayTanggal}</span><span class="text-xs text-slate-500">${item.waktu || '-'}</span></td><td class="px-6 py-4 font-semibold">${item.agenda} ${fileIcon}</td><td class="px-6 py-4"><span class="bg-green-100 dark:bg-emerald-900/30 text-green-800 dark:text-emerald-400 text-xs px-2 py-1 rounded font-medium">${item.unit}</span></td><td class="px-6 py-4">${statusBadge}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`;
-            });
-            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-            document.getElementById('page-info').innerText = `Halaman ${currentPage} dari ${totalPages}`;
-            document.getElementById('btn-prev').disabled = (currentPage === 1);
-            document.getElementById('btn-next').disabled = (currentPage === totalPages);
-        }
-
+        function closeAttendanceModal() { document.getElementById('modal-attendance').classList.add('hidden'); }
+        function loadData() { if(!currentUser) return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'read', email: currentUser.email }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { allData = resp.data; handleFilter(); renderDashboard(); } else alert(resp.message); }).catch(() => { toggleLoader(false); alert("Error Jaringan"); }); }
+        function handleFilter() { const searchVal = document.getElementById('search-input').value.toLowerCase(); const sortVal = document.getElementById('sort-select').value; let temp = allData.filter(item => (item.agenda && item.agenda.toLowerCase().includes(searchVal)) || (item.unit && item.unit.toLowerCase().includes(searchVal))); if (sortVal === 'newest') temp.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)); else if (sortVal === 'oldest') temp.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)); else if (sortVal === 'az') temp.sort((a, b) => a.agenda.localeCompare(b.agenda)); else if (sortVal === 'za') temp.sort((a, b) => b.agenda.localeCompare(a.agenda)); filteredData = temp; currentPage = 1; renderPaginatedTable(); }
+        function renderPaginatedTable() { const tbody = document.getElementById('table-body'); const footer = document.getElementById('pagination-footer'); tbody.innerHTML = ''; if (filteredData.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400">Data tidak ditemukan.</td></tr>`; footer.classList.add('hidden'); return; } footer.classList.remove('hidden'); const start = (currentPage - 1) * itemsPerPage; const end = start + itemsPerPage; const pageData = filteredData.slice(start, end); pageData.forEach(item => { const canEdit = (currentUser.role === 'ADMIN' || item.pencatatEmail === currentUser.email); const fileIcon = (item.fileUrl && item.fileUrl.length > 5) ? `<a href="${item.fileUrl}" target="_blank" class="text-red-500 ml-2"><i class="fa-solid fa-file-pdf"></i></a>` : ''; let statusBadge = item.isi && item.isi.length > 5 ? `<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-200 dark:border-blue-800">Selesai</span>` : `<span class="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] px-3 py-1 rounded-full font-bold border border-amber-200 dark:border-amber-800">Terjadwal</span>`; let btn = '-'; if(canEdit) { btn = `<div class="flex items-center justify-center gap-2"><button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-green-600 dark:text-slate-500 dark:hover:text-emerald-400 text-lg transition" title="Salin Link Absensi"><i class="fa-solid fa-qrcode"></i></button><button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}')" class="text-slate-400 hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400 text-lg transition" title="Lihat Daftar Hadir"><i class="fa-solid fa-users"></i></button><button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 dark:text-blue-400 font-bold text-xs border border-blue-200 dark:border-blue-800 px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">EDIT</button></div>`; } tbody.innerHTML += `<tr class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition"><td class="px-6 py-4"><span class="font-bold block">${item.displayTanggal}</span><span class="text-xs text-slate-500">${item.waktu || '-'}</span></td><td class="px-6 py-4 font-semibold">${item.agenda} ${fileIcon}</td><td class="px-6 py-4"><span class="bg-green-100 dark:bg-emerald-900/30 text-green-800 dark:text-emerald-400 text-xs px-2 py-1 rounded font-medium">${item.unit}</span></td><td class="px-6 py-4">${statusBadge}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`; }); const totalPages = Math.ceil(filteredData.length / itemsPerPage); document.getElementById('page-info').innerText = `Halaman ${currentPage} dari ${totalPages}`; document.getElementById('btn-prev').disabled = (currentPage === 1); document.getElementById('btn-next').disabled = (currentPage === totalPages); }
         function nextPage() { if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) { currentPage++; renderPaginatedTable(); } }
         function prevPage() { if (currentPage > 1) { currentPage--; renderPaginatedTable(); } }
         function renderDashboard() { document.getElementById('dash-total-count').innerText = allData.length; }
-
-        function resetForm() {
-            document.getElementById('mainForm').reset();
-            document.getElementById('form-action').value = 'create'; document.getElementById('form-id').value = '';
-            document.getElementById('existing-file-display').classList.add('hidden');
-            document.getElementById('new-docs-container').innerHTML = ''; document.getElementById('existing-docs-container').innerHTML = ''; document.getElementById('existing-docs-container').classList.add('hidden'); document.getElementById('empty-docs-msg').classList.remove('hidden'); document.getElementById('form-kept-docs').value = "[]";
-            document.getElementById('inp-unit').value = currentUser.unit || "";
-            document.getElementById('section-recording').classList.add('hidden');
-            document.getElementById('inp-isi').removeAttribute('required');
-            document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-green-100 dark:bg-emerald-900/50 text-green-600 dark:text-emerald-400 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-plus"></i></span> Buat Jadwal Rapat';
-            document.getElementById('btn-submit-text').innerText = "Simpan Jadwal";
-        }
-
-        function editNotulen(itemStr) {
-            const item = JSON.parse(decodeURIComponent(itemStr));
-            navTo('create');
-            document.getElementById('section-recording').classList.remove('hidden');
-            document.getElementById('inp-isi').setAttribute('required', 'true');
-            document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-to-square"></i></span> Isi Hasil Rapat';
-            document.getElementById('btn-submit-text').innerText = "Simpan Hasil Notulen";
-            document.getElementById('form-action').value = 'update'; document.getElementById('form-id').value = item.id;
-            document.getElementById('inp-unit').value = item.unit;
-            const d = new Date(item.tanggal); document.getElementById('inp-tanggal').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-            document.getElementById('inp-waktu').value = item.waktu || "";
-            document.getElementById('inp-agenda').value = item.agenda; document.getElementById('inp-peserta').value = item.peserta;
-            document.getElementById('inp-isi').value = item.isi; document.getElementById('inp-tindak').value = item.tindakLanjut;
-            if(item.fileUrl && item.fileUrl.length > 5) { document.getElementById('form-existing-file').value = item.fileUrl; document.getElementById('existing-file-display').classList.remove('hidden'); document.getElementById('link-existing-file').href = item.fileUrl; } else { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; }
-            if(item.dokumentasiJson && item.dokumentasiJson.length > 5) { try { const docs = JSON.parse(item.dokumentasiJson); document.getElementById('form-kept-docs').value = JSON.stringify(docs); renderKeptDocs(docs); } catch(e) {} } else { document.getElementById('form-kept-docs').value = "[]"; renderKeptDocs([]); }
-        }
-
+        function resetForm() { document.getElementById('mainForm').reset(); document.getElementById('form-action').value = 'create'; document.getElementById('form-id').value = ''; document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('new-docs-container').innerHTML = ''; document.getElementById('existing-docs-container').innerHTML = ''; document.getElementById('existing-docs-container').classList.add('hidden'); document.getElementById('empty-docs-msg').classList.remove('hidden'); document.getElementById('form-kept-docs').value = "[]"; document.getElementById('inp-unit').value = currentUser.unit || ""; document.getElementById('section-recording').classList.add('hidden'); document.getElementById('inp-isi').removeAttribute('required'); document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-green-100 dark:bg-emerald-900/50 text-green-600 dark:text-emerald-400 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-plus"></i></span> Buat Jadwal Rapat'; document.getElementById('btn-submit-text').innerText = "Simpan Jadwal"; }
+        function editNotulen(itemStr) { const item = JSON.parse(decodeURIComponent(itemStr)); navTo('create'); document.getElementById('section-recording').classList.remove('hidden'); document.getElementById('inp-isi').setAttribute('required', 'true'); document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-to-square"></i></span> Isi Hasil Rapat'; document.getElementById('btn-submit-text').innerText = "Simpan Hasil Notulen"; document.getElementById('form-action').value = 'update'; document.getElementById('form-id').value = item.id; document.getElementById('inp-unit').value = item.unit; const d = new Date(item.tanggal); document.getElementById('inp-tanggal').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; document.getElementById('inp-waktu').value = item.waktu || ""; document.getElementById('inp-agenda').value = item.agenda; document.getElementById('inp-peserta').value = item.peserta; document.getElementById('inp-isi').value = item.isi; document.getElementById('inp-tindak').value = item.tindakLanjut; if(item.fileUrl && item.fileUrl.length > 5) { document.getElementById('form-existing-file').value = item.fileUrl; document.getElementById('existing-file-display').classList.remove('hidden'); document.getElementById('link-existing-file').href = item.fileUrl; } else { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; } if(item.dokumentasiJson && item.dokumentasiJson.length > 5) { try { const docs = JSON.parse(item.dokumentasiJson); document.getElementById('form-kept-docs').value = JSON.stringify(docs); renderKeptDocs(docs); } catch(e) {} } else { document.getElementById('form-kept-docs').value = "[]"; renderKeptDocs([]); } }
         function addDocRow() { document.getElementById('empty-docs-msg').classList.add('hidden'); const container = document.getElementById('new-docs-container'); const rowId = 'doc-' + Date.now(); container.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="doc-row flex gap-2 bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-white/10"><div class="flex-1"><input type="text" placeholder="Deskripsi..." class="doc-desc glass-input w-full rounded-lg px-3 py-2 text-sm"></div><div class="flex items-center gap-2"><input type="file" class="doc-file text-xs text-slate-500" accept="image/*,.pdf"><button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2"><i class="fa-solid fa-xmark"></i></button></div></div>`); }
         function renderKeptDocs(docs) { const c = document.getElementById('existing-docs-container'); c.innerHTML = ''; if(!docs.length) { c.classList.add('hidden'); return; } c.classList.remove('hidden'); docs.forEach((d,i) => c.insertAdjacentHTML('beforeend', `<div class="flex justify-between p-3 bg-white dark:bg-black/20 border rounded-lg"><div class="flex gap-2 overflow-hidden"><i class="fa-solid fa-file-image text-indigo-500 mt-1"></i><div class="truncate"><p class="text-sm font-bold">${d.desc||''}</p><a href="${d.url}" target="_blank" class="text-xs text-blue-500">Lihat File</a></div></div><button type="button" onclick="removeKeptDoc(${i})" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></div>`)); }
         function removeKeptDoc(i) { const k = JSON.parse(document.getElementById('form-kept-docs').value); if(confirm("Hapus?")) { k.splice(i,1); document.getElementById('form-kept-docs').value = JSON.stringify(k); renderKeptDocs(k); } }
         function deleteExistingFile() { if(confirm("Hapus lampiran?")) { document.getElementById('form-existing-file').value = ""; document.getElementById('existing-file-display').classList.add('hidden'); } }
-
-        async function submitData(e) { e.preventDefault(); toggleLoader(true); const form = document.getElementById('mainForm'); const payload = { action: document.getElementById('form-action').value, id: document.getElementById('form-id').value, unit: form.unit.value, tanggal: form.tanggal.value, waktu: form.waktu.value, agenda: form.agenda.value, peserta: form.peserta.value, isi: form.isi.value, tindakLanjut: form.tindakLanjut.value, pencatatNama: currentUser.name, pencatatEmail: currentUser.email, existingFileUrl: document.getElementById('form-existing-file').value }; 
-        const fileInput = document.getElementById('inp-file'); if(fileInput.files.length > 0) { const f = fileInput.files[0]; if(f.size > 5*1024*1024) { toggleLoader(false); alert("File Max 5MB"); return; } payload.fileData = (await toBase64(f)).split(',')[1]; payload.fileName = f.name; payload.mimeType = f.type; }
-        const newDocs = []; for(const row of document.querySelectorAll('.doc-row')) { const fi = row.querySelector('.doc-file'); const di = row.querySelector('.doc-desc'); if(fi.files.length > 0) { const f = fi.files[0]; if(f.size > 3*1024*1024) { toggleLoader(false); alert("Foto Dokumentasi Max 3MB"); return; } newDocs.push({ fileData: (await toBase64(f)).split(',')[1], fileName: f.name, mimeType: f.type, description: di.value }); } } payload.newDokumentasi = newDocs; payload.keptDokumentasi = document.getElementById('form-kept-docs').value;
-        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); resetForm(); navTo('list'); loadData(); } else alert("Gagal: " + resp.message); }).catch(() => { toggleLoader(false); alert("Error Server"); }); }
-
+        async function submitData(e) { e.preventDefault(); toggleLoader(true); const form = document.getElementById('mainForm'); const payload = { action: document.getElementById('form-action').value, id: document.getElementById('form-id').value, unit: form.unit.value, tanggal: form.tanggal.value, waktu: form.waktu.value, agenda: form.agenda.value, peserta: form.peserta.value, isi: form.isi.value, tindakLanjut: form.tindakLanjut.value, pencatatNama: currentUser.name, pencatatEmail: currentUser.email, existingFileUrl: document.getElementById('form-existing-file').value }; const fileInput = document.getElementById('inp-file'); if(fileInput.files.length > 0) { const f = fileInput.files[0]; if(f.size > 5*1024*1024) { toggleLoader(false); alert("File Max 5MB"); return; } payload.fileData = (await toBase64(f)).split(',')[1]; payload.fileName = f.name; payload.mimeType = f.type; } const newDocs = []; for(const row of document.querySelectorAll('.doc-row')) { const fi = row.querySelector('.doc-file'); const di = row.querySelector('.doc-desc'); if(fi.files.length > 0) { const f = fi.files[0]; if(f.size > 3*1024*1024) { toggleLoader(false); alert("Foto Dokumentasi Max 3MB"); return; } newDocs.push({ fileData: (await toBase64(f)).split(',')[1], fileName: f.name, mimeType: f.type, description: di.value }); } } payload.newDokumentasi = newDocs; payload.keptDokumentasi = document.getElementById('form-kept-docs').value; fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); resetForm(); navTo('list'); loadData(); } else alert("Gagal: " + resp.message); }).catch(() => { toggleLoader(false); alert("Error Server"); }); }
         const toBase64 = file => new Promise((r, j) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => r(reader.result); reader.onerror = j; });
         function loadProfileView() { document.getElementById('prof-img').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=16a34a&color=fff`; document.getElementById('prof-name-disp').innerText = currentUser.name; document.getElementById('prof-email-disp').innerText = currentUser.email; document.getElementById('prof-role-disp').innerText = currentUser.role; document.getElementById('prof-email').value = currentUser.email; document.getElementById('prof-name').value = currentUser.name; document.getElementById('prof-unit').value = currentUser.unit || ""; document.getElementById('prof-phone').value = currentUser.phone || ""; }
         function saveProfile(e) { e.preventDefault(); toggleLoader(true); const newData = { action: 'updateProfile', email: currentUser.email, name: document.getElementById('prof-name').value, unit: document.getElementById('prof-unit').value, phone: document.getElementById('prof-phone').value }; fetch(API_URL, { method: 'POST', body: JSON.stringify(newData) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); currentUser.name = newData.name; currentUser.unit = newData.unit; currentUser.phone = newData.phone; localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); initApp(); loadProfileView(); } else alert("Gagal: " + resp.message); }); }
