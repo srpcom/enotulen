@@ -173,7 +173,7 @@
                     <h2 class="text-3xl font-bold text-slate-800 dark:text-white mb-2">Selamat Datang</h2>
                     <p class="text-slate-500 dark:text-slate-400 text-sm mb-8 leading-relaxed">Sistem Informasi Manajemen Notulen Rapat<br><span class="font-semibold text-green-700 dark:text-emerald-400">RSUD dr. R. Koesma Tuban</span></p>
                     <div class="flex justify-center"><div id="g_id_onload" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div><div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="pill" data-logo_alignment="left" data-width="280"></div></div>
-                    <p class="mt-8 text-xs text-slate-400">© 2025 Bagian Admin dan Umum RSUD Koesma - Secure Access</p>
+                    <p class="mt-8 text-xs text-slate-400">© 2025 IT RSUD Koesma - Secure Access</p>
                 </div>
             </div>
 
@@ -222,7 +222,26 @@
                                 <div class="col-span-1 md:col-span-2"><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Email Akun</label><input type="text" id="prof-email" disabled class="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-500 px-4 py-3 text-sm cursor-not-allowed dark:bg-slate-900/50 dark:border-slate-700"></div>
                                 <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Nama Lengkap</label><input type="text" id="prof-name" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all"></div>
                                 <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Nomor HP / WA</label><input type="tel" id="prof-phone" placeholder="08..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all"></div>
-                                <div class="col-span-1 md:col-span-2"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Unit Kerja</label><select id="prof-unit" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all dark:bg-slate-800"><option value="">-- Pilih Unit --</option><option value="Direksi">Direksi</option><option value="Yanmed">Yanmed</option><option value="Keperawatan">Keperawatan</option><option value="Penunjang">Penunjang</option><option value="Umum">Umum & Kepegawaian</option><option value="Keuangan">Keuangan</option><option value="Komite Medis">Komite Medis</option><option value="Lainnya">Lainnya</option></select></div>
+                                <div class="col-span-1 md:col-span-2">
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Unit Kerja</label>
+                                    <!-- [PERUBAHAN] onchange untuk handle Lainnya -->
+                                    <select id="prof-unit" onchange="handleProfileUnitChange(this)" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all dark:bg-slate-800">
+                                        <option value="">-- Pilih Unit --</option>
+                                        <option value="Direksi">Direksi</option>
+                                        <option value="Yanmed">Yanmed</option>
+                                        <option value="Keperawatan">Keperawatan</option>
+                                        <option value="Penunjang">Penunjang</option>
+                                        <option value="Umum">Umum & Kepegawaian</option>
+                                        <option value="Keuangan">Keuangan</option>
+                                        <option value="Komite Medis">Komite Medis</option>
+                                        <option value="Lainnya">Lainnya</option>
+                                    </select>
+                                    <!-- [PERUBAHAN] Input field hidden untuk Lainnya -->
+                                    <div id="prof-unit-lainnya-group" class="hidden mt-3 animate-fade-in">
+                                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Unit Kerja (Lainnya)</label>
+                                        <input type="text" id="prof-unit-lainnya" placeholder="Masukkan nama unit kerja Anda..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all">
+                                    </div>
+                                </div>
                             </div>
                             <div class="pt-4 flex justify-end"><button type="submit" class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3 rounded-xl hover:shadow-lg hover:shadow-green-500/30 text-sm font-semibold flex items-center transform active:scale-95 transition-all"><i class="fa-solid fa-check-circle mr-2"></i> Simpan Perubahan</button></div>
                         </form>
@@ -660,7 +679,20 @@
         function loadUsers() { if(currentUser.role !== 'ADMIN') return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getUsers', requesterEmail: currentUser.email }) }).then(res => res.json()).then(resp => { toggleLoader(false); const tbody = document.getElementById('users-table-body'); tbody.innerHTML = ''; resp.data.forEach(u => { const isSuper = u.email === "ridwankoramil9@gmail.com"; let btn = isSuper ? "SUPER" : `<button onclick="changeRole('${u.email}', '${u.role==='ADMIN'?'USER':'ADMIN'}')" class="text-xs bg-gray-100 px-2 py-1 rounded">Role</button>`; tbody.innerHTML += `<tr class="border-b"><td class="px-6 py-4">${u.name}</td><td class="px-6 py-4 text-xs">${u.email}</td><td class="px-6 py-4">${u.role}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`; }); }); }
         function changeRole(email, newRole) { if(!confirm("Ubah role?")) return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'toggleAdmin', targetEmail: email, newRole: newRole }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') loadUsers(); else alert(resp.message); }); }
         function toggleLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
+        
+        // [BARU] Fungsi untuk menangani perubahan unit pada profil
+        function handleProfileUnitChange(select) {
+            const div = document.getElementById('prof-unit-lainnya-group');
+            const input = document.getElementById('prof-unit-lainnya');
+            if (select.value === 'Lainnya') {
+                div.classList.remove('hidden');
+                input.setAttribute('required', 'true');
+            } else {
+                div.classList.add('hidden');
+                input.removeAttribute('required');
+                input.value = "";
+            }
+        }
     </script>
 </body>
 </html>
-
