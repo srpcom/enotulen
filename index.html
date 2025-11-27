@@ -145,9 +145,18 @@
                         <div class="mb-6 bg-blue-50/50 p-5 rounded-xl border border-blue-100 border-dashed border-2">
                             <label class="block text-xs font-bold text-blue-800 uppercase mb-2">Upload Undangan (PDF/Img)</label>
                             <input type="file" id="inp-file" accept=".pdf,image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
-                            <div id="existing-file-display" class="hidden mt-3 p-3 bg-white rounded-lg border border-blue-100 flex items-center justify-between">
-                                <span class="text-sm font-medium">File Terlampir</span>
-                                <a href="#" target="_blank" id="link-existing-file" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold">Lihat File</a>
+                            
+                            <!-- FILE EXISTING DISPLAY WITH DELETE BUTTON -->
+                            <div id="existing-file-display" class="hidden mt-3 p-3 bg-white rounded-lg border border-blue-100 flex items-center justify-between shadow-sm">
+                                <div class="flex items-center gap-2 overflow-hidden">
+                                    <span class="text-sm font-medium text-gray-700 truncate"><i class="fa-solid fa-file-circle-check text-green-600 mr-1"></i> File Terlampir</span>
+                                    <a href="#" target="_blank" id="link-existing-file" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold hover:bg-blue-100 border border-blue-200 transition whitespace-nowrap">
+                                        Lihat File <i class="fa-solid fa-external-link-alt ml-1"></i>
+                                    </a>
+                                </div>
+                                <button type="button" onclick="deleteExistingFile()" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition" title="Hapus lampiran ini">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -373,6 +382,17 @@
                 document.getElementById('form-existing-file').value = item.fileUrl;
                 document.getElementById('existing-file-display').classList.remove('hidden');
                 document.getElementById('link-existing-file').href = item.fileUrl;
+            } else {
+                document.getElementById('existing-file-display').classList.add('hidden');
+                document.getElementById('form-existing-file').value = "";
+            }
+        }
+
+        // Logic Baru: Hapus File Existing
+        function deleteExistingFile() {
+            if(confirm("Apakah Anda yakin ingin menghapus file lampiran ini? (Perubahan diterapkan setelah tombol Simpan ditekan)")) {
+                document.getElementById('form-existing-file').value = "";
+                document.getElementById('existing-file-display').classList.add('hidden');
             }
         }
 
