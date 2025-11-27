@@ -19,22 +19,15 @@
                         glass: {
                             light: 'rgba(255, 255, 255, 0.7)',
                             dark: 'rgba(30, 41, 59, 0.7)',
-                            border: 'rgba(255, 255, 255, 0.2)',
-                            borderDark: 'rgba(255, 255, 255, 0.05)',
                         }
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
                     },
                     keyframes: {
                         fadeIn: {
                             '0%': { opacity: '0' },
                             '100%': { opacity: '1' },
-                        },
-                        slideUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
                         }
                     }
                 }
@@ -48,360 +41,443 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
-        /* Base Styles & Glassmorphism Utilities */
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: background-color 0.5s ease, color 0.5s ease;
-        }
-
-        /* AM THEME: Green Glass */
-        .am-bg {
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
-            background-attachment: fixed;
-        }
-
-        /* PM THEME: Dark Elegant */
-        .dark .pm-bg {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #111827 100%);
-            background-attachment: fixed;
-        }
-
-        /* Glass Cards - Light */
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.5s ease; }
+        .am-bg { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%); background-attachment: fixed; }
+        .dark .pm-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #111827 100%); background-attachment: fixed; }
+        
         .glass-card {
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
         }
-
-        /* Glass Cards - Dark */
         .dark .glass-card {
             background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
-
-        /* Inputs Glass */
-        .glass-input {
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-        .dark .glass-input {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #e2e8f0;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        .glass-input { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(0,0,0,0.1); }
+        .dark .glass-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; }
 
         .hidden { display: none !important; }
-        
-        /* Active Nav Styling */
-        .nav-item.active {
-            background: rgba(22, 163, 74, 0.1);
-            color: #15803d;
-            border-right: 3px solid #15803d;
-        }
-        .dark .nav-item.active {
-            background: rgba(52, 211, 153, 0.15);
-            color: #34d399;
-            border-right: 3px solid #34d399;
-        }
+        .nav-item.active { background: rgba(22, 163, 74, 0.1); color: #15803d; border-right: 3px solid #15803d; }
+        .dark .nav-item.active { background: rgba(52, 211, 153, 0.15); color: #34d399; border-right: 3px solid #34d399; }
+
+        /* Signature Canvas */
+        #signature-pad { touch-action: none; background-color: white; cursor: crosshair; }
     </style>
 </head>
 <body class="am-bg h-screen flex overflow-hidden text-slate-800 dark:text-slate-200">
 
     <script>
-        // --- KONFIGURASI API ---
         const API_URL = "https://script.google.com/macros/s/AKfycbzj1mWjE3EC2KmtKbaHoz8yNEcnNFffDKXJ2xQg0mAKsSBB9QWGtIfwDw65z0OnnHWV/exec"; 
         const CLIENT_ID = "783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com";
 
-        // --- THEME LOGIC (AM/PM) ---
         function updateTheme() {
             const hour = new Date().getHours();
             const isPM = hour >= 12; 
             const html = document.documentElement;
             const body = document.body;
-            
             if (isPM) {
-                html.classList.add('dark');
-                body.classList.remove('am-bg');
-                body.classList.add('pm-bg');
-                document.getElementById('theme-icon').className = "fa-solid fa-moon text-yellow-400";
-                document.getElementById('theme-text').innerText = "Mode Malam (PM)";
+                html.classList.add('dark'); body.classList.remove('am-bg'); body.classList.add('pm-bg');
+                const ti = document.getElementById('theme-icon'); if(ti) ti.className = "fa-solid fa-moon text-yellow-400";
             } else {
-                html.classList.remove('dark');
-                body.classList.remove('pm-bg');
-                body.classList.add('am-bg');
-                document.getElementById('theme-icon').className = "fa-solid fa-sun text-orange-400";
-                document.getElementById('theme-text').innerText = "Mode Pagi (AM)";
+                html.classList.remove('dark'); body.classList.remove('pm-bg'); body.classList.add('am-bg');
+                const ti = document.getElementById('theme-icon'); if(ti) ti.className = "fa-solid fa-sun text-orange-400";
             }
         }
         setInterval(updateTheme, 60000);
     </script>
 
-    <!-- SIDEBAR -->
-    <aside id="sidebar" class="hidden fixed md:relative z-50 w-72 h-full flex-col border-r border-white/20 shadow-2xl transition-transform duration-300 md:translate-x-0 -translate-x-full glass-card">
-        <div class="h-20 flex items-center px-8 border-b border-white/10">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-green-500/30 mr-3">
-                <i class="fa-solid fa-hospital text-white text-lg"></i>
+    <!-- ======================== -->
+    <!-- VIEW: ABSENSI (PUBLIC) -->
+    <!-- ======================== -->
+    <div id="app-absensi" class="hidden w-full h-full overflow-y-auto p-4 flex flex-col items-center">
+        <div class="glass-card max-w-md w-full p-6 rounded-3xl shadow-2xl border-t border-white/60 animate-fade-in my-auto">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm"><i class="fa-solid fa-clipboard-user text-3xl text-green-600"></i></div>
+                <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Daftar Hadir Rapat</h2>
+                <p class="text-slate-500 text-xs">RSUD dr. R. Koesma Tuban</p>
             </div>
-            <div>
-                <h1 class="font-bold text-lg tracking-tight dark:text-white">E-Notulen</h1>
-                <p class="text-[10px] font-medium text-green-600 dark:text-emerald-400 uppercase tracking-wider">RSUD dr. R. Koesma</p>
-            </div>
-        </div>
-        <div onclick="navTo('profile')" class="mx-4 mt-6 mb-2 p-3 rounded-2xl bg-white/40 dark:bg-black/20 border border-white/20 cursor-pointer hover:bg-white/60 dark:hover:bg-white/5 transition group">
-            <div class="flex items-center gap-3">
-                <img id="sb-avatar" src="" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-600 shadow-sm object-cover">
-                <div class="overflow-hidden">
-                    <p id="sb-name" class="text-sm font-bold truncate group-hover:text-green-700 dark:group-hover:text-emerald-400 transition">User</p>
-                    <p id="sb-role" class="text-[10px] font-bold px-2 py-0.5 rounded bg-green-100 dark:bg-emerald-900/50 text-green-700 dark:text-emerald-400 w-max mt-1">LOADING</p>
-                </div>
-            </div>
-        </div>
-        <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-            <button onclick="navTo('dashboard')" id="nav-dashboard" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5 transition flex items-center gap-3"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</button>
-            <button onclick="navTo('create')" id="nav-create" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5 transition flex items-center gap-3"><i class="fa-solid fa-calendar-plus w-5"></i> Buat Jadwal</button>
-            <button onclick="navTo('list')" id="nav-list" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5 transition flex items-center gap-3"><i class="fa-solid fa-folder-open w-5"></i> Arsip Notulen</button>
-            <button onclick="navTo('profile')" id="nav-profile" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5 transition flex items-center gap-3"><i class="fa-solid fa-user-gear w-5"></i> Pengaturan</button>
-            <div id="menu-admin" class="hidden pt-4 mt-2 border-t border-slate-200/50 dark:border-white/5">
-                <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Admin Panel</p>
-                <button onclick="navTo('users')" id="nav-users" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5 transition flex items-center gap-3"><i class="fa-solid fa-users-gear w-5"></i> Data User</button>
-            </div>
-        </nav>
-        <div class="p-4 border-t border-white/10 bg-white/20 dark:bg-black/20 backdrop-blur-sm">
-            <div class="flex items-center justify-between mb-4 px-2">
-                <div class="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                    <i id="theme-icon" class="fa-solid fa-sun"></i> <span id="theme-text">Mode Pagi</span>
-                </div>
-            </div>
-            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 px-4 py-2.5 rounded-xl transition font-semibold text-sm shadow-sm"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
-        </div>
-    </aside>
-
-    <div id="sidebar-overlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden transition-opacity"></div>
-
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 flex flex-col relative h-full overflow-hidden">
-        <header class="md:hidden h-16 glass-card flex items-center justify-between px-6 z-30 shrink-0 border-b-0">
-            <span class="font-bold text-lg text-green-800 dark:text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-hospital-user"></i> E-Notulen</span>
-            <button onclick="toggleSidebar()" class="text-slate-600 dark:text-slate-300 p-2 rounded-lg active:bg-slate-100 dark:active:bg-slate-800"><i class="fa-solid fa-bars text-xl"></i></button>
-        </header>
-
-        <!-- LOGIN -->
-        <div id="view-login" class="absolute inset-0 z-[60] flex flex-col items-center justify-center p-4">
-            <div class="glass-card max-w-md w-full p-8 rounded-3xl text-center shadow-2xl border-t border-white/60 animate-fade-in relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 to-emerald-600"></div>
-                <div class="w-24 h-24 bg-gradient-to-br from-green-100 to-emerald-50 dark:from-emerald-900 dark:to-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><i class="fa-solid fa-hospital text-5xl text-green-600 dark:text-emerald-400 drop-shadow-sm"></i></div>
-                <h2 class="text-3xl font-bold text-slate-800 dark:text-white mb-2">Selamat Datang</h2>
-                <p class="text-slate-500 dark:text-slate-400 text-sm mb-8 leading-relaxed">Sistem Informasi Manajemen Notulen Rapat<br><span class="font-semibold text-green-700 dark:text-emerald-400">RSUD dr. R. Koesma Tuban</span></p>
-                <div class="flex justify-center"><div id="g_id_onload" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div><div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="pill" data-logo_alignment="left" data-width="280"></div></div>
-                <p class="mt-8 text-xs text-slate-400">© 2025 IT RSUD Koesma - Secure Access</p>
-            </div>
-        </div>
-
-        <!-- CONTENT -->
-        <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 hidden">
             
-            <!-- DASHBOARD -->
-            <div id="view-dashboard" class="page-view animate-fade-in max-w-6xl mx-auto space-y-6">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
-                    <div><h1 class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">Dashboard Overview</h1><p class="text-slate-500 dark:text-slate-400 text-sm">Selamat datang kembali, mari produktif hari ini.</p></div>
-                    <div class="text-right hidden md:block"><p class="text-xs font-bold text-green-600 dark:text-emerald-400 bg-green-100 dark:bg-emerald-900/30 px-3 py-1 rounded-full border border-green-200 dark:border-emerald-800/50"><i class="fa-regular fa-calendar-check mr-1"></i> Sistem Aktif</p></div>
+            <div id="absensi-loading" class="text-center py-4"><i class="fa-solid fa-circle-notch fa-spin text-green-600"></i> Memuat Info Rapat...</div>
+            
+            <div id="absensi-content" class="hidden">
+                <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl mb-6 border border-slate-200 dark:border-white/10 text-center">
+                    <h3 id="abs-agenda" class="font-bold text-lg text-green-700 dark:text-emerald-400 leading-tight mb-1">...</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-300"><i class="fa-regular fa-calendar mr-1"></i> <span id="abs-tanggal">...</span> &bull; <i class="fa-regular fa-clock mr-1"></i> <span id="abs-waktu">...</span></p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div onclick="navTo('create')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden">
-                        <div class="absolute right-0 top-0 w-32 h-32 bg-green-400/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-                        <div class="flex items-center gap-5 relative z-10">
-                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-green-500/30 group-hover:rotate-6 transition"><i class="fa-solid fa-plus text-2xl"></i></div>
-                            <div><h3 class="font-bold text-xl text-slate-800 dark:text-white">Buat Jadwal Rapat</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Jadwalkan rapat baru dan undang peserta.</p></div>
-                            <div class="ml-auto text-slate-300 dark:text-slate-600 group-hover:text-green-500 transition"><i class="fa-solid fa-arrow-right text-xl"></i></div>
-                        </div>
+
+                <form id="formAbsensi" onsubmit="submitAbsensi(event)" class="space-y-4">
+                    <input type="hidden" id="abs-meeting-id">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Nama Lengkap</label>
+                        <input type="text" id="abs-nama" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500" placeholder="Nama beserta gelar...">
                     </div>
-                    <div onclick="navTo('list')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden">
-                        <div class="absolute right-0 top-0 w-32 h-32 bg-blue-400/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-                        <div class="flex items-center gap-5 relative z-10">
-                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:rotate-6 transition"><i class="fa-solid fa-folder-open text-2xl"></i></div>
-                            <div><h3 class="font-bold text-xl text-slate-800 dark:text-white">Arsip Notulen</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Anda memiliki <span id="dash-total-count" class="font-bold text-blue-500">...</span> dokumen tersimpan.</p></div>
-                            <div class="ml-auto text-slate-300 dark:text-slate-600 group-hover:text-blue-500 transition"><i class="fa-solid fa-arrow-right text-xl"></i></div>
-                        </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Nomor HP / WhatsApp</label>
+                        <input type="tel" id="abs-phone" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500" placeholder="08...">
                     </div>
-                </div>
-            </div>
-
-            <!-- PROFILE -->
-            <div id="view-profile" class="page-view hidden animate-fade-in max-w-3xl mx-auto">
-                <h1 class="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg"><i class="fa-solid fa-user-gear"></i></span> Pengaturan Profil</h1>
-                <div class="glass-card rounded-2xl p-6 md:p-8">
-                    <div class="flex flex-col md:flex-row items-center gap-6 mb-8 pb-8 border-b border-slate-200/50 dark:border-white/10">
-                        <div class="relative"><img id="prof-img" src="" class="w-24 h-24 rounded-full border-4 border-white dark:border-slate-700 shadow-md"><div class="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div></div>
-                        <div class="text-center md:text-left"><h2 id="prof-name-disp" class="text-2xl font-bold text-slate-900 dark:text-white">User Name</h2><p id="prof-email-disp" class="text-slate-500 dark:text-slate-400 mb-2">email@example.com</p><span id="prof-role-disp" class="inline-block text-xs font-bold tracking-wider bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full uppercase">USER</span></div>
-                    </div>
-                    <form id="profileForm" onsubmit="saveProfile(event)" class="space-y-5">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div class="col-span-1 md:col-span-2"><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Email Akun</label><input type="text" id="prof-email" disabled class="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-500 px-4 py-3 text-sm cursor-not-allowed dark:bg-slate-900/50 dark:border-slate-700"></div>
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Nama Lengkap</label><input type="text" id="prof-name" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all"></div>
-                            <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Nomor HP / WA</label><input type="tel" id="prof-phone" placeholder="08..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all"></div>
-                            <div class="col-span-1 md:col-span-2"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Unit Kerja</label><select id="prof-unit" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all dark:bg-slate-800"><option value="">-- Pilih Unit --</option><option value="Direksi">Direksi</option><option value="Yanmed">Yanmed</option><option value="Keperawatan">Keperawatan</option><option value="Penunjang">Penunjang</option><option value="Umum">Umum & Kepegawaian</option><option value="Keuangan">Keuangan</option><option value="Komite Medis">Komite Medis</option><option value="Lainnya">Lainnya</option></select></div>
-                        </div>
-                        <div class="pt-4 flex justify-end"><button type="submit" class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3 rounded-xl hover:shadow-lg hover:shadow-green-500/30 text-sm font-semibold flex items-center transform active:scale-95 transition-all"><i class="fa-solid fa-check-circle mr-2"></i> Simpan Perubahan</button></div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- CREATE / EDIT -->
-            <div id="view-create" class="page-view hidden animate-slide-up max-w-4xl mx-auto">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                    <h1 id="form-title" class="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-green-100 dark:bg-emerald-900/50 text-green-600 dark:text-emerald-400 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-nib"></i></span> Jadwal Baru</h1>
-                    <button onclick="navTo('list')" class="text-sm px-4 py-2 bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-white transition font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali</button>
-                </div>
-
-                <div class="glass-card rounded-2xl shadow-sm p-6 md:p-8">
-                    <form id="mainForm" onsubmit="submitData(event)">
-                        <input type="hidden" name="action" id="form-action" value="create">
-                        <input type="hidden" name="id" id="form-id">
-                        <input type="hidden" name="existingFileUrl" id="form-existing-file">
-                        <input type="hidden" id="form-kept-docs" value="[]">
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Unit <span class="text-red-500">*</span></label><select name="unit" id="inp-unit" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm dark:bg-slate-800"><option value="">-- Pilih Unit --</option><option value="Direksi">Direksi</option><option value="Yanmed">Yanmed</option><option value="Keperawatan">Keperawatan</option><option value="Penunjang">Penunjang</option><option value="Umum">Umum</option><option value="Keuangan">Keuangan</option><option value="Komite Medis">Komite Medis</option><option value="Lainnya">Lainnya</option></select></div>
-                            <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Tanggal <span class="text-red-500">*</span></label><input type="date" name="tanggal" id="inp-tanggal" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm dark:text-slate-200"></div>
-                            <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Jam <span class="text-red-500">*</span></label><input type="time" name="waktu" id="inp-waktu" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm dark:text-slate-200"></div>
-                        </div>
-
-                        <div class="mb-6"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Agenda Rapat <span class="text-red-500">*</span></label><input type="text" name="agenda" id="inp-agenda" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm" placeholder="Contoh: Rapat Koordinasi Bulanan"></div>
-                        <div class="mb-6"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Peserta (Ringkasan)</label><input type="text" name="peserta" id="inp-peserta" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm" placeholder="Contoh: Direktur, Kabid, Ka. Ruangan..."></div>
-
-                        <div class="mb-6 bg-blue-50/50 dark:bg-blue-900/10 p-5 rounded-xl border-2 border-dashed border-blue-200 dark:border-blue-800 transition hover:border-blue-400">
-                            <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 uppercase mb-3"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> Upload Undangan (PDF/Img)</label>
-                            <input type="file" id="inp-file" accept=".pdf,image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer transition">
-                            <div id="existing-file-display" class="hidden mt-4 p-3 bg-white/80 dark:bg-slate-800 rounded-lg border border-blue-100 dark:border-blue-900 flex items-center justify-between shadow-sm">
-                                <div class="flex items-center gap-3 overflow-hidden"><div class="bg-blue-100 p-2 rounded text-blue-600"><i class="fa-solid fa-file-lines"></i></div><span class="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">File Terlampir</span><a href="#" target="_blank" id="link-existing-file" class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold hover:bg-blue-100 border border-blue-200 transition whitespace-nowrap">BUKA FILE <i class="fa-solid fa-external-link-alt ml-1"></i></a></div>
-                                <button type="button" onclick="deleteExistingFile()" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-full transition" title="Hapus lampiran"><i class="fa-solid fa-trash-can"></i></button>
-                            </div>
-                        </div>
-
-                        <div id="section-recording" class="hidden pt-6 border-t border-slate-200 dark:border-white/10 mt-6 animate-fade-in">
-                            <div class="mb-5 bg-green-50 dark:bg-emerald-900/20 p-4 rounded-xl border border-green-200 dark:border-emerald-800 flex gap-3 items-start">
-                                <i class="fa-solid fa-circle-info text-green-600 mt-1"></i>
-                                <div><h3 class="text-green-800 dark:text-emerald-400 font-bold text-sm">Area Notulensi</h3><p class="text-green-600 dark:text-emerald-500 text-xs">Silakan lengkapi hasil rapat dan rencana tindak lanjut di bawah ini.</p></div>
-                            </div>
-                            <div class="mb-6"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Isi Pembahasan <span class="text-red-500">*</span></label><textarea name="isi" id="inp-isi" rows="8" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm leading-relaxed" placeholder="Catat poin-poin penting rapat..."></textarea></div>
-                            <div class="mb-8"><label class="block text-xs font-bold text-green-700 dark:text-emerald-400 uppercase mb-2">Rencana Tindak Lanjut</label><textarea name="tindakLanjut" id="inp-tindak" rows="3" class="glass-input w-full rounded-xl border-green-200 dark:border-emerald-900 bg-green-50/30 dark:bg-emerald-900/10 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm" placeholder="Action plan..."></textarea></div>
-                            
-                            <!-- DOKUMENTASI KEGIATAN -->
-                            <div class="pt-6 border-t border-slate-200 dark:border-white/10 mt-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase"><i class="fa-solid fa-images mr-1"></i> Dokumentasi Kegiatan</label>
-                                    <button type="button" onclick="addDocRow()" class="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition"><i class="fa-solid fa-plus mr-1"></i> Tambah Dokumen</button>
-                                </div>
-                                <div id="existing-docs-container" class="space-y-3 mb-4 hidden"></div>
-                                <div id="new-docs-container" class="space-y-3"></div>
-                                <div id="empty-docs-msg" class="text-center py-6 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl text-slate-400 text-sm">Belum ada dokumentasi baru ditambahkan.</div>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end gap-3 pt-6 border-t border-slate-200 dark:border-white/10 mt-6">
-                            <button type="button" onclick="navTo('list')" class="px-6 py-2.5 rounded-xl border border-slate-300 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 text-sm font-semibold transition">Batal</button>
-                            <button type="submit" class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-2.5 rounded-xl hover:shadow-lg hover:shadow-green-500/30 text-sm font-bold flex items-center transform active:scale-95 transition"><i class="fa-solid fa-paper-plane mr-2"></i> <span id="btn-submit-text">Simpan Jadwal</span></button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- LIST (SEARCH, SORT, PAGINATION ADDED) -->
-            <div id="view-list" class="page-view hidden animate-fade-in max-w-6xl mx-auto">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-                    <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Daftar Notulen</h1>
                     
-                    <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-                        <!-- Search -->
-                        <div class="relative w-full md:w-64">
-                            <i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-400 text-xs"></i>
-                            <input type="text" id="search-input" oninput="handleFilter()" placeholder="Cari agenda, unit..." class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 transition dark:bg-slate-800 dark:text-white">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Tanda Tangan Digital</label>
+                        <div class="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden bg-white touch-none h-40">
+                            <canvas id="signature-pad" class="w-full h-full"></canvas>
+                            <div class="absolute bottom-2 right-2 flex gap-2">
+                                <button type="button" onclick="clearSignature()" class="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200">Hapus</button>
+                            </div>
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none text-slate-200 text-sm font-bold">Area Tanda Tangan</div>
                         </div>
-                        
-                        <!-- Sort -->
-                        <div class="relative w-full md:w-40">
-                            <i class="fa-solid fa-sort absolute left-3 top-3.5 text-slate-400 text-xs"></i>
-                            <select id="sort-select" onchange="handleFilter()" class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 transition appearance-none cursor-pointer dark:bg-slate-800 dark:text-white">
-                                <option value="newest">Terbaru</option>
-                                <option value="oldest">Terlama</option>
-                                <option value="az">Agenda (A-Z)</option>
-                                <option value="za">Agenda (Z-A)</option>
-                            </select>
-                        </div>
-
-                        <button onclick="loadData()" class="px-4 py-2.5 glass-card rounded-xl text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-white dark:hover:bg-slate-700 transition"><i class="fa-solid fa-rotate"></i></button>
                     </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-green-500/30 transform active:scale-95 transition">
+                        <i class="fa-solid fa-check-circle mr-2"></i> Konfirmasi Kehadiran
+                    </button>
+                </form>
+            </div>
+            
+            <div id="absensi-success" class="hidden text-center py-8">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce"><i class="fa-solid fa-check text-4xl text-green-600"></i></div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Terima Kasih!</h3>
+                <p class="text-slate-500 text-sm">Kehadiran Anda telah tercatat.</p>
+                <button onclick="location.reload()" class="mt-6 text-sm text-green-600 hover:underline">Isi absen lagi</button>
+            </div>
+        </div>
+        <p class="mt-8 text-[10px] text-slate-500">© 2025 E-Notulen RSUD Koesma</p>
+    </div>
+
+    <!-- ======================== -->
+    <!-- VIEW: ADMIN / NOTULIS  -->
+    <!-- ======================== -->
+    <div id="app-admin" class="flex w-full h-full overflow-hidden">
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="hidden fixed md:relative z-50 w-72 h-full flex-col border-r border-white/20 shadow-2xl transition-transform duration-300 md:translate-x-0 -translate-x-full glass-card">
+            <div class="h-20 flex items-center px-8 border-b border-white/10">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-green-500/30 mr-3">
+                    <i class="fa-solid fa-hospital text-white text-lg"></i>
                 </div>
-
-                <div class="glass-card rounded-2xl overflow-hidden shadow-sm flex flex-col min-h-[400px]">
-                    <div class="overflow-x-auto flex-1">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50/80 dark:bg-slate-800/80 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/10">
-                                <tr><th class="px-6 py-5">Waktu</th><th class="px-6 py-5">Agenda</th><th class="px-6 py-5">Unit</th><th class="px-6 py-5">Status</th><th class="px-6 py-5 text-center">Aksi</th></tr>
-                            </thead>
-                            <tbody id="table-body" class="divide-y divide-slate-100 dark:divide-white/5">
-                                <tr><td colspan="5" class="p-10 text-center text-slate-400">Sedang memuat data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <!-- Pagination Footer -->
-                    <div id="pagination-footer" class="hidden border-t border-slate-200 dark:border-white/10 p-4 bg-slate-50/50 dark:bg-slate-900/30 flex justify-between items-center">
-                        <span id="page-info" class="text-xs font-medium text-slate-500 dark:text-slate-400">Halaman 1 dari 1</span>
-                        <div class="flex gap-2">
-                            <button onclick="prevPage()" id="btn-prev" disabled class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white dark:hover:bg-slate-800 transition">Prev</button>
-                            <button onclick="nextPage()" id="btn-next" disabled class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white dark:hover:bg-slate-800 transition">Next</button>
-                        </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight dark:text-white">E-Notulen</h1>
+                    <p class="text-[10px] font-medium text-green-600 dark:text-emerald-400 uppercase tracking-wider">RSUD dr. R. Koesma</p>
+                </div>
+            </div>
+            <div onclick="navTo('profile')" class="mx-4 mt-6 mb-2 p-3 rounded-2xl bg-white/40 dark:bg-black/20 border border-white/20 cursor-pointer hover:bg-white/60 dark:hover:bg-white/5 transition group">
+                <div class="flex items-center gap-3">
+                    <img id="sb-avatar" src="" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-600 shadow-sm object-cover">
+                    <div class="overflow-hidden">
+                        <p id="sb-name" class="text-sm font-bold truncate group-hover:text-green-700 dark:group-hover:text-emerald-400 transition">User</p>
+                        <p id="sb-role" class="text-[10px] font-bold px-2 py-0.5 rounded bg-green-100 dark:bg-emerald-900/50 text-green-700 dark:text-emerald-400 w-max mt-1">LOADING</p>
                     </div>
                 </div>
             </div>
-
-            <!-- USERS -->
-            <div id="view-users" class="page-view hidden animate-fade-in max-w-5xl mx-auto">
-                <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Manajemen Pengguna</h1>
-                    <button onclick="loadUsers()" class="text-sm text-green-600 dark:text-emerald-400 font-semibold hover:underline">Refresh Data</button>
+            <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+                <button onclick="navTo('dashboard')" id="nav-dashboard" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5 transition flex items-center gap-3"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</button>
+                <button onclick="navTo('create')" id="nav-create" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5 transition flex items-center gap-3"><i class="fa-solid fa-calendar-plus w-5"></i> Buat Jadwal</button>
+                <button onclick="navTo('list')" id="nav-list" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5 transition flex items-center gap-3"><i class="fa-solid fa-folder-open w-5"></i> Arsip Notulen</button>
+                <button onclick="navTo('profile')" id="nav-profile" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5 transition flex items-center gap-3"><i class="fa-solid fa-user-gear w-5"></i> Pengaturan</button>
+                <div id="menu-admin" class="hidden pt-4 mt-2 border-t border-slate-200/50 dark:border-white/5">
+                    <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Admin Panel</p>
+                    <button onclick="navTo('users')" id="nav-users" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5 transition flex items-center gap-3"><i class="fa-solid fa-users-gear w-5"></i> Data User</button>
                 </div>
-                <div class="glass-card rounded-2xl overflow-hidden shadow-sm">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50/80 dark:bg-slate-800/80 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/10">
-                            <tr><th class="px-6 py-5">Nama</th><th class="px-6 py-5">Email</th><th class="px-6 py-5">Role</th><th class="px-6 py-5 text-center">Aksi</th></tr>
-                        </thead>
-                        <tbody id="users-table-body" class="divide-y divide-slate-100 dark:divide-white/5"><tr><td colspan="4" class="p-10 text-center text-slate-400">Memuat user...</td></tr></tbody>
-                    </table>
+            </nav>
+            <div class="p-4 border-t border-white/10 bg-white/20 dark:bg-black/20 backdrop-blur-sm">
+                <div class="flex items-center justify-between mb-4 px-2">
+                    <div class="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                        <i id="theme-icon" class="fa-solid fa-sun"></i> <span id="theme-text">Mode Pagi</span>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 px-4 py-2.5 rounded-xl transition font-semibold text-sm shadow-sm"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+        </aside>
+
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden transition-opacity"></div>
+
+        <!-- MAIN ADMIN CONTENT -->
+        <div class="flex-1 flex flex-col relative h-full overflow-hidden">
+            <header class="md:hidden h-16 glass-card flex items-center justify-between px-6 z-30 shrink-0 border-b-0">
+                <span class="font-bold text-lg text-green-800 dark:text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-hospital-user"></i> E-Notulen</span>
+                <button onclick="toggleSidebar()" class="text-slate-600 dark:text-slate-300 p-2 rounded-lg active:bg-slate-100 dark:active:bg-slate-800"><i class="fa-solid fa-bars text-xl"></i></button>
+            </header>
+
+            <!-- LOGIN -->
+            <div id="view-login" class="absolute inset-0 z-[60] flex flex-col items-center justify-center p-4 bg-white dark:bg-slate-900">
+                <div class="glass-card max-w-md w-full p-8 rounded-3xl text-center shadow-2xl border-t border-white/60 animate-fade-in relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 to-emerald-600"></div>
+                    <div class="w-24 h-24 bg-gradient-to-br from-green-100 to-emerald-50 dark:from-emerald-900 dark:to-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><i class="fa-solid fa-hospital text-5xl text-green-600 dark:text-emerald-400 drop-shadow-sm"></i></div>
+                    <h2 class="text-3xl font-bold text-slate-800 dark:text-white mb-2">Selamat Datang</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mb-8 leading-relaxed">Sistem Informasi Manajemen Notulen Rapat<br><span class="font-semibold text-green-700 dark:text-emerald-400">RSUD dr. R. Koesma Tuban</span></p>
+                    <div class="flex justify-center"><div id="g_id_onload" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div><div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="pill" data-logo_alignment="left" data-width="280"></div></div>
+                    <p class="mt-8 text-xs text-slate-400">© 2025 IT RSUD Koesma - Secure Access</p>
+                </div>
+            </div>
+
+            <!-- CONTENT -->
+            <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 hidden">
+                
+                <!-- DASHBOARD -->
+                <div id="view-dashboard" class="page-view animate-fade-in max-w-6xl mx-auto space-y-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+                        <div><h1 class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">Dashboard Overview</h1><p class="text-slate-500 dark:text-slate-400 text-sm">Selamat datang kembali, mari produktif hari ini.</p></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div onclick="navTo('create')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden">
+                            <div class="flex items-center gap-5 relative z-10">
+                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-green-500/30 group-hover:rotate-6 transition"><i class="fa-solid fa-plus text-2xl"></i></div>
+                                <div><h3 class="font-bold text-xl text-slate-800 dark:text-white">Buat Jadwal Rapat</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Jadwalkan rapat baru dan undang peserta.</p></div>
+                            </div>
+                        </div>
+                        <div onclick="navTo('list')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden">
+                            <div class="flex items-center gap-5 relative z-10">
+                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:rotate-6 transition"><i class="fa-solid fa-folder-open text-2xl"></i></div>
+                                <div><h3 class="font-bold text-xl text-slate-800 dark:text-white">Arsip Notulen</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Anda memiliki <span id="dash-total-count" class="font-bold text-blue-500">...</span> dokumen tersimpan.</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROFILE (Standard) -->
+                <div id="view-profile" class="page-view hidden animate-fade-in max-w-3xl mx-auto">
+                     <h1 class="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg"><i class="fa-solid fa-user-gear"></i></span> Pengaturan Profil</h1>
+                    <div class="glass-card rounded-2xl p-6 md:p-8">
+                        <div class="flex flex-col md:flex-row items-center gap-6 mb-8 pb-8 border-b border-slate-200/50 dark:border-white/10">
+                            <div class="relative"><img id="prof-img" src="" class="w-24 h-24 rounded-full border-4 border-white dark:border-slate-700 shadow-md"></div>
+                            <div class="text-center md:text-left"><h2 id="prof-name-disp" class="text-2xl font-bold text-slate-900 dark:text-white">User Name</h2><p id="prof-email-disp" class="text-slate-500 dark:text-slate-400 mb-2">email@example.com</p><span id="prof-role-disp" class="inline-block text-xs font-bold tracking-wider bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full uppercase">USER</span></div>
+                        </div>
+                        <form id="profileForm" onsubmit="saveProfile(event)" class="space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="col-span-1 md:col-span-2"><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Email Akun</label><input type="text" id="prof-email" disabled class="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-500 px-4 py-3 text-sm cursor-not-allowed dark:bg-slate-900/50 dark:border-slate-700"></div>
+                                <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Nama Lengkap</label><input type="text" id="prof-name" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all"></div>
+                                <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Nomor HP / WA</label><input type="tel" id="prof-phone" placeholder="08..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all"></div>
+                                <div class="col-span-1 md:col-span-2"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Unit Kerja</label><select id="prof-unit" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all dark:bg-slate-800"><option value="">-- Pilih Unit --</option><option value="Direksi">Direksi</option><option value="Yanmed">Yanmed</option><option value="Keperawatan">Keperawatan</option><option value="Penunjang">Penunjang</option><option value="Umum">Umum & Kepegawaian</option><option value="Keuangan">Keuangan</option><option value="Komite Medis">Komite Medis</option><option value="Lainnya">Lainnya</option></select></div>
+                            </div>
+                            <div class="pt-4 flex justify-end"><button type="submit" class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3 rounded-xl hover:shadow-lg hover:shadow-green-500/30 text-sm font-semibold flex items-center transform active:scale-95 transition-all"><i class="fa-solid fa-check-circle mr-2"></i> Simpan Perubahan</button></div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- CREATE / EDIT FORM -->
+                <div id="view-create" class="page-view hidden animate-slide-up max-w-4xl mx-auto">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h1 id="form-title" class="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-green-100 dark:bg-emerald-900/50 text-green-600 dark:text-emerald-400 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-nib"></i></span> Jadwal Baru</h1>
+                        <button onclick="navTo('list')" class="text-sm px-4 py-2 bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-white transition font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali</button>
+                    </div>
+                    <div class="glass-card rounded-2xl shadow-sm p-6 md:p-8">
+                        <form id="mainForm" onsubmit="submitData(event)">
+                            <input type="hidden" name="action" id="form-action" value="create">
+                            <input type="hidden" name="id" id="form-id">
+                            <input type="hidden" name="existingFileUrl" id="form-existing-file">
+                            <input type="hidden" id="form-kept-docs" value="[]">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Unit <span class="text-red-500">*</span></label><select name="unit" id="inp-unit" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm dark:bg-slate-800"><option value="">-- Pilih Unit --</option><option value="Direksi">Direksi</option><option value="Yanmed">Yanmed</option><option value="Keperawatan">Keperawatan</option><option value="Penunjang">Penunjang</option><option value="Umum">Umum</option><option value="Keuangan">Keuangan</option><option value="Komite Medis">Komite Medis</option><option value="Lainnya">Lainnya</option></select></div>
+                                <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Tanggal <span class="text-red-500">*</span></label><input type="date" name="tanggal" id="inp-tanggal" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm dark:text-slate-200"></div>
+                                <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Jam <span class="text-red-500">*</span></label><input type="time" name="waktu" id="inp-waktu" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm dark:text-slate-200"></div>
+                            </div>
+                            <div class="mb-6"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Agenda Rapat <span class="text-red-500">*</span></label><input type="text" name="agenda" id="inp-agenda" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm" placeholder="Contoh: Rapat Koordinasi Bulanan"></div>
+                            <div class="mb-6"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Peserta (Ringkasan)</label><input type="text" name="peserta" id="inp-peserta" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm" placeholder="Contoh: Direktur, Kabid, Ka. Ruangan..."></div>
+                            <div class="mb-6 bg-blue-50/50 dark:bg-blue-900/10 p-5 rounded-xl border-2 border-dashed border-blue-200 dark:border-blue-800 transition hover:border-blue-400">
+                                <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 uppercase mb-3"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> Upload Undangan (PDF/Img)</label>
+                                <input type="file" id="inp-file" accept=".pdf,image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer transition">
+                                <div id="existing-file-display" class="hidden mt-4 p-3 bg-white/80 dark:bg-slate-800 rounded-lg border border-blue-100 dark:border-blue-900 flex items-center justify-between shadow-sm">
+                                    <div class="flex items-center gap-3 overflow-hidden"><div class="bg-blue-100 p-2 rounded text-blue-600"><i class="fa-solid fa-file-lines"></i></div><span class="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">File Terlampir</span><a href="#" target="_blank" id="link-existing-file" class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold hover:bg-blue-100 border border-blue-200 transition whitespace-nowrap">BUKA FILE <i class="fa-solid fa-external-link-alt ml-1"></i></a></div>
+                                    <button type="button" onclick="deleteExistingFile()" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-full transition" title="Hapus lampiran"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                            </div>
+                            <div id="section-recording" class="hidden pt-6 border-t border-slate-200 dark:border-white/10 mt-6 animate-fade-in">
+                                <div class="mb-5 bg-green-50 dark:bg-emerald-900/20 p-4 rounded-xl border border-green-200 dark:border-emerald-800 flex gap-3 items-start"><i class="fa-solid fa-circle-info text-green-600 mt-1"></i><div><h3 class="text-green-800 dark:text-emerald-400 font-bold text-sm">Area Notulensi</h3><p class="text-green-600 dark:text-emerald-500 text-xs">Silakan lengkapi hasil rapat dan rencana tindak lanjut di bawah ini.</p></div></div>
+                                <div class="mb-6"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Isi Pembahasan <span class="text-red-500">*</span></label><textarea name="isi" id="inp-isi" rows="8" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm leading-relaxed" placeholder="Catat poin-poin penting rapat..."></textarea></div>
+                                <div class="mb-8"><label class="block text-xs font-bold text-green-700 dark:text-emerald-400 uppercase mb-2">Rencana Tindak Lanjut</label><textarea name="tindakLanjut" id="inp-tindak" rows="3" class="glass-input w-full rounded-xl border-green-200 dark:border-emerald-900 bg-green-50/30 dark:bg-emerald-900/10 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm" placeholder="Action plan..."></textarea></div>
+                                <div class="pt-6 border-t border-slate-200 dark:border-white/10 mt-6"><div class="flex items-center justify-between mb-4"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase"><i class="fa-solid fa-images mr-1"></i> Dokumentasi Kegiatan</label><button type="button" onclick="addDocRow()" class="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition"><i class="fa-solid fa-plus mr-1"></i> Tambah Dokumen</button></div><div id="existing-docs-container" class="space-y-3 mb-4 hidden"></div><div id="new-docs-container" class="space-y-3"></div><div id="empty-docs-msg" class="text-center py-6 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl text-slate-400 text-sm">Belum ada dokumentasi baru ditambahkan.</div></div>
+                            </div>
+                            <div class="flex justify-end gap-3 pt-6 border-t border-slate-200 dark:border-white/10 mt-6">
+                                <button type="button" onclick="navTo('list')" class="px-6 py-2.5 rounded-xl border border-slate-300 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 text-sm font-semibold transition">Batal</button>
+                                <button type="submit" class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-2.5 rounded-xl hover:shadow-lg hover:shadow-green-500/30 text-sm font-bold flex items-center transform active:scale-95 transition"><i class="fa-solid fa-paper-plane mr-2"></i> <span id="btn-submit-text">Simpan Jadwal</span></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- LIST (Search, Sort, Pagination, Copy Link) -->
+                <div id="view-list" class="page-view hidden animate-fade-in max-w-6xl mx-auto">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Daftar Notulen</h1>
+                        <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                            <div class="relative w-full md:w-64"><i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-400 text-xs"></i><input type="text" id="search-input" oninput="handleFilter()" placeholder="Cari agenda, unit..." class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 transition dark:bg-slate-800 dark:text-white"></div>
+                            <div class="relative w-full md:w-40"><i class="fa-solid fa-sort absolute left-3 top-3.5 text-slate-400 text-xs"></i><select id="sort-select" onchange="handleFilter()" class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 transition appearance-none cursor-pointer dark:bg-slate-800 dark:text-white"><option value="newest">Terbaru</option><option value="oldest">Terlama</option><option value="az">Agenda (A-Z)</option><option value="za">Agenda (Z-A)</option></select></div>
+                            <button onclick="loadData()" class="px-4 py-2.5 glass-card rounded-xl text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-white dark:hover:bg-slate-700 transition"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
+                    </div>
+                    <div class="glass-card rounded-2xl overflow-hidden shadow-sm flex flex-col min-h-[400px]">
+                        <div class="overflow-x-auto flex-1">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50/80 dark:bg-slate-800/80 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/10"><tr><th class="px-6 py-5">Waktu</th><th class="px-6 py-5">Agenda</th><th class="px-6 py-5">Unit</th><th class="px-6 py-5">Status</th><th class="px-6 py-5 text-center">Aksi</th></tr></thead>
+                                <tbody id="table-body" class="divide-y divide-slate-100 dark:divide-white/5"><tr><td colspan="5" class="p-10 text-center text-slate-400">Sedang memuat data...</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div id="pagination-footer" class="hidden border-t border-slate-200 dark:border-white/10 p-4 bg-slate-50/50 dark:bg-slate-900/30 flex justify-between items-center">
+                            <span id="page-info" class="text-xs font-medium text-slate-500 dark:text-slate-400">Halaman 1 dari 1</span>
+                            <div class="flex gap-2"><button onclick="prevPage()" id="btn-prev" disabled class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 disabled:opacity-50 hover:bg-white dark:hover:bg-slate-800 transition">Prev</button><button onclick="nextPage()" id="btn-next" disabled class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 disabled:opacity-50 hover:bg-white dark:hover:bg-slate-800 transition">Next</button></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- USERS -->
+                <div id="view-users" class="page-view hidden animate-fade-in max-w-5xl mx-auto">
+                    <div class="flex justify-between items-center mb-6"><h1 class="text-2xl font-bold text-slate-800 dark:text-white">Manajemen Pengguna</h1><button onclick="loadUsers()" class="text-sm text-green-600 dark:text-emerald-400 font-semibold hover:underline">Refresh Data</button></div>
+                    <div class="glass-card rounded-2xl overflow-hidden shadow-sm"><table class="w-full text-left text-sm"><thead class="bg-slate-50/80 dark:bg-slate-800/80 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/10"><tr><th class="px-6 py-5">Nama</th><th class="px-6 py-5">Email</th><th class="px-6 py-5">Role</th><th class="px-6 py-5 text-center">Aksi</th></tr></thead><tbody id="users-table-body" class="divide-y divide-slate-100 dark:divide-white/5"><tr><td colspan="4" class="p-10 text-center text-slate-400">Memuat user...</td></tr></tbody></table></div>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
+    <!-- LOADER -->
     <div id="loader" class="hidden fixed inset-0 z-[100] bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur-sm flex flex-col items-center justify-center transition-all duration-300">
         <div class="relative"><div class="w-16 h-16 rounded-full border-4 border-green-200 dark:border-emerald-900 animate-pulse"></div><div class="absolute top-0 left-0 w-16 h-16 rounded-full border-4 border-t-green-600 dark:border-t-emerald-500 animate-spin"></div></div>
         <p class="text-slate-600 dark:text-slate-300 font-bold mt-4 tracking-wider animate-pulse">MEMPROSES...</p>
     </div>
 
     <script>
-        // Init & Global
+        // --- 1. SIGNATURE PAD LOGIC ---
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            ctx.scale(ratio, ratio);
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = getCoords(e);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault(); 
+            const [x, y] = getCoords(e);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            [lastX, lastY] = [x, y];
+        }
+
+        function stopDrawing() { isDrawing = false; }
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return [clientX - rect.left, clientY - rect.top];
+        }
+        function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // --- 2. INIT APPLICATION ---
         updateTheme();
-        let currentUser = null;
-        let allData = []; // Menyimpan semua data mentah dari server
-        let filteredData = []; // Data setelah search & sort
         
-        // Pagination Config
+        // CHECK MODE: Public Attendance vs Admin
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('v');
+        const meetingId = urlParams.get('id');
+
+        if (mode === 'absensi' && meetingId) {
+            // MODE: ABSENSI
+            document.getElementById('app-admin').classList.add('hidden');
+            document.getElementById('app-absensi').classList.remove('hidden');
+            loadMeetingInfo(meetingId);
+        } else {
+            // MODE: ADMIN (DEFAULT)
+            document.getElementById('app-absensi').classList.add('hidden');
+            const googleBtn = document.getElementById('g_id_onload');
+            if(googleBtn) googleBtn.setAttribute('data-client_id', CLIENT_ID);
+            // Check Auto Login
+            const savedUser = localStorage.getItem('rsud_user_pro_v2'); 
+            if(savedUser) { 
+                try { currentUser = JSON.parse(savedUser); initApp(); } 
+                catch(e) { localStorage.removeItem('rsud_user_pro_v2'); } 
+            }
+        }
+
+        // --- 3. ABSENSI LOGIC ---
+        function loadMeetingInfo(id) {
+            document.getElementById('abs-meeting-id').value = id;
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getMeetingInfo', id: id }) })
+            .then(res => res.json())
+            .then(resp => {
+                document.getElementById('absensi-loading').classList.add('hidden');
+                if(resp.status === 'success') {
+                    document.getElementById('absensi-content').classList.remove('hidden');
+                    document.getElementById('abs-agenda').textContent = resp.data.agenda;
+                    document.getElementById('abs-tanggal').textContent = resp.data.tanggal;
+                    document.getElementById('abs-waktu').textContent = resp.data.waktu;
+                } else {
+                    alert("Data Rapat Tidak Ditemukan.");
+                }
+            })
+            .catch(err => {
+                document.getElementById('absensi-loading').innerHTML = '<span class="text-red-500">Gagal memuat data. Periksa koneksi.</span>';
+            });
+        }
+
+        function submitAbsensi(e) {
+            e.preventDefault();
+            toggleLoader(true);
+            
+            // Get Signature Image
+            const signatureData = canvas.toDataURL('image/png');
+            
+            // Check if empty canvas (simple check by length or pixel check, assuming length for now)
+            if(signatureData.length < 3000) { // arbitrary small size for empty canvas
+                toggleLoader(false);
+                alert("Mohon tanda tangan terlebih dahulu.");
+                return;
+            }
+
+            const payload = {
+                action: 'submitAttendance',
+                meetingId: document.getElementById('abs-meeting-id').value,
+                nama: document.getElementById('abs-nama').value,
+                phone: document.getElementById('abs-phone').value,
+                signatureData: signatureData
+            };
+
+            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+            .then(res => res.json())
+            .then(resp => {
+                toggleLoader(false);
+                if(resp.status === 'success') {
+                    document.getElementById('absensi-content').classList.add('hidden');
+                    document.getElementById('absensi-success').classList.remove('hidden');
+                } else {
+                    alert("Gagal: " + resp.message);
+                }
+            })
+            .catch(err => {
+                toggleLoader(false);
+                alert("Terjadi kesalahan sistem.");
+            });
+        }
+
+        // --- 4. ADMIN LOGIC (Existing) ---
+        let currentUser = null;
+        let allData = [];
+        let filteredData = [];
         let currentPage = 1;
         const itemsPerPage = 15;
-
-        const googleBtn = document.getElementById('g_id_onload');
-        if(googleBtn) googleBtn.setAttribute('data-client_id', CLIENT_ID);
 
         function handleCredentialResponse(response) {
             const payload = JSON.parse(decodeURIComponent(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
@@ -433,15 +509,7 @@
             if(target) { target.classList.remove('hidden'); target.classList.remove('animate-fade-in'); void target.offsetWidth; target.classList.add('animate-fade-in'); }
             if(document.getElementById(`nav-${page}`)) document.getElementById(`nav-${page}`).classList.add('active');
             if(window.innerWidth < 768) toggleSidebar(false);
-            
-            if (page === 'create') {
-                resetForm();
-                document.getElementById('section-recording').classList.add('hidden');
-                document.getElementById('inp-isi').removeAttribute('required');
-                document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-green-100 dark:bg-emerald-900/50 text-green-600 dark:text-emerald-400 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-plus"></i></span> Buat Jadwal Rapat';
-                document.getElementById('btn-submit-text').innerText = "Simpan Jadwal";
-                if(currentUser.unit) document.getElementById('inp-unit').value = currentUser.unit;
-            }
+            if (page === 'create') resetForm();
             if (page === 'profile') loadProfileView();
             if (page === 'users') loadUsers();
             if (page === 'dashboard') renderDashboard();
@@ -457,194 +525,78 @@
 
         function logout() { localStorage.removeItem('rsud_user_pro_v2'); location.reload(); }
 
-        // --- PROFILE ---
-        function loadProfileView() {
-            document.getElementById('prof-img').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=16a34a&color=fff`;
-            document.getElementById('prof-name-disp').innerText = currentUser.name;
-            document.getElementById('prof-email-disp').innerText = currentUser.email;
-            document.getElementById('prof-role-disp').innerText = currentUser.role;
-            document.getElementById('prof-email').value = currentUser.email;
-            document.getElementById('prof-name').value = currentUser.name;
-            document.getElementById('prof-unit').value = currentUser.unit || "";
-            document.getElementById('prof-phone').value = currentUser.phone || "";
-        }
-
-        function saveProfile(e) {
-            e.preventDefault();
-            toggleLoader(true);
-            const newData = { action: 'updateProfile', email: currentUser.email, name: document.getElementById('prof-name').value, unit: document.getElementById('prof-unit').value, phone: document.getElementById('prof-phone').value };
-            fetch(API_URL, { method: 'POST', body: JSON.stringify(newData) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); currentUser.name = newData.name; currentUser.unit = newData.unit; currentUser.phone = newData.phone; localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); initApp(); loadProfileView(); } else alert("Gagal: " + resp.message); }).catch(() => { toggleLoader(false); alert("Error Jaringan"); });
-        }
-
-        // --- DYNAMIC DOCUMENTS LOGIC ---
-        function addDocRow() {
-            document.getElementById('empty-docs-msg').classList.add('hidden');
-            const container = document.getElementById('new-docs-container');
-            const rowId = 'doc-' + Date.now();
-            const div = document.createElement('div');
-            div.className = "doc-row flex flex-col md:flex-row gap-2 bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-white/10 animate-fade-in";
-            div.id = rowId;
-            div.innerHTML = `
-                <div class="flex-1">
-                    <input type="text" placeholder="Deskripsi dokumen (Contoh: Foto Kegiatan)" class="doc-desc glass-input w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-500">
-                </div>
-                <div class="flex items-center gap-2">
-                    <input type="file" class="doc-file text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 dark:file:bg-indigo-900/50 dark:file:text-indigo-300" accept="image/*,.pdf">
-                    <button type="button" onclick="removeDocRow('${rowId}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-lg transition"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-            `;
-            container.appendChild(div);
-        }
-
-        function removeDocRow(id) {
-            document.getElementById(id).remove();
-            if(document.getElementById('new-docs-container').children.length === 0) {
-                document.getElementById('empty-docs-msg').classList.remove('hidden');
-            }
-        }
-
-        function removeKeptDoc(index) {
-            const keptInput = document.getElementById('form-kept-docs');
-            let keptDocs = JSON.parse(keptInput.value);
-            if(confirm("Hapus dokumen ini?")) {
-                keptDocs.splice(index, 1);
-                keptInput.value = JSON.stringify(keptDocs);
-                renderKeptDocs(keptDocs);
-            }
-        }
-
-        function renderKeptDocs(docs) {
-            const container = document.getElementById('existing-docs-container');
-            container.innerHTML = '';
-            if(!docs || docs.length === 0) {
-                container.classList.add('hidden');
-                return;
-            }
-            container.classList.remove('hidden');
-            docs.forEach((doc, idx) => {
-                const div = document.createElement('div');
-                div.className = "flex items-center justify-between p-3 bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg";
-                div.innerHTML = `
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <div class="bg-indigo-100 dark:bg-indigo-900/50 p-2 rounded text-indigo-600 dark:text-indigo-400 shrink-0"><i class="fa-solid fa-file-image"></i></div>
-                        <div class="overflow-hidden">
-                            <p class="text-sm font-bold text-slate-700 dark:text-slate-300 truncate">${doc.desc || 'Tanpa Deskripsi'}</p>
-                            <a href="${doc.url}" target="_blank" class="text-xs text-blue-500 hover:underline flex items-center gap-1">Lihat File <i class="fa-solid fa-external-link-alt text-[10px]"></i></a>
-                        </div>
-                    </div>
-                    <button type="button" onclick="removeKeptDoc(${idx})" class="text-slate-400 hover:text-red-500 p-2"><i class="fa-solid fa-trash-can"></i></button>
-                `;
-                container.appendChild(div);
+        // Copy Link Absensi
+        function copyAbsensiLink(id) {
+            const baseUrl = window.location.href.split('?')[0];
+            const fullUrl = `${baseUrl}?v=absensi&id=${id}`;
+            navigator.clipboard.writeText(fullUrl).then(() => {
+                alert("Link Absensi Berhasil Disalin!");
             });
         }
 
-
-        // --- MAIN DATA LOGIC (Search, Sort, Paginate) ---
         function loadData() {
             if(!currentUser) return;
             toggleLoader(true);
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'read', email: currentUser.email }) })
-            .then(res => res.json()).then(resp => { 
-                toggleLoader(false); 
-                if(resp.status === 'success') { 
-                    allData = resp.data; 
-                    handleFilter(); // Init data display
-                    renderDashboard(); 
-                } 
-                else alert(resp.message); 
-            }).catch(() => { toggleLoader(false); alert("Error Jaringan"); });
+            .then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { allData = resp.data; handleFilter(); renderDashboard(); } else alert(resp.message); }).catch(() => { toggleLoader(false); alert("Error Jaringan"); });
         }
 
-        // Logic Filter & Sort
         function handleFilter() {
             const searchVal = document.getElementById('search-input').value.toLowerCase();
             const sortVal = document.getElementById('sort-select').value;
-            
-            // 1. Searching
-            let temp = allData.filter(item => {
-                return (item.agenda && item.agenda.toLowerCase().includes(searchVal)) || 
-                       (item.unit && item.unit.toLowerCase().includes(searchVal));
-            });
-
-            // 2. Sorting
-            if (sortVal === 'newest') {
-                temp.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-            } else if (sortVal === 'oldest') {
-                temp.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
-            } else if (sortVal === 'az') {
-                temp.sort((a, b) => a.agenda.localeCompare(b.agenda));
-            } else if (sortVal === 'za') {
-                temp.sort((a, b) => b.agenda.localeCompare(a.agenda));
-            }
-
-            filteredData = temp;
-            currentPage = 1; // Reset ke halaman 1 setiap filter berubah
-            renderPaginatedTable();
+            let temp = allData.filter(item => (item.agenda && item.agenda.toLowerCase().includes(searchVal)) || (item.unit && item.unit.toLowerCase().includes(searchVal)));
+            if (sortVal === 'newest') temp.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+            else if (sortVal === 'oldest') temp.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+            else if (sortVal === 'az') temp.sort((a, b) => a.agenda.localeCompare(b.agenda));
+            else if (sortVal === 'za') temp.sort((a, b) => b.agenda.localeCompare(a.agenda));
+            filteredData = temp; currentPage = 1; renderPaginatedTable();
         }
 
-        // Logic Pagination Render
         function renderPaginatedTable() {
             const tbody = document.getElementById('table-body');
             const footer = document.getElementById('pagination-footer');
             tbody.innerHTML = '';
-
-            if (filteredData.length === 0) { 
-                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 flex flex-col items-center"><i class="fa-solid fa-magnifying-glass mb-2 text-2xl"></i>Data tidak ditemukan.</td></tr>`; 
-                footer.classList.add('hidden');
-                return; 
-            }
-
+            if (filteredData.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400">Data tidak ditemukan.</td></tr>`; footer.classList.add('hidden'); return; }
             footer.classList.remove('hidden');
-            
-            // Calculate slice
             const start = (currentPage - 1) * itemsPerPage;
             const end = start + itemsPerPage;
             const pageData = filteredData.slice(start, end);
-            
-            // Render Rows
             pageData.forEach(item => {
                 const canEdit = (currentUser.role === 'ADMIN' || item.pencatatEmail === currentUser.email);
                 const fileIcon = (item.fileUrl && item.fileUrl.length > 5) ? `<a href="${item.fileUrl}" target="_blank" class="text-red-500 ml-2"><i class="fa-solid fa-file-pdf"></i></a>` : '';
                 let statusBadge = item.isi && item.isi.length > 5 ? `<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-200 dark:border-blue-800">Selesai</span>` : `<span class="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] px-3 py-1 rounded-full font-bold border border-amber-200 dark:border-amber-800">Terjadwal</span>`;
-                const btn = canEdit ? `<button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 dark:text-blue-400 font-bold text-xs border border-blue-200 dark:border-blue-800 px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20">EDIT</button>` : '-';
+                
+                // TOMBOL AKSI: Copy Link & Edit
+                let btn = '-';
+                if(canEdit) {
+                    btn = `<div class="flex items-center justify-center gap-2">
+                        <button onclick="copyAbsensiLink('${item.id}')" class="text-slate-500 hover:text-green-600 dark:text-slate-400 dark:hover:text-emerald-400 text-lg" title="Salin Link Absensi"><i class="fa-solid fa-qrcode"></i></button>
+                        <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 dark:text-blue-400 font-bold text-xs border border-blue-200 dark:border-blue-800 px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20">EDIT</button>
+                    </div>`;
+                }
+
                 tbody.innerHTML += `<tr class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition"><td class="px-6 py-4"><span class="font-bold block">${item.displayTanggal}</span><span class="text-xs text-slate-500">${item.waktu || '-'}</span></td><td class="px-6 py-4 font-semibold">${item.agenda} ${fileIcon}</td><td class="px-6 py-4"><span class="bg-green-100 dark:bg-emerald-900/30 text-green-800 dark:text-emerald-400 text-xs px-2 py-1 rounded font-medium">${item.unit}</span></td><td class="px-6 py-4">${statusBadge}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`;
             });
-
-            // Update Info & Buttons
             const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-            document.getElementById('page-info').innerText = `Halaman ${currentPage} dari ${totalPages} (${filteredData.length} Data)`;
-            
+            document.getElementById('page-info').innerText = `Halaman ${currentPage} dari ${totalPages}`;
             document.getElementById('btn-prev').disabled = (currentPage === 1);
             document.getElementById('btn-next').disabled = (currentPage === totalPages);
         }
 
-        function nextPage() {
-            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderPaginatedTable();
-            }
-        }
-
-        function prevPage() {
-            if (currentPage > 1) {
-                currentPage--;
-                renderPaginatedTable();
-            }
-        }
-
+        function nextPage() { if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) { currentPage++; renderPaginatedTable(); } }
+        function prevPage() { if (currentPage > 1) { currentPage--; renderPaginatedTable(); } }
         function renderDashboard() { document.getElementById('dash-total-count').innerText = allData.length; }
 
         function resetForm() {
             document.getElementById('mainForm').reset();
-            document.getElementById('form-action').value = 'create';
-            document.getElementById('form-id').value = '';
+            document.getElementById('form-action').value = 'create'; document.getElementById('form-id').value = '';
             document.getElementById('existing-file-display').classList.add('hidden');
-            document.getElementById('new-docs-container').innerHTML = '';
-            document.getElementById('existing-docs-container').innerHTML = '';
-            document.getElementById('existing-docs-container').classList.add('hidden');
-            document.getElementById('empty-docs-msg').classList.remove('hidden');
-            document.getElementById('form-kept-docs').value = "[]";
+            document.getElementById('new-docs-container').innerHTML = ''; document.getElementById('existing-docs-container').innerHTML = ''; document.getElementById('existing-docs-container').classList.add('hidden'); document.getElementById('empty-docs-msg').classList.remove('hidden'); document.getElementById('form-kept-docs').value = "[]";
+            document.getElementById('inp-unit').value = currentUser.unit || "";
+            document.getElementById('section-recording').classList.add('hidden');
+            document.getElementById('inp-isi').removeAttribute('required');
+            document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-green-100 dark:bg-emerald-900/50 text-green-600 dark:text-emerald-400 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-plus"></i></span> Buat Jadwal Rapat';
+            document.getElementById('btn-submit-text').innerText = "Simpan Jadwal";
         }
 
         function editNotulen(itemStr) {
@@ -654,100 +606,32 @@
             document.getElementById('inp-isi').setAttribute('required', 'true');
             document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-to-square"></i></span> Isi Hasil Rapat';
             document.getElementById('btn-submit-text').innerText = "Simpan Hasil Notulen";
-
-            document.getElementById('form-action').value = 'update';
-            document.getElementById('form-id').value = item.id;
+            document.getElementById('form-action').value = 'update'; document.getElementById('form-id').value = item.id;
             document.getElementById('inp-unit').value = item.unit;
-            
-            const d = new Date(item.tanggal);
-            const yyyy = d.getFullYear(); const mm = String(d.getMonth() + 1).padStart(2, '0'); const dd = String(d.getDate()).padStart(2, '0');
-            document.getElementById('inp-tanggal').value = `${yyyy}-${mm}-${dd}`;
+            const d = new Date(item.tanggal); document.getElementById('inp-tanggal').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
             document.getElementById('inp-waktu').value = item.waktu || "";
-            document.getElementById('inp-agenda').value = item.agenda;
-            document.getElementById('inp-peserta').value = item.peserta;
-            document.getElementById('inp-isi').value = item.isi;
-            document.getElementById('inp-tindak').value = item.tindakLanjut;
-            
-            if(item.fileUrl && item.fileUrl.length > 5) {
-                document.getElementById('form-existing-file').value = item.fileUrl;
-                document.getElementById('existing-file-display').classList.remove('hidden');
-                document.getElementById('link-existing-file').href = item.fileUrl;
-            } else {
-                document.getElementById('existing-file-display').classList.add('hidden');
-                document.getElementById('form-existing-file').value = "";
-            }
-
-            if(item.dokumentasiJson && item.dokumentasiJson.length > 5) {
-                try {
-                    const docs = JSON.parse(item.dokumentasiJson);
-                    document.getElementById('form-kept-docs').value = JSON.stringify(docs);
-                    renderKeptDocs(docs);
-                } catch(e) { console.error("Gagal parse dokumentasi", e); }
-            } else {
-                document.getElementById('form-kept-docs').value = "[]";
-                renderKeptDocs([]);
-            }
+            document.getElementById('inp-agenda').value = item.agenda; document.getElementById('inp-peserta').value = item.peserta;
+            document.getElementById('inp-isi').value = item.isi; document.getElementById('inp-tindak').value = item.tindakLanjut;
+            if(item.fileUrl && item.fileUrl.length > 5) { document.getElementById('form-existing-file').value = item.fileUrl; document.getElementById('existing-file-display').classList.remove('hidden'); document.getElementById('link-existing-file').href = item.fileUrl; } else { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; }
+            if(item.dokumentasiJson && item.dokumentasiJson.length > 5) { try { const docs = JSON.parse(item.dokumentasiJson); document.getElementById('form-kept-docs').value = JSON.stringify(docs); renderKeptDocs(docs); } catch(e) {} } else { document.getElementById('form-kept-docs').value = "[]"; renderKeptDocs([]); }
         }
 
-        function deleteExistingFile() { if(confirm("Hapus lampiran ini?")) { document.getElementById('form-existing-file').value = ""; document.getElementById('existing-file-display').classList.add('hidden'); } }
+        function addDocRow() { document.getElementById('empty-docs-msg').classList.add('hidden'); const container = document.getElementById('new-docs-container'); const rowId = 'doc-' + Date.now(); container.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="doc-row flex gap-2 bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-white/10"><div class="flex-1"><input type="text" placeholder="Deskripsi..." class="doc-desc glass-input w-full rounded-lg px-3 py-2 text-sm"></div><div class="flex items-center gap-2"><input type="file" class="doc-file text-xs text-slate-500" accept="image/*,.pdf"><button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2"><i class="fa-solid fa-xmark"></i></button></div></div>`); }
+        function renderKeptDocs(docs) { const c = document.getElementById('existing-docs-container'); c.innerHTML = ''; if(!docs.length) { c.classList.add('hidden'); return; } c.classList.remove('hidden'); docs.forEach((d,i) => c.insertAdjacentHTML('beforeend', `<div class="flex justify-between p-3 bg-white dark:bg-black/20 border rounded-lg"><div class="flex gap-2 overflow-hidden"><i class="fa-solid fa-file-image text-indigo-500 mt-1"></i><div class="truncate"><p class="text-sm font-bold">${d.desc||''}</p><a href="${d.url}" target="_blank" class="text-xs text-blue-500">Lihat File</a></div></div><button type="button" onclick="removeKeptDoc(${i})" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></div>`)); }
+        function removeKeptDoc(i) { const k = JSON.parse(document.getElementById('form-kept-docs').value); if(confirm("Hapus?")) { k.splice(i,1); document.getElementById('form-kept-docs').value = JSON.stringify(k); renderKeptDocs(k); } }
+        function deleteExistingFile() { if(confirm("Hapus lampiran?")) { document.getElementById('form-existing-file').value = ""; document.getElementById('existing-file-display').classList.add('hidden'); } }
 
-        async function submitData(e) {
-            e.preventDefault();
-            toggleLoader(true);
-            const form = document.getElementById('mainForm');
-            const fileInput = document.getElementById('inp-file');
-            
-            const payload = {
-                action: document.getElementById('form-action').value,
-                id: document.getElementById('form-id').value,
-                unit: form.unit.value, tanggal: form.tanggal.value, waktu: form.waktu.value, agenda: form.agenda.value, 
-                peserta: form.peserta.value, isi: form.isi.value, tindakLanjut: form.tindakLanjut.value, 
-                pencatatNama: currentUser.name, pencatatEmail: currentUser.email,
-                existingFileUrl: document.getElementById('form-existing-file').value
-            };
-
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                if(file.size > 5*1024*1024) { toggleLoader(false); alert("File Undangan Max 5MB"); return; }
-                const base64 = await toBase64(file);
-                payload.fileData = base64.split(',')[1]; payload.fileName = file.name; payload.mimeType = file.type;
-            }
-
-            const newDocs = [];
-            const docRows = document.querySelectorAll('.doc-row');
-            for (const row of docRows) {
-                const fileInp = row.querySelector('.doc-file');
-                const descInp = row.querySelector('.doc-desc');
-                if(fileInp.files.length > 0) {
-                    const f = fileInp.files[0];
-                    if(f.size > 3*1024*1024) { toggleLoader(false); alert("Ukuran foto dokumentasi maksimal 3MB per file."); return; }
-                    try {
-                        const b64 = await toBase64(f);
-                        newDocs.push({ fileData: b64.split(',')[1], fileName: f.name, mimeType: f.type, description: descInp.value || "Dokumentasi" });
-                    } catch(err) { console.error(err); }
-                }
-            }
-            
-            payload.newDokumentasi = newDocs;
-            payload.keptDokumentasi = document.getElementById('form-kept-docs').value;
-
-            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-            .then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); resetForm(); navTo('list'); loadData(); } else alert("Gagal: " + resp.message); })
-            .catch(() => { toggleLoader(false); alert("Error Server"); });
-        }
+        async function submitData(e) { e.preventDefault(); toggleLoader(true); const form = document.getElementById('mainForm'); const payload = { action: document.getElementById('form-action').value, id: document.getElementById('form-id').value, unit: form.unit.value, tanggal: form.tanggal.value, waktu: form.waktu.value, agenda: form.agenda.value, peserta: form.peserta.value, isi: form.isi.value, tindakLanjut: form.tindakLanjut.value, pencatatNama: currentUser.name, pencatatEmail: currentUser.email, existingFileUrl: document.getElementById('form-existing-file').value }; 
+        const fileInput = document.getElementById('inp-file'); if(fileInput.files.length > 0) { const f = fileInput.files[0]; if(f.size > 5*1024*1024) { toggleLoader(false); alert("File Max 5MB"); return; } payload.fileData = (await toBase64(f)).split(',')[1]; payload.fileName = f.name; payload.mimeType = f.type; }
+        const newDocs = []; for(const row of document.querySelectorAll('.doc-row')) { const fi = row.querySelector('.doc-file'); const di = row.querySelector('.doc-desc'); if(fi.files.length > 0) { const f = fi.files[0]; if(f.size > 3*1024*1024) { toggleLoader(false); alert("Foto Dokumentasi Max 3MB"); return; } newDocs.push({ fileData: (await toBase64(f)).split(',')[1], fileName: f.name, mimeType: f.type, description: di.value }); } } payload.newDokumentasi = newDocs; payload.keptDokumentasi = document.getElementById('form-kept-docs').value;
+        fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); resetForm(); navTo('list'); loadData(); } else alert("Gagal: " + resp.message); }).catch(() => { toggleLoader(false); alert("Error Server"); }); }
 
         const toBase64 = file => new Promise((r, j) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => r(reader.result); reader.onerror = j; });
-
-        function loadUsers() {
-            if(currentUser.role !== 'ADMIN') return;
-            toggleLoader(true);
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getUsers', requesterEmail: currentUser.email }) }).then(res => res.json()).then(resp => { toggleLoader(false); const tbody = document.getElementById('users-table-body'); tbody.innerHTML = ''; resp.data.forEach(u => { const isSuper = u.email === "ridwankoramil9@gmail.com"; let btn = isSuper ? "SUPER" : `<button onclick="changeRole('${u.email}', '${u.role==='ADMIN'?'USER':'ADMIN'}')" class="text-xs bg-gray-100 px-2 py-1 rounded">Role</button>`; tbody.innerHTML += `<tr class="border-b"><td class="px-6 py-4">${u.name}</td><td class="px-6 py-4 text-xs">${u.email}</td><td class="px-6 py-4">${u.role}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`; }); });
-        }
-
+        function loadProfileView() { document.getElementById('prof-img').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=16a34a&color=fff`; document.getElementById('prof-name-disp').innerText = currentUser.name; document.getElementById('prof-email-disp').innerText = currentUser.email; document.getElementById('prof-role-disp').innerText = currentUser.role; document.getElementById('prof-email').value = currentUser.email; document.getElementById('prof-name').value = currentUser.name; document.getElementById('prof-unit').value = currentUser.unit || ""; document.getElementById('prof-phone').value = currentUser.phone || ""; }
+        function saveProfile(e) { e.preventDefault(); toggleLoader(true); const newData = { action: 'updateProfile', email: currentUser.email, name: document.getElementById('prof-name').value, unit: document.getElementById('prof-unit').value, phone: document.getElementById('prof-phone').value }; fetch(API_URL, { method: 'POST', body: JSON.stringify(newData) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); currentUser.name = newData.name; currentUser.unit = newData.unit; currentUser.phone = newData.phone; localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); initApp(); loadProfileView(); } else alert("Gagal: " + resp.message); }); }
+        function loadUsers() { if(currentUser.role !== 'ADMIN') return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getUsers', requesterEmail: currentUser.email }) }).then(res => res.json()).then(resp => { toggleLoader(false); const tbody = document.getElementById('users-table-body'); tbody.innerHTML = ''; resp.data.forEach(u => { const isSuper = u.email === "ridwankoramil9@gmail.com"; let btn = isSuper ? "SUPER" : `<button onclick="changeRole('${u.email}', '${u.role==='ADMIN'?'USER':'ADMIN'}')" class="text-xs bg-gray-100 px-2 py-1 rounded">Role</button>`; tbody.innerHTML += `<tr class="border-b"><td class="px-6 py-4">${u.name}</td><td class="px-6 py-4 text-xs">${u.email}</td><td class="px-6 py-4">${u.role}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`; }); }); }
         function changeRole(email, newRole) { if(!confirm("Ubah role?")) return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'toggleAdmin', targetEmail: email, newRole: newRole }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') loadUsers(); else alert(resp.message); }); }
-
         function toggleLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
-        const savedUser = localStorage.getItem('rsud_user_pro_v2'); if(savedUser) { try { currentUser = JSON.parse(savedUser); initApp(); } catch(e) { localStorage.removeItem('rsud_user_pro_v2'); } }
     </script>
 </body>
 </html>
