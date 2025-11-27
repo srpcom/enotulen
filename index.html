@@ -8,35 +8,22 @@
     <!-- Favicon RSUD -->
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png">
 
-    <!-- Tailwind CSS & Config -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- SheetJS (Library untuk Export Excel) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- ExcelJS & FileSaver (Untuk Export Excel dengan Gambar) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
-                    colors: {
-                        glass: {
-                            light: 'rgba(255, 255, 255, 0.7)',
-                            dark: 'rgba(30, 41, 59, 0.7)',
-                        }
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
-                    }
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: { glass: { light: 'rgba(255, 255, 255, 0.7)', dark: 'rgba(30, 41, 59, 0.7)' } },
+                    animation: { 'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)' },
+                    keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
                 }
             }
         }
@@ -51,32 +38,14 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.5s ease; }
         .am-bg { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%); background-attachment: fixed; }
         .dark .pm-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #111827 100%); background-attachment: fixed; }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
-        .dark .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
+        .glass-card { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); }
+        .dark .glass-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); }
         .glass-input { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(0,0,0,0.1); }
         .dark .glass-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; }
-
         .hidden { display: none !important; }
         .nav-item.active { background: rgba(22, 163, 74, 0.1); color: #15803d; border-right: 3px solid #15803d; }
         .dark .nav-item.active { background: rgba(52, 211, 153, 0.15); color: #34d399; border-right: 3px solid #34d399; }
-
-        /* Signature Canvas CSS Fix */
-        #signature-pad { 
-            touch-action: none; 
-            background-color: white; 
-            cursor: crosshair; 
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
+        #signature-pad { touch-action: none; background-color: white; cursor: crosshair; display: block; width: 100%; height: 100%; }
     </style>
 </head>
 <body class="am-bg h-screen flex overflow-hidden text-slate-800 dark:text-slate-200">
@@ -104,58 +73,36 @@
         setInterval(updateTheme, 60000);
     </script>
 
-    <!-- ======================== -->
-    <!-- VIEW: ABSENSI (PUBLIC) -->
-    <!-- ======================== -->
+    <!-- VIEW: ABSENSI -->
     <div id="app-absensi" class="hidden w-full h-full overflow-y-auto p-4 flex flex-col items-center">
         <div class="glass-card max-w-md w-full p-6 rounded-3xl shadow-2xl border-t border-white/60 animate-fade-in my-auto">
             <div class="text-center mb-6">
-                <!-- LOGO RSUD -->
                 <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-20 h-20 object-contain mx-auto mb-3 drop-shadow-sm" alt="Logo RSUD">
                 <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Daftar Hadir Rapat</h2>
                 <p class="text-slate-500 text-xs">RSUD dr. R. Koesma Tuban</p>
             </div>
-            
             <div id="absensi-loading" class="text-center py-4"><i class="fa-solid fa-circle-notch fa-spin text-green-600"></i> Memuat Info Rapat...</div>
-            
             <div id="absensi-content" class="hidden">
                 <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl mb-6 border border-slate-200 dark:border-white/10 text-center">
                     <h3 id="abs-agenda" class="font-bold text-lg text-green-700 dark:text-emerald-400 leading-tight mb-1">...</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-300"><i class="fa-regular fa-calendar mr-1"></i> <span id="abs-tanggal">...</span> &bull; <i class="fa-regular fa-clock mr-1"></i> <span id="abs-waktu">...</span></p>
                 </div>
-
                 <form id="formAbsensi" onsubmit="submitAbsensi(event)" class="space-y-4">
                     <input type="hidden" id="abs-meeting-id">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Nama Lengkap</label>
-                        <input type="text" id="abs-nama" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500" placeholder="Nama beserta gelar...">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Nomor HP / WhatsApp</label>
-                        <input type="tel" id="abs-phone" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500" placeholder="08...">
-                    </div>
-                    
+                    <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Nama Lengkap</label><input type="text" id="abs-nama" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500" placeholder="Nama beserta gelar..."></div>
+                    <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Nomor HP / WhatsApp</label><input type="tel" id="abs-phone" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500" placeholder="08..."></div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Tanda Tangan Digital</label>
-                        <!-- Container Canvas -->
                         <div class="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden bg-white touch-none h-48 w-full">
                             <canvas id="signature-pad"></canvas>
-                            <div class="absolute bottom-2 right-2 flex gap-2">
-                                <button type="button" onclick="clearSignature()" class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-lg hover:bg-red-200 font-semibold shadow-sm border border-red-200">
-                                    <i class="fa-solid fa-eraser mr-1"></i> Hapus
-                                </button>
-                            </div>
+                            <div class="absolute bottom-2 right-2 flex gap-2"><button type="button" onclick="clearSignature()" class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-lg hover:bg-red-200 font-semibold shadow-sm border border-red-200"><i class="fa-solid fa-eraser mr-1"></i> Hapus</button></div>
                             <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none text-slate-200 text-sm font-bold opacity-50">Area Tanda Tangan</div>
                         </div>
                         <p class="text-[10px] text-slate-400 mt-1">*Coretkan tanda tangan pada kotak di atas.</p>
                     </div>
-
-                    <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-green-500/30 transform active:scale-95 transition">
-                        <i class="fa-solid fa-check-circle mr-2"></i> Konfirmasi Kehadiran
-                    </button>
+                    <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-green-500/30 transform active:scale-95 transition"><i class="fa-solid fa-check-circle mr-2"></i> Konfirmasi Kehadiran</button>
                 </form>
             </div>
-            
             <div id="absensi-success" class="hidden text-center py-8">
                 <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce"><i class="fa-solid fa-check text-4xl text-green-600"></i></div>
                 <h3 class="text-xl font-bold text-slate-800 dark:text-white">Terima Kasih!</h3>
@@ -166,27 +113,17 @@
         <p class="mt-8 text-[10px] text-slate-500">© 2025 E-Notulen RSUD Koesma</p>
     </div>
 
-    <!-- ======================== -->
-    <!-- VIEW: ADMIN / NOTULIS  -->
-    <!-- ======================== -->
+    <!-- VIEW: ADMIN -->
     <div id="app-admin" class="flex w-full h-full overflow-hidden">
-        <!-- SIDEBAR -->
         <aside id="sidebar" class="hidden fixed md:relative z-50 w-72 h-full flex-col border-r border-white/20 shadow-2xl transition-transform duration-300 md:translate-x-0 -translate-x-full glass-card">
             <div class="h-20 flex items-center px-8 border-b border-white/10">
-                <!-- LOGO RSUD -->
                 <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-10 h-10 object-contain mr-3 filter drop-shadow-sm" alt="Logo">
-                <div>
-                    <h1 class="font-bold text-lg tracking-tight dark:text-white">E-Notulen</h1>
-                    <p class="text-[10px] font-medium text-green-600 dark:text-emerald-400 uppercase tracking-wider">RSUD dr. R. Koesma</p>
-                </div>
+                <div><h1 class="font-bold text-lg tracking-tight dark:text-white">E-Notulen</h1><p class="text-[10px] font-medium text-green-600 dark:text-emerald-400 uppercase tracking-wider">RSUD dr. R. Koesma</p></div>
             </div>
             <div onclick="navTo('profile')" class="mx-4 mt-6 mb-2 p-3 rounded-2xl bg-white/40 dark:bg-black/20 border border-white/20 cursor-pointer hover:bg-white/60 dark:hover:bg-white/5 transition group">
                 <div class="flex items-center gap-3">
                     <img id="sb-avatar" src="" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-600 shadow-sm object-cover bg-white">
-                    <div class="overflow-hidden">
-                        <p id="sb-name" class="text-sm font-bold truncate group-hover:text-green-700 dark:group-hover:text-emerald-400 transition">User</p>
-                        <p id="sb-role" class="text-[10px] font-bold px-2 py-0.5 rounded bg-green-100 dark:bg-emerald-900/50 text-green-700 dark:text-emerald-400 w-max mt-1">LOADING</p>
-                    </div>
+                    <div class="overflow-hidden"><p id="sb-name" class="text-sm font-bold truncate group-hover:text-green-700 dark:group-hover:text-emerald-400 transition">User</p><p id="sb-role" class="text-[10px] font-bold px-2 py-0.5 rounded bg-green-100 dark:bg-emerald-900/50 text-green-700 dark:text-emerald-400 w-max mt-1">LOADING</p></div>
                 </div>
             </div>
             <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-1">
@@ -201,23 +138,17 @@
             </nav>
             <div class="p-4 border-t border-white/10 bg-white/20 dark:bg-black/20 backdrop-blur-sm">
                 <div class="flex items-center justify-between mb-4 px-2">
-                    <div class="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                        <i id="theme-icon" class="fa-solid fa-sun"></i> <span id="theme-text">Mode Pagi</span>
-                    </div>
+                    <div class="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400"><i id="theme-icon" class="fa-solid fa-sun"></i> <span id="theme-text">Mode Pagi</span></div>
                 </div>
                 <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 px-4 py-2.5 rounded-xl transition font-semibold text-sm shadow-sm"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
             </div>
         </aside>
-
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden transition-opacity"></div>
 
-        <!-- MAIN ADMIN CONTENT -->
         <div class="flex-1 flex flex-col relative h-full overflow-hidden">
             <header class="md:hidden h-16 glass-card flex items-center justify-between px-6 z-30 shrink-0 border-b-0">
                 <span class="font-bold text-lg text-green-800 dark:text-emerald-400 flex items-center gap-2">
-                    <!-- LOGO RSUD -->
-                    <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-8 h-8 object-contain" alt="Logo">
-                    E-Notulen
+                    <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-8 h-8 object-contain" alt="Logo"> E-Notulen
                 </span>
                 <button onclick="toggleSidebar()" class="text-slate-600 dark:text-slate-300 p-2 rounded-lg active:bg-slate-100 dark:active:bg-slate-800"><i class="fa-solid fa-bars text-xl"></i></button>
             </header>
@@ -226,44 +157,26 @@
             <div id="view-login" class="absolute inset-0 z-[60] flex flex-col items-center justify-center p-4 bg-white dark:bg-slate-900">
                 <div class="glass-card max-w-md w-full p-8 rounded-3xl text-center shadow-2xl border-t border-white/60 animate-fade-in relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 to-emerald-600"></div>
-                    <!-- LOGO RSUD BESAR -->
                     <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-24 h-24 object-contain mx-auto mb-6 drop-shadow-md" alt="Logo RSUD">
-                    
                     <h2 class="text-3xl font-bold text-slate-800 dark:text-white mb-2">Selamat Datang</h2>
                     <p class="text-slate-500 dark:text-slate-400 text-sm mb-8 leading-relaxed">Sistem Informasi Manajemen Notulen Rapat<br><span class="font-semibold text-green-700 dark:text-emerald-400">RSUD dr. R. Koesma Tuban</span></p>
-                    <div class="flex justify-center">
-                        <div id="g_id_onload" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-                        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="pill" data-logo_alignment="left" data-width="280"></div>
-                    </div>
+                    <div class="flex justify-center"><div id="g_id_onload" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div><div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="pill" data-logo_alignment="left" data-width="280"></div></div>
                     <p class="mt-8 text-xs text-slate-400">© 2025 IT RSUD Koesma - Secure Access</p>
                 </div>
             </div>
 
             <!-- CONTENT -->
             <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 hidden">
-                
                 <!-- DASHBOARD -->
                 <div id="view-dashboard" class="page-view animate-fade-in max-w-6xl mx-auto space-y-6">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
-                        <div><h1 class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">Dashboard Overview</h1><p class="text-slate-500 dark:text-slate-400 text-sm">Selamat datang kembali, mari produktif hari ini.</p></div>
-                    </div>
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2"><div><h1 class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">Dashboard Overview</h1><p class="text-slate-500 dark:text-slate-400 text-sm">Selamat datang kembali, mari produktif hari ini.</p></div></div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div onclick="navTo('create')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden">
-                            <div class="flex items-center gap-5 relative z-10">
-                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-green-500/30 group-hover:rotate-6 transition"><i class="fa-solid fa-plus text-2xl"></i></div>
-                                <div><h3 class="font-bold text-xl text-slate-800 dark:text-white">Buat Jadwal Rapat</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Jadwalkan rapat baru dan undang peserta.</p></div>
-                            </div>
-                        </div>
-                        <div onclick="navTo('list')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden">
-                            <div class="flex items-center gap-5 relative z-10">
-                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:rotate-6 transition"><i class="fa-solid fa-folder-open text-2xl"></i></div>
-                                <div><h3 class="font-bold text-xl text-slate-800 dark:text-white">Arsip Notulen</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Anda memiliki <span id="dash-total-count" class="font-bold text-blue-500">...</span> dokumen tersimpan.</p></div>
-                            </div>
-                        </div>
+                        <div onclick="navTo('create')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden"><div class="flex items-center gap-5 relative z-10"><div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-green-500/30 group-hover:rotate-6 transition"><i class="fa-solid fa-plus text-2xl"></i></div><div><h3 class="font-bold text-xl text-slate-800 dark:text-white">Buat Jadwal Rapat</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Jadwalkan rapat baru dan undang peserta.</p></div></div></div>
+                        <div onclick="navTo('list')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden"><div class="flex items-center gap-5 relative z-10"><div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:rotate-6 transition"><i class="fa-solid fa-folder-open text-2xl"></i></div><div><h3 class="font-bold text-xl text-slate-800 dark:text-white">Arsip Notulen</h3><p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Anda memiliki <span id="dash-total-count" class="font-bold text-blue-500">...</span> dokumen tersimpan.</p></div></div></div>
                     </div>
                 </div>
 
-                <!-- PROFILE (Standard) -->
+                <!-- PROFILE -->
                 <div id="view-profile" class="page-view hidden animate-fade-in max-w-3xl mx-auto">
                      <h1 class="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg"><i class="fa-solid fa-user-gear"></i></span> Pengaturan Profil</h1>
                     <div class="glass-card rounded-2xl p-6 md:p-8">
@@ -283,18 +196,12 @@
                     </div>
                 </div>
 
-                <!-- CREATE / EDIT FORM -->
+                <!-- CREATE / EDIT -->
                 <div id="view-create" class="page-view hidden animate-slide-up max-w-4xl mx-auto">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                        <h1 id="form-title" class="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-green-100 dark:bg-emerald-900/50 text-green-600 dark:text-emerald-400 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-nib"></i></span> Jadwal Baru</h1>
-                        <button onclick="navTo('list')" class="text-sm px-4 py-2 bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-white transition font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali</button>
-                    </div>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"><h1 id="form-title" class="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-green-100 dark:bg-emerald-900/50 text-green-600 dark:text-emerald-400 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-nib"></i></span> Jadwal Baru</h1><button onclick="navTo('list')" class="text-sm px-4 py-2 bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-white transition font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali</button></div>
                     <div class="glass-card rounded-2xl shadow-sm p-6 md:p-8">
                         <form id="mainForm" onsubmit="submitData(event)">
-                            <input type="hidden" name="action" id="form-action" value="create">
-                            <input type="hidden" name="id" id="form-id">
-                            <input type="hidden" name="existingFileUrl" id="form-existing-file">
-                            <input type="hidden" id="form-kept-docs" value="[]">
+                            <input type="hidden" name="action" id="form-action" value="create"><input type="hidden" name="id" id="form-id"><input type="hidden" name="existingFileUrl" id="form-existing-file"><input type="hidden" id="form-kept-docs" value="[]">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                 <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Unit <span class="text-red-500">*</span></label><select name="unit" id="inp-unit" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm dark:bg-slate-800"><option value="">-- Pilih Unit --</option><option value="Direksi">Direksi</option><option value="Yanmed">Yanmed</option><option value="Keperawatan">Keperawatan</option><option value="Penunjang">Penunjang</option><option value="Umum">Umum</option><option value="Keuangan">Keuangan</option><option value="Komite Medis">Komite Medis</option><option value="Lainnya">Lainnya</option></select></div>
                                 <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Tanggal <span class="text-red-500">*</span></label><input type="date" name="tanggal" id="inp-tanggal" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm dark:text-slate-200"></div>
@@ -303,12 +210,8 @@
                             <div class="mb-6"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Agenda Rapat <span class="text-red-500">*</span></label><input type="text" name="agenda" id="inp-agenda" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm" placeholder="Contoh: Rapat Koordinasi Bulanan"></div>
                             <div class="mb-6"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Peserta (Ringkasan)</label><input type="text" name="peserta" id="inp-peserta" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm" placeholder="Contoh: Direktur, Kabid, Ka. Ruangan..."></div>
                             <div class="mb-6 bg-blue-50/50 dark:bg-blue-900/10 p-5 rounded-xl border-2 border-dashed border-blue-200 dark:border-blue-800 transition hover:border-blue-400">
-                                <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 uppercase mb-3"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> Upload Undangan (PDF/Img)</label>
-                                <input type="file" id="inp-file" accept=".pdf,image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer transition">
-                                <div id="existing-file-display" class="hidden mt-4 p-3 bg-white/80 dark:bg-slate-800 rounded-lg border border-blue-100 dark:border-blue-900 flex items-center justify-between shadow-sm">
-                                    <div class="flex items-center gap-3 overflow-hidden"><div class="bg-blue-100 p-2 rounded text-blue-600"><i class="fa-solid fa-file-lines"></i></div><span class="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">File Terlampir</span><a href="#" target="_blank" id="link-existing-file" class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold hover:bg-blue-100 border border-blue-200 transition whitespace-nowrap">BUKA FILE <i class="fa-solid fa-external-link-alt ml-1"></i></a></div>
-                                    <button type="button" onclick="deleteExistingFile()" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-full transition" title="Hapus lampiran"><i class="fa-solid fa-trash-can"></i></button>
-                                </div>
+                                <label class="block text-xs font-bold text-blue-800 dark:text-blue-400 uppercase mb-3"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> Upload Undangan (PDF/Img)</label><input type="file" id="inp-file" accept=".pdf,image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer transition">
+                                <div id="existing-file-display" class="hidden mt-4 p-3 bg-white/80 dark:bg-slate-800 rounded-lg border border-blue-100 dark:border-blue-900 flex items-center justify-between shadow-sm"><div class="flex items-center gap-3 overflow-hidden"><div class="bg-blue-100 p-2 rounded text-blue-600"><i class="fa-solid fa-file-lines"></i></div><span class="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">File Terlampir</span><a href="#" target="_blank" id="link-existing-file" class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold hover:bg-blue-100 border border-blue-200 transition whitespace-nowrap">BUKA FILE <i class="fa-solid fa-external-link-alt ml-1"></i></a></div><button type="button" onclick="deleteExistingFile()" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-full transition" title="Hapus lampiran"><i class="fa-solid fa-trash-can"></i></button></div>
                             </div>
                             <div id="section-recording" class="hidden pt-6 border-t border-slate-200 dark:border-white/10 mt-6 animate-fade-in">
                                 <div class="mb-5 bg-green-50 dark:bg-emerald-900/20 p-4 rounded-xl border border-green-200 dark:border-emerald-800 flex gap-3 items-start"><i class="fa-solid fa-circle-info text-green-600 mt-1"></i><div><h3 class="text-green-800 dark:text-emerald-400 font-bold text-sm">Area Notulensi</h3><p class="text-green-600 dark:text-emerald-500 text-xs">Silakan lengkapi hasil rapat dan rencana tindak lanjut di bawah ini.</p></div></div>
@@ -324,27 +227,12 @@
                     </div>
                 </div>
 
-                <!-- LIST (Search, Sort, Pagination, Copy Link) -->
+                <!-- LIST -->
                 <div id="view-list" class="page-view hidden animate-fade-in max-w-6xl mx-auto">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-                        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Daftar Notulen</h1>
-                        <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-                            <div class="relative w-full md:w-64"><i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-400 text-xs"></i><input type="text" id="search-input" oninput="handleFilter()" placeholder="Cari agenda, unit..." class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 transition dark:bg-slate-800 dark:text-white"></div>
-                            <div class="relative w-full md:w-40"><i class="fa-solid fa-sort absolute left-3 top-3.5 text-slate-400 text-xs"></i><select id="sort-select" onchange="handleFilter()" class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 transition appearance-none cursor-pointer dark:bg-slate-800 dark:text-white"><option value="newest">Terbaru</option><option value="oldest">Terlama</option><option value="az">Agenda (A-Z)</option><option value="za">Agenda (Z-A)</option></select></div>
-                            <button onclick="loadData()" class="px-4 py-2.5 glass-card rounded-xl text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-white dark:hover:bg-slate-700 transition"><i class="fa-solid fa-rotate"></i></button>
-                        </div>
-                    </div>
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6"><h1 class="text-2xl font-bold text-slate-800 dark:text-white">Daftar Notulen</h1><div class="flex flex-col md:flex-row gap-3 w-full md:w-auto"><div class="relative w-full md:w-64"><i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-400 text-xs"></i><input type="text" id="search-input" oninput="handleFilter()" placeholder="Cari agenda, unit..." class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 transition dark:bg-slate-800 dark:text-white"></div><div class="relative w-full md:w-40"><i class="fa-solid fa-sort absolute left-3 top-3.5 text-slate-400 text-xs"></i><select id="sort-select" onchange="handleFilter()" class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 transition appearance-none cursor-pointer dark:bg-slate-800 dark:text-white"><option value="newest">Terbaru</option><option value="oldest">Terlama</option><option value="az">Agenda (A-Z)</option><option value="za">Agenda (Z-A)</option></select></div><button onclick="loadData()" class="px-4 py-2.5 glass-card rounded-xl text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-white dark:hover:bg-slate-700 transition"><i class="fa-solid fa-rotate"></i></button></div></div>
                     <div class="glass-card rounded-2xl overflow-hidden shadow-sm flex flex-col min-h-[400px]">
-                        <div class="overflow-x-auto flex-1">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-slate-50/80 dark:bg-slate-800/80 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/10"><tr><th class="px-6 py-5">Waktu</th><th class="px-6 py-5">Agenda</th><th class="px-6 py-5">Unit</th><th class="px-6 py-5">Status</th><th class="px-6 py-5 text-center">Aksi</th></tr></thead>
-                                <tbody id="table-body" class="divide-y divide-slate-100 dark:divide-white/5"><tr><td colspan="5" class="p-10 text-center text-slate-400">Sedang memuat data...</td></tr></tbody>
-                            </table>
-                        </div>
-                        <div id="pagination-footer" class="hidden border-t border-slate-200 dark:border-white/10 p-4 bg-slate-50/50 dark:bg-slate-900/30 flex justify-between items-center">
-                            <span id="page-info" class="text-xs font-medium text-slate-500 dark:text-slate-400">Halaman 1 dari 1</span>
-                            <div class="flex gap-2"><button onclick="prevPage()" id="btn-prev" disabled class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 disabled:opacity-50 hover:bg-white dark:hover:bg-slate-800 transition">Prev</button><button onclick="nextPage()" id="btn-next" disabled class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 disabled:opacity-50 hover:bg-white dark:hover:bg-slate-800 transition">Next</button></div>
-                        </div>
+                        <div class="overflow-x-auto flex-1"><table class="w-full text-left text-sm"><thead class="bg-slate-50/80 dark:bg-slate-800/80 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/10"><tr><th class="px-6 py-5">Waktu</th><th class="px-6 py-5">Agenda</th><th class="px-6 py-5">Unit</th><th class="px-6 py-5">Status</th><th class="px-6 py-5 text-center">Aksi</th></tr></thead><tbody id="table-body" class="divide-y divide-slate-100 dark:divide-white/5"><tr><td colspan="5" class="p-10 text-center text-slate-400">Sedang memuat data...</td></tr></tbody></table></div>
+                        <div id="pagination-footer" class="hidden border-t border-slate-200 dark:border-white/10 p-4 bg-slate-50/50 dark:bg-slate-900/30 flex justify-between items-center"><span id="page-info" class="text-xs font-medium text-slate-500 dark:text-slate-400">Halaman 1 dari 1</span><div class="flex gap-2"><button onclick="prevPage()" id="btn-prev" disabled class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 disabled:opacity-50 hover:bg-white dark:hover:bg-slate-800 transition">Prev</button><button onclick="nextPage()" id="btn-next" disabled class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 disabled:opacity-50 hover:bg-white dark:hover:bg-slate-800 transition">Next</button></div></div>
                     </div>
                 </div>
 
@@ -361,32 +249,12 @@
     <div id="modal-attendance" class="hidden fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-6 border-b border-slate-200 dark:border-white/10 flex justify-between items-center">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-800 dark:text-white">Daftar Hadir</h3>
-                    <p id="att-modal-title" class="text-sm text-slate-500 dark:text-slate-400">Memuat...</p>
-                </div>
+                <div><h3 class="text-xl font-bold text-slate-800 dark:text-white">Daftar Hadir</h3><p id="att-modal-title" class="text-sm text-slate-500 dark:text-slate-400">Memuat...</p></div>
                 <button onclick="closeAttendanceModal()" class="text-slate-400 hover:text-red-500 text-xl transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="p-0 overflow-y-auto flex-1">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-50 dark:bg-slate-800 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 sticky top-0">
-                        <tr>
-                            <th class="px-6 py-3">No</th>
-                            <th class="px-6 py-3">Waktu</th>
-                            <th class="px-6 py-3">Nama</th>
-                            <th class="px-6 py-3">No HP</th>
-                            <th class="px-6 py-3 text-center">TTD</th>
-                        </tr>
-                    </thead>
-                    <tbody id="att-table-body" class="divide-y divide-slate-100 dark:divide-white/5">
-                        <!-- Data will be injected here -->
-                    </tbody>
-                </table>
-            </div>
+            <div class="p-0 overflow-y-auto flex-1"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 sticky top-0"><tr><th class="px-6 py-3">No</th><th class="px-6 py-3">Waktu</th><th class="px-6 py-3">Nama</th><th class="px-6 py-3">No HP</th><th class="px-6 py-3 text-center">TTD</th></tr></thead><tbody id="att-table-body" class="divide-y divide-slate-100 dark:divide-white/5"></tbody></table></div>
             <div class="p-4 border-t border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-900/30 flex justify-between items-center">
-                <button onclick="downloadAttendanceXLSX()" id="btn-download-att" class="hidden px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 shadow-sm flex items-center gap-2">
-                    <i class="fa-solid fa-file-excel"></i> Download Excel (.xlsx)
-                </button>
+                <button onclick="downloadAttendanceWithImages()" id="btn-download-att" class="hidden px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 shadow-sm flex items-center gap-2"><i class="fa-solid fa-file-excel"></i> Download Excel (.xlsx)</button>
                 <button onclick="closeAttendanceModal()" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition">Tutup</button>
             </div>
         </div>
@@ -408,9 +276,7 @@
 
         function resizeCanvas() {
             if(!canvas || !ctx) return;
-            // Hanya resize jika canvas terlihat
             if(canvas.offsetParent === null) return; 
-            
             const ratio = Math.max(window.devicePixelRatio || 1, 1);
             canvas.width = canvas.offsetWidth * ratio;
             canvas.height = canvas.offsetHeight * ratio;
@@ -453,7 +319,7 @@
         function clearSignature() {
             if(!ctx || !canvas) return;
             ctx.clearRect(0, 0, canvas.width / (window.devicePixelRatio||1), canvas.height / (window.devicePixelRatio||1));
-            resizeCanvas(); // Re-init context state
+            resizeCanvas(); 
         }
 
         if(canvas) {
@@ -468,39 +334,21 @@
 
 
         // --- 2. INIT APPLICATION ---
-        // updateTheme sudah dijalankan di tag script atas untuk mencegah flash
-        
+        try { updateTheme(); } catch(e) {}
         const urlParams = new URLSearchParams(window.location.search);
         const mode = urlParams.get('v');
         const meetingId = urlParams.get('id');
 
-        // FORCE DISPLAY LOGIC
         if (mode === 'absensi' && meetingId) {
-            // MODE: ABSENSI
-            const adminApp = document.getElementById('app-admin');
-            if(adminApp) adminApp.classList.add('hidden');
-            
-            const absensiApp = document.getElementById('app-absensi');
-            if(absensiApp) absensiApp.classList.remove('hidden');
-            
-            loadMeetingInfo(meetingId);
-            setTimeout(resizeCanvas, 300);
+            const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.add('hidden');
+            const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.remove('hidden');
+            loadMeetingInfo(meetingId); setTimeout(resizeCanvas, 300);
         } else {
-            // MODE: ADMIN (DEFAULT)
-            const absensiApp = document.getElementById('app-absensi');
-            if(absensiApp) absensiApp.classList.add('hidden');
-            
-            const adminApp = document.getElementById('app-admin');
-            if(adminApp) adminApp.classList.remove('hidden');
-
-            const googleBtn = document.getElementById('g_id_onload');
-            if(googleBtn) googleBtn.setAttribute('data-client_id', CLIENT_ID);
-            
+            const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.add('hidden');
+            const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.remove('hidden');
+            const googleBtn = document.getElementById('g_id_onload'); if(googleBtn) googleBtn.setAttribute('data-client_id', CLIENT_ID);
             const savedUser = localStorage.getItem('rsud_user_pro_v2'); 
-            if(savedUser) { 
-                try { currentUser = JSON.parse(savedUser); initApp(); } 
-                catch(e) { localStorage.removeItem('rsud_user_pro_v2'); } 
-            }
+            if(savedUser) { try { currentUser = JSON.parse(savedUser); initApp(); } catch(e) { localStorage.removeItem('rsud_user_pro_v2'); } }
         }
 
         // --- 3. ABSENSI LOGIC ---
@@ -536,8 +384,6 @@
         let filteredData = [];
         let currentPage = 1;
         const itemsPerPage = 15;
-        
-        // --- DATA ATTENDANCE UNTUK DOWNLOAD ---
         let currentAttendanceData = [];
         let currentMeetingTitle = "";
 
@@ -587,7 +433,7 @@
 
         function logout() { localStorage.removeItem('rsud_user_pro_v2'); location.reload(); }
 
-        // --- NEW: View & Download Attendance Logic ---
+        // --- VIEW ATTENDANCE (Updated) ---
         function copyAbsensiLink(id) {
             const baseUrl = window.location.href.split('?')[0];
             const fullUrl = `${baseUrl}?v=absensi&id=${id}`;
@@ -599,8 +445,6 @@
             document.getElementById('att-modal-title').textContent = title;
             document.getElementById('att-table-body').innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Mengambil data...</td></tr>';
             document.getElementById('btn-download-att').classList.add('hidden');
-            
-            // Simpan Judul untuk Filename
             currentMeetingTitle = title;
 
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getAttendance', meetingId: id }) })
@@ -609,20 +453,17 @@
                 const tbody = document.getElementById('att-table-body');
                 tbody.innerHTML = '';
                 if (resp.status === 'success' && resp.data.length > 0) {
-                    // Simpan data untuk download
                     currentAttendanceData = resp.data;
                     document.getElementById('btn-download-att').classList.remove('hidden');
-
                     resp.data.forEach((row, idx) => {
+                        const ttdDisplay = row.ttdUrl ? `<a href="${row.ttdUrl}" target="_blank" class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-100 border border-indigo-200">Lihat TTD</a>` : '-';
                         tbody.innerHTML += `
                             <tr class="hover:bg-slate-50 dark:hover:bg-white/5 border-b border-slate-100 dark:border-white/5">
                                 <td class="px-6 py-4 font-bold text-slate-500">${idx + 1}</td>
                                 <td class="px-6 py-4">${row.waktu}</td>
                                 <td class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-200">${row.nama}</td>
                                 <td class="px-6 py-4 text-slate-500">${row.hp}</td>
-                                <td class="px-6 py-4 text-center">
-                                    <a href="${row.ttd}" target="_blank" class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-100 border border-indigo-200">Lihat TTD</a>
-                                </td>
+                                <td class="px-6 py-4 text-center">${ttdDisplay}</td>
                             </tr>
                         `;
                     });
@@ -631,45 +472,71 @@
                     tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">Belum ada peserta yang mengisi daftar hadir.</td></tr>';
                 }
             })
-            .catch(() => {
-                document.getElementById('att-table-body').innerHTML = '<tr><td colspan="5" class="p-8 text-center text-red-400">Gagal memuat data.</td></tr>';
-            });
+            .catch(() => { document.getElementById('att-table-body').innerHTML = '<tr><td colspan="5" class="p-8 text-center text-red-400">Gagal memuat data.</td></tr>'; });
         }
 
-        function downloadAttendanceXLSX() {
+        async function downloadAttendanceWithImages() {
             if (!currentAttendanceData || currentAttendanceData.length === 0) return;
-
-            // 1. Format Data untuk Excel (Lebih rapi dari CSV)
-            const sheetData = currentAttendanceData.map((row, index) => ({
-                "No": index + 1,
-                "Waktu Absen": row.waktu,
-                "Nama Peserta": row.nama,
-                "Nomor HP": row.hp,
-                "Link Tanda Tangan": row.ttd
-            }));
-
-            // 2. Buat Worksheet
-            const worksheet = XLSX.utils.json_to_sheet(sheetData);
-
-            // 3. Atur Lebar Kolom (Agar siap print)
-            const wscols = [
-                { wch: 5 },  // No
-                { wch: 15 }, // Waktu
-                { wch: 35 }, // Nama
-                { wch: 20 }, // HP
-                { wch: 50 }  // Link TTD
-            ];
-            worksheet['!cols'] = wscols;
-
-            // 4. Buat Workbook
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Daftar Hadir");
-
-            // 5. Generate Filename yang Aman
-            const safeTitle = (currentMeetingTitle || "Rapat").replace(/[^a-zA-Z0-9]/g, "_");
             
-            // 6. Download File .xlsx
-            XLSX.writeFile(workbook, `Absensi_${safeTitle}.xlsx`);
+            // Show loader locally
+            const btn = document.getElementById('btn-download-att');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyusun Excel...';
+            btn.disabled = true;
+
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Daftar Hadir');
+
+            // Set Columns
+            worksheet.columns = [
+                { header: 'No', key: 'no', width: 5 },
+                { header: 'Waktu Absen', key: 'waktu', width: 20 },
+                { header: 'Nama Peserta', key: 'nama', width: 30 },
+                { header: 'Nomor HP', key: 'hp', width: 20 },
+                { header: 'Tanda Tangan', key: 'ttd', width: 20 } 
+            ];
+
+            // Add Data Rows
+            for (let i = 0; i < currentAttendanceData.length; i++) {
+                const rowData = currentAttendanceData[i];
+                const row = worksheet.addRow({
+                    no: i + 1,
+                    waktu: rowData.waktu,
+                    nama: rowData.nama,
+                    hp: rowData.hp,
+                    ttd: '' // Placeholder for image
+                });
+                
+                // Adjust row height for image
+                row.height = 60; 
+
+                // Insert Image if Base64 exists
+                if (rowData.ttdBase64) {
+                    const imageId = workbook.addImage({
+                        base64: rowData.ttdBase64,
+                        extension: 'png',
+                    });
+
+                    worksheet.addImage(imageId, {
+                        tl: { col: 4, row: row.number - 1 }, // Column 4 (0-index is 4 for 5th col), Row index
+                        ext: { width: 100, height: 50 },
+                        editAs: 'oneCell'
+                    });
+                }
+            }
+
+            // Styling Header
+            worksheet.getRow(1).font = { bold: true };
+            worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+
+            // Generate & Download
+            const buffer = await workbook.xlsx.writeBuffer();
+            const safeTitle = (currentMeetingTitle || "Rapat").replace(/[^a-zA-Z0-9]/g, "_");
+            saveAs(new Blob([buffer]), `Absensi_${safeTitle}.xlsx`);
+
+            // Restore Button
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
 
         function closeAttendanceModal() {
