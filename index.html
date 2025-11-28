@@ -103,6 +103,26 @@
                     <input type="hidden" id="abs-meeting-id">
                     <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Nama Lengkap</label><input type="text" id="abs-nama" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500" placeholder="Nama beserta gelar..."></div>
                     <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Nomor HP / WhatsApp</label><input type="tel" id="abs-phone" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500" placeholder="08xx / 628xx / +628xx"></div>
+                    
+                    <!-- [MODIFIKASI] INPUT UNIT/RUANGAN PADA ABSENSI -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Unit / Ruangan</label>
+                        <select id="abs-unit" onchange="handleAbsensiUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 dark:bg-slate-800">
+                            <option value="">-- Pilih Unit --</option>
+                            <option value="Direksi">Direksi</option>
+                            <option value="Yanmed">Yanmed</option>
+                            <option value="Keperawatan">Keperawatan</option>
+                            <option value="Penunjang">Penunjang</option>
+                            <option value="Umum">Umum & Kepegawaian</option>
+                            <option value="Keuangan">Keuangan</option>
+                            <option value="Komite Medis">Komite Medis</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                        <div id="abs-unit-lainnya-group" class="hidden mt-3 animate-fade-in">
+                             <input type="text" id="abs-unit-lainnya" placeholder="Tulis nama unit/ruangan..." class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500">
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Tanda Tangan Digital</label>
                         <div class="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden bg-white touch-none h-48 w-full">
@@ -173,7 +193,7 @@
                     <h2 class="text-3xl font-bold text-slate-800 dark:text-white mb-2">Selamat Datang</h2>
                     <p class="text-slate-500 dark:text-slate-400 text-sm mb-8 leading-relaxed">Sistem Informasi Manajemen Notulen Rapat<br><span class="font-semibold text-green-700 dark:text-emerald-400">RSUD dr. R. Koesma Tuban</span></p>
                     <div class="flex justify-center"><div id="g_id_onload" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div><div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="pill" data-logo_alignment="left" data-width="280"></div></div>
-                    <p class="mt-8 text-xs text-slate-400">© 2025 Bagian Adm dan Umum RSUD dr. R. Koesma - Secure Access</p>
+                    <p class="mt-8 text-xs text-slate-400">© 2025 IT RSUD Koesma - Secure Access</p>
                 </div>
             </div>
 
@@ -224,7 +244,6 @@
                                 <div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Nomor HP / WA</label><input type="tel" id="prof-phone" placeholder="08..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all"></div>
                                 <div class="col-span-1 md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Unit Kerja</label>
-                                    <!-- [PERUBAHAN] onchange untuk handle Lainnya -->
                                     <select id="prof-unit" onchange="handleProfileUnitChange(this)" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all dark:bg-slate-800">
                                         <option value="">-- Pilih Unit --</option>
                                         <option value="Direksi">Direksi</option>
@@ -236,7 +255,6 @@
                                         <option value="Komite Medis">Komite Medis</option>
                                         <option value="Lainnya">Lainnya</option>
                                     </select>
-                                    <!-- [PERUBAHAN] Input field hidden untuk Lainnya -->
                                     <div id="prof-unit-lainnya-group" class="hidden mt-3 animate-fade-in">
                                         <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Unit Kerja (Lainnya)</label>
                                         <input type="text" id="prof-unit-lainnya" placeholder="Masukkan nama unit kerja Anda..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all">
@@ -304,7 +322,7 @@
                 <div><h3 class="text-xl font-bold text-slate-800 dark:text-white">Daftar Hadir</h3><p id="att-modal-title" class="text-sm text-slate-500 dark:text-slate-400">Memuat...</p></div>
                 <button onclick="closeAttendanceModal()" class="text-slate-400 hover:text-red-500 text-xl transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="p-0 overflow-y-auto flex-1"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 sticky top-0"><tr><th class="px-6 py-3">No</th><th class="px-6 py-3">Waktu</th><th class="px-6 py-3">Nama</th><th class="px-6 py-3">No HP</th><th class="px-6 py-3 text-center">TTD</th></tr></thead><tbody id="att-table-body" class="divide-y divide-slate-100 dark:divide-white/5"></tbody></table></div>
+            <div class="p-0 overflow-y-auto flex-1"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-800 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 sticky top-0"><tr><th class="px-6 py-3">No</th><th class="px-6 py-3">Waktu</th><th class="px-6 py-3">Nama</th><th class="px-6 py-3">No HP</th><th class="px-6 py-3">Unit</th><th class="px-6 py-3 text-center">TTD</th></tr></thead><tbody id="att-table-body" class="divide-y divide-slate-100 dark:divide-white/5"></tbody></table></div>
             <div class="p-4 border-t border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-900/30 flex justify-between items-center">
                 <button onclick="downloadAttendanceWithImages()" id="btn-download-att" class="hidden px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 shadow-sm flex items-center gap-2"><i class="fa-solid fa-file-excel"></i> Download Excel (.xlsx)</button>
                 <button onclick="closeAttendanceModal()" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition">Tutup</button>
@@ -392,7 +410,21 @@
             // Get data from Library
             const signatureData = signaturePad.toDataURL('image/png');
             
-            const payload = { action: 'submitAttendance', meetingId: document.getElementById('abs-meeting-id').value, nama: document.getElementById('abs-nama').value, phone: document.getElementById('abs-phone').value, signatureData: signatureData };
+            // Get Unit Data
+            let unitValue = document.getElementById('abs-unit').value;
+            if (unitValue === 'Lainnya') {
+                unitValue = document.getElementById('abs-unit-lainnya').value;
+            }
+
+            const payload = { 
+                action: 'submitAttendance', 
+                meetingId: document.getElementById('abs-meeting-id').value, 
+                nama: document.getElementById('abs-nama').value, 
+                phone: document.getElementById('abs-phone').value, 
+                unit: unitValue,
+                signatureData: signatureData 
+            };
+
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { document.getElementById('absensi-content').classList.add('hidden'); document.getElementById('absensi-success').classList.remove('hidden'); } else { alert("Gagal: " + resp.message); } }).catch(err => { toggleLoader(false); alert("Terjadi kesalahan sistem."); });
         }
 
@@ -463,7 +495,7 @@
         function viewAttendance(id, title, date, time) {
             document.getElementById('modal-attendance').classList.remove('hidden');
             document.getElementById('att-modal-title').textContent = title;
-            document.getElementById('att-table-body').innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Mengambil data...</td></tr>';
+            document.getElementById('att-table-body').innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Mengambil data...</td></tr>';
             document.getElementById('btn-download-att').classList.add('hidden');
             
             // Simpan Info Global untuk Header Excel
@@ -487,16 +519,17 @@
                                 <td class="px-6 py-4">${row.waktu}</td>
                                 <td class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-200">${row.nama}</td>
                                 <td class="px-6 py-4 text-slate-500">${row.hp}</td>
+                                <td class="px-6 py-4 text-slate-500">${row.unit || '-'}</td>
                                 <td class="px-6 py-4 text-center">${ttdDisplay}</td>
                             </tr>
                         `;
                     });
                 } else {
                     currentAttendanceData = [];
-                    tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">Belum ada peserta yang mengisi daftar hadir.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">Belum ada peserta yang mengisi daftar hadir.</td></tr>';
                 }
             })
-            .catch(() => { document.getElementById('att-table-body').innerHTML = '<tr><td colspan="5" class="p-8 text-center text-red-400">Gagal memuat data.</td></tr>'; });
+            .catch(() => { document.getElementById('att-table-body').innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-400">Gagal memuat data.</td></tr>'; });
         }
 
         async function downloadAttendanceWithImages() {
@@ -511,11 +544,14 @@
             const worksheet = workbook.addWorksheet('Daftar Hadir');
 
             // Atur Lebar Kolom (Width Increased for Date)
-            worksheet.getColumn(1).width = 5;  // No
-            worksheet.getColumn(2).width = 25; // Waktu (Increased from 20)
-            worksheet.getColumn(3).width = 35; // Nama
-            worksheet.getColumn(4).width = 25; // HP
-            worksheet.getColumn(5).width = 25; // TTD
+            worksheet.columns = [
+                { header: 'No', key: 'no', width: 5 },
+                { header: 'Waktu Absen', key: 'waktu', width: 25 },
+                { header: 'Nama Peserta', key: 'nama', width: 35 },
+                { header: 'Nomor HP', key: 'hp', width: 25 },
+                { header: 'Unit/Ruangan', key: 'unit', width: 30 },
+                { header: 'Tanda Tangan', key: 'ttd', width: 25 } 
+            ];
 
             // --- HEADER CUSTOM (MERGED CELLS) ---
             
@@ -523,25 +559,25 @@
             const titleRow = worksheet.addRow(['DAFTAR HADIR']);
             titleRow.font = { size: 14, bold: true };
             titleRow.alignment = { vertical: 'middle', horizontal: 'center' };
-            worksheet.mergeCells('A1:E1');
+            worksheet.mergeCells('A1:F1'); // Updated merge range for 6 columns
 
             // Baris 2: Judul Rapat
             const agendaRow = worksheet.addRow([currentMeetingTitle]);
             agendaRow.font = { size: 12, bold: true };
             agendaRow.alignment = { vertical: 'middle', horizontal: 'center' };
-            worksheet.mergeCells('A2:E2');
+            worksheet.mergeCells('A2:F2');
 
             // Baris 3: Tanggal & Waktu
             const dateRow = worksheet.addRow([`Pelaksanaan: ${currentMeetingDate} - Pukul ${currentMeetingTime}`]);
             dateRow.font = { size: 11, italic: true };
             dateRow.alignment = { vertical: 'middle', horizontal: 'center' };
-            worksheet.mergeCells('A3:E3');
+            worksheet.mergeCells('A3:F3');
 
             // Baris 4: Spasi Kosong
             worksheet.addRow([]);
 
             // Baris 5: Header Tabel
-            const headerRow = worksheet.addRow(['No', 'Waktu Absen', 'Nama Peserta', 'Nomor HP', 'Tanda Tangan']);
+            const headerRow = worksheet.addRow(['No', 'Waktu Absen', 'Nama Peserta', 'Nomor HP', 'Unit/Ruangan', 'Tanda Tangan']);
             headerRow.height = 25;
             headerRow.eachCell((cell) => {
                 cell.font = { bold: true };
@@ -558,6 +594,7 @@
                     rowData.waktu,
                     rowData.nama,
                     rowData.hp,
+                    rowData.unit || '-', // Add Unit here
                     '' // Placeholder TTD
                 ]);
                 
@@ -581,7 +618,7 @@
                     });
 
                     worksheet.addImage(imageId, {
-                        tl: { col: 4.1, row: row.number - 1.1 }, // Posisi sedikit geser agar di tengah
+                        tl: { col: 5.1, row: row.number - 1.1 }, // Posisi sedikit geser agar di tengah (Column index is 5 for 6th column)
                         ext: { width: 80, height: 40 },
                         editAs: 'oneCell'
                     });
@@ -693,7 +730,20 @@
                 input.value = "";
             }
         }
+
+        // [BARU] Fungsi untuk menangani perubahan unit pada Absensi (sama dengan profil)
+        function handleAbsensiUnitChange(select) {
+            const div = document.getElementById('abs-unit-lainnya-group');
+            const input = document.getElementById('abs-unit-lainnya');
+            if (select.value === 'Lainnya') {
+                div.classList.remove('hidden');
+                input.setAttribute('required', 'true');
+            } else {
+                div.classList.add('hidden');
+                input.removeAttribute('required');
+                input.value = "";
+            }
+        }
     </script>
 </body>
 </html>
-
