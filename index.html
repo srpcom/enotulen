@@ -273,7 +273,24 @@
                         <form id="mainForm" onsubmit="submitData(event)">
                             <input type="hidden" name="action" id="form-action" value="create"><input type="hidden" name="id" id="form-id"><input type="hidden" name="existingFileUrl" id="form-existing-file"><input type="hidden" id="form-kept-docs" value="[]">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Unit <span class="text-red-500">*</span></label><select name="unit" id="inp-unit" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm dark:bg-slate-800"><option value="">-- Pilih Unit --</option><option value="Direksi">Direksi</option><option value="Yanmed">Yanmed</option><option value="Keperawatan">Keperawatan</option><option value="Penunjang">Penunjang</option><option value="Umum">Umum</option><option value="Keuangan">Keuangan</option><option value="Komite Medis">Komite Medis</option><option value="Lainnya">Lainnya</option></select></div>
+                                <div class="md:col-span-1">
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Unit <span class="text-red-500">*</span></label>
+                                    <select name="unit" id="inp-unit" onchange="handleCreateUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm dark:bg-slate-800">
+                                        <option value="">-- Pilih Unit --</option>
+                                        <option value="Direksi">Direksi</option>
+                                        <option value="Yanmed">Yanmed</option>
+                                        <option value="Keperawatan">Keperawatan</option>
+                                        <option value="Penunjang">Penunjang</option>
+                                        <option value="Umum">Umum</option>
+                                        <option value="Keuangan">Keuangan</option>
+                                        <option value="Komite Medis">Komite Medis</option>
+                                        <option value="Lainnya">Lainnya</option>
+                                    </select>
+                                    <!-- Input Unit Lainnya (Hidden by Default) -->
+                                    <div id="inp-unit-lainnya-group" class="hidden mt-2 animate-fade-in">
+                                        <input type="text" id="inp-unit-lainnya" placeholder="Tulis nama unit..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm transition-all">
+                                    </div>
+                                </div>
                                 <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Tanggal <span class="text-red-500">*</span></label><input type="date" name="tanggal" id="inp-tanggal" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm dark:text-slate-200"></div>
                                 <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2">Jam <span class="text-red-500">*</span></label><input type="time" name="waktu" id="inp-waktu" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm dark:text-slate-200"></div>
                             </div>
@@ -709,13 +726,110 @@
         function nextPage() { if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) { currentPage++; renderPaginatedTable(); } }
         function prevPage() { if (currentPage > 1) { currentPage--; renderPaginatedTable(); } }
         function renderDashboard() { document.getElementById('dash-total-count').innerText = allData.length; }
-        function resetForm() { document.getElementById('mainForm').reset(); document.getElementById('form-action').value = 'create'; document.getElementById('form-id').value = ''; document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('new-docs-container').innerHTML = ''; document.getElementById('existing-docs-container').innerHTML = ''; document.getElementById('existing-docs-container').classList.add('hidden'); document.getElementById('empty-docs-msg').classList.remove('hidden'); document.getElementById('form-kept-docs').value = "[]"; document.getElementById('inp-unit').value = currentUser.unit || ""; document.getElementById('section-recording').classList.add('hidden'); document.getElementById('inp-isi').removeAttribute('required'); document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-green-100 dark:bg-emerald-900/50 text-green-600 dark:text-emerald-400 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-plus"></i></span> Buat Jadwal Rapat'; document.getElementById('btn-submit-text').innerText = "Simpan Jadwal"; }
-        function editNotulen(itemStr) { const item = JSON.parse(decodeURIComponent(itemStr)); navTo('create'); document.getElementById('section-recording').classList.remove('hidden'); document.getElementById('inp-isi').setAttribute('required', 'true'); document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-to-square"></i></span> Isi Hasil Rapat'; document.getElementById('btn-submit-text').innerText = "Simpan Hasil Notulen"; document.getElementById('form-action').value = 'update'; document.getElementById('form-id').value = item.id; document.getElementById('inp-unit').value = item.unit; const d = new Date(item.tanggal); document.getElementById('inp-tanggal').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; document.getElementById('inp-waktu').value = item.waktu || ""; document.getElementById('inp-agenda').value = item.agenda; document.getElementById('inp-peserta').value = item.peserta; document.getElementById('inp-isi').value = item.isi; document.getElementById('inp-tindak').value = item.tindakLanjut; if(item.fileUrl && item.fileUrl.length > 5) { document.getElementById('form-existing-file').value = item.fileUrl; document.getElementById('existing-file-display').classList.remove('hidden'); document.getElementById('link-existing-file').href = item.fileUrl; } else { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; } if(item.dokumentasiJson && item.dokumentasiJson.length > 5) { try { const docs = JSON.parse(item.dokumentasiJson); document.getElementById('form-kept-docs').value = JSON.stringify(docs); renderKeptDocs(docs); } catch(e) {} } else { document.getElementById('form-kept-docs').value = "[]"; renderKeptDocs([]); } }
+        
+        // [MODIFIKASI] Reset Form termasuk input unit lainnya
+        function resetForm() { 
+            document.getElementById('mainForm').reset(); 
+            document.getElementById('form-action').value = 'create'; 
+            document.getElementById('form-id').value = ''; 
+            document.getElementById('existing-file-display').classList.add('hidden'); 
+            document.getElementById('new-docs-container').innerHTML = ''; 
+            document.getElementById('existing-docs-container').innerHTML = ''; 
+            document.getElementById('existing-docs-container').classList.add('hidden'); 
+            document.getElementById('empty-docs-msg').classList.remove('hidden'); 
+            document.getElementById('form-kept-docs').value = "[]"; 
+            
+            // Reset Unit Lainnya
+            document.getElementById('inp-unit').value = currentUser.unit || ""; 
+            handleCreateUnitChange(document.getElementById('inp-unit')); // Trigger change to hide/show
+            
+            document.getElementById('section-recording').classList.add('hidden'); 
+            document.getElementById('inp-isi').removeAttribute('required'); 
+            document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-green-100 dark:bg-emerald-900/50 text-green-600 dark:text-emerald-400 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-plus"></i></span> Buat Jadwal Rapat'; 
+            document.getElementById('btn-submit-text').innerText = "Simpan Jadwal"; 
+        }
+
+        // [MODIFIKASI] Edit Form Handling Unit Lainnya
+        function editNotulen(itemStr) { 
+            const item = JSON.parse(decodeURIComponent(itemStr)); 
+            navTo('create'); 
+            document.getElementById('section-recording').classList.remove('hidden'); 
+            document.getElementById('inp-isi').setAttribute('required', 'true'); 
+            document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-to-square"></i></span> Isi Hasil Rapat'; 
+            document.getElementById('btn-submit-text').innerText = "Simpan Hasil Notulen"; 
+            document.getElementById('form-action').value = 'update'; 
+            document.getElementById('form-id').value = item.id; 
+            
+            // Handle Unit Lainnya in Edit
+            const unitSelect = document.getElementById('inp-unit');
+            const unitInput = document.getElementById('inp-unit-lainnya');
+            
+            // Cek apakah unit tersimpan ada di opsi standar
+            let isStandard = false;
+            for(let i=0; i<unitSelect.options.length; i++) {
+                if(unitSelect.options[i].value === item.unit) {
+                    isStandard = true;
+                    break;
+                }
+            }
+            
+            if(isStandard) {
+                unitSelect.value = item.unit;
+            } else {
+                unitSelect.value = 'Lainnya';
+                unitInput.value = item.unit;
+            }
+            handleCreateUnitChange(unitSelect); // Refresh UI
+
+            const d = new Date(item.tanggal); 
+            document.getElementById('inp-tanggal').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; 
+            document.getElementById('inp-waktu').value = item.waktu || ""; 
+            document.getElementById('inp-agenda').value = item.agenda; 
+            document.getElementById('inp-peserta').value = item.peserta; 
+            document.getElementById('inp-isi').value = item.isi; 
+            document.getElementById('inp-tindak').value = item.tindakLanjut; 
+            if(item.fileUrl && item.fileUrl.length > 5) { document.getElementById('form-existing-file').value = item.fileUrl; document.getElementById('existing-file-display').classList.remove('hidden'); document.getElementById('link-existing-file').href = item.fileUrl; } else { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; } 
+            if(item.dokumentasiJson && item.dokumentasiJson.length > 5) { try { const docs = JSON.parse(item.dokumentasiJson); document.getElementById('form-kept-docs').value = JSON.stringify(docs); renderKeptDocs(docs); } catch(e) {} } else { document.getElementById('form-kept-docs').value = "[]"; renderKeptDocs([]); } 
+        }
         function addDocRow() { document.getElementById('empty-docs-msg').classList.add('hidden'); const container = document.getElementById('new-docs-container'); const rowId = 'doc-' + Date.now(); container.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="doc-row flex gap-2 bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-white/10"><div class="flex-1"><input type="text" placeholder="Deskripsi..." class="doc-desc glass-input w-full rounded-lg px-3 py-2 text-sm"></div><div class="flex items-center gap-2"><input type="file" class="doc-file text-xs text-slate-500" accept="image/*,.pdf"><button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2"><i class="fa-solid fa-xmark"></i></button></div></div>`); }
         function renderKeptDocs(docs) { const c = document.getElementById('existing-docs-container'); c.innerHTML = ''; if(!docs.length) { c.classList.add('hidden'); return; } c.classList.remove('hidden'); docs.forEach((d,i) => c.insertAdjacentHTML('beforeend', `<div class="flex justify-between p-3 bg-white dark:bg-black/20 border rounded-lg"><div class="flex gap-2 overflow-hidden"><i class="fa-solid fa-file-image text-indigo-500 mt-1"></i><div class="truncate"><p class="text-sm font-bold">${d.desc||''}</p><a href="${d.url}" target="_blank" class="text-xs text-blue-500">Lihat File</a></div></div><button type="button" onclick="removeKeptDoc(${i})" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></div>`)); }
         function removeKeptDoc(i) { const k = JSON.parse(document.getElementById('form-kept-docs').value); if(confirm("Hapus?")) { k.splice(i,1); document.getElementById('form-kept-docs').value = JSON.stringify(k); renderKeptDocs(k); } }
         function deleteExistingFile() { if(confirm("Hapus lampiran?")) { document.getElementById('form-existing-file').value = ""; document.getElementById('existing-file-display').classList.add('hidden'); } }
-        async function submitData(e) { e.preventDefault(); toggleLoader(true); const form = document.getElementById('mainForm'); const payload = { action: document.getElementById('form-action').value, id: document.getElementById('form-id').value, unit: form.unit.value, tanggal: form.tanggal.value, waktu: form.waktu.value, agenda: form.agenda.value, peserta: form.peserta.value, isi: form.isi.value, tindakLanjut: form.tindakLanjut.value, pencatatNama: currentUser.name, pencatatEmail: currentUser.email, existingFileUrl: document.getElementById('form-existing-file').value }; const fileInput = document.getElementById('inp-file'); if(fileInput.files.length > 0) { const f = fileInput.files[0]; if(f.size > 5*1024*1024) { toggleLoader(false); alert("File Max 5MB"); return; } payload.fileData = (await toBase64(f)).split(',')[1]; payload.fileName = f.name; payload.mimeType = f.type; } const newDocs = []; for(const row of document.querySelectorAll('.doc-row')) { const fi = row.querySelector('.doc-file'); const di = row.querySelector('.doc-desc'); if(fi.files.length > 0) { const f = fi.files[0]; if(f.size > 3*1024*1024) { toggleLoader(false); alert("Foto Dokumentasi Max 3MB"); return; } newDocs.push({ fileData: (await toBase64(f)).split(',')[1], fileName: f.name, mimeType: f.type, description: di.value }); } } payload.newDokumentasi = newDocs; payload.keptDokumentasi = document.getElementById('form-kept-docs').value; fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); resetForm(); navTo('list'); loadData(); } else alert("Gagal: " + resp.message); }).catch(() => { toggleLoader(false); alert("Error Server"); }); }
+        
+        // [MODIFIKASI] Submit Data Handling Unit Lainnya
+        async function submitData(e) { 
+            e.preventDefault(); 
+            toggleLoader(true); 
+            const form = document.getElementById('mainForm'); 
+            
+            // Logic Ambil Value Unit
+            let finalUnit = form.unit.value;
+            if (finalUnit === 'Lainnya') {
+                finalUnit = document.getElementById('inp-unit-lainnya').value;
+            }
+
+            const payload = { 
+                action: document.getElementById('form-action').value, 
+                id: document.getElementById('form-id').value, 
+                unit: finalUnit, 
+                tanggal: form.tanggal.value, 
+                waktu: form.waktu.value, 
+                agenda: form.agenda.value, 
+                peserta: form.peserta.value, 
+                isi: form.isi.value, 
+                tindakLanjut: form.tindakLanjut.value, 
+                pencatatNama: currentUser.name, 
+                pencatatEmail: currentUser.email, 
+                existingFileUrl: document.getElementById('form-existing-file').value 
+            }; 
+            const fileInput = document.getElementById('inp-file'); 
+            if(fileInput.files.length > 0) { const f = fileInput.files[0]; if(f.size > 5*1024*1024) { toggleLoader(false); alert("File Max 5MB"); return; } payload.fileData = (await toBase64(f)).split(',')[1]; payload.fileName = f.name; payload.mimeType = f.type; } 
+            const newDocs = []; for(const row of document.querySelectorAll('.doc-row')) { const fi = row.querySelector('.doc-file'); const di = row.querySelector('.doc-desc'); if(fi.files.length > 0) { const f = fi.files[0]; if(f.size > 3*1024*1024) { toggleLoader(false); alert("Foto Dokumentasi Max 3MB"); return; } newDocs.push({ fileData: (await toBase64(f)).split(',')[1], fileName: f.name, mimeType: f.type, description: di.value }); } } 
+            payload.newDokumentasi = newDocs; 
+            payload.keptDokumentasi = document.getElementById('form-kept-docs').value; 
+            
+            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); resetForm(); navTo('list'); loadData(); } else alert("Gagal: " + resp.message); }).catch(() => { toggleLoader(false); alert("Error Server"); }); 
+        }
         const toBase64 = file => new Promise((r, j) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => r(reader.result); reader.onerror = j; });
         function loadProfileView() { document.getElementById('prof-img').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=16a34a&color=fff`; document.getElementById('prof-name-disp').innerText = currentUser.name; document.getElementById('prof-email-disp').innerText = currentUser.email; document.getElementById('prof-role-disp').innerText = currentUser.role; document.getElementById('prof-email').value = currentUser.email; document.getElementById('prof-name').value = currentUser.name; document.getElementById('prof-unit').value = currentUser.unit || ""; document.getElementById('prof-phone').value = currentUser.phone || ""; }
         function saveProfile(e) { e.preventDefault(); toggleLoader(true); const newData = { action: 'updateProfile', email: currentUser.email, name: document.getElementById('prof-name').value, unit: document.getElementById('prof-unit').value, phone: document.getElementById('prof-phone').value }; fetch(API_URL, { method: 'POST', body: JSON.stringify(newData) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); currentUser.name = newData.name; currentUser.unit = newData.unit; currentUser.phone = newData.phone; localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); initApp(); loadProfileView(); } else alert("Gagal: " + resp.message); }); }
@@ -723,7 +837,6 @@
         function changeRole(email, newRole) { if(!confirm("Ubah role?")) return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'toggleAdmin', targetEmail: email, newRole: newRole }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') loadUsers(); else alert(resp.message); }); }
         function toggleLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
         
-        // [BARU] Fungsi untuk menangani perubahan unit pada profil
         function handleProfileUnitChange(select) {
             const div = document.getElementById('prof-unit-lainnya-group');
             const input = document.getElementById('prof-unit-lainnya');
@@ -737,10 +850,23 @@
             }
         }
 
-        // [BARU] Fungsi untuk menangani perubahan unit pada Absensi (sama dengan profil)
         function handleAbsensiUnitChange(select) {
             const div = document.getElementById('abs-unit-lainnya-group');
             const input = document.getElementById('abs-unit-lainnya');
+            if (select.value === 'Lainnya') {
+                div.classList.remove('hidden');
+                input.setAttribute('required', 'true');
+            } else {
+                div.classList.add('hidden');
+                input.removeAttribute('required');
+                input.value = "";
+            }
+        }
+
+        // [BARU] Handler untuk Unit di Form Buat Jadwal
+        function handleCreateUnitChange(select) {
+            const div = document.getElementById('inp-unit-lainnya-group');
+            const input = document.getElementById('inp-unit-lainnya');
             if (select.value === 'Lainnya') {
                 div.classList.remove('hidden');
                 input.setAttribute('required', 'true');
