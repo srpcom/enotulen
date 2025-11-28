@@ -544,12 +544,13 @@
             const worksheet = workbook.addWorksheet('Daftar Hadir');
 
             // Atur Lebar Kolom (Width Increased for Date)
+            // [MODIFIKASI] Tambahkan style: { numFmt: '@' } agar kolom HP dianggap Teks
             worksheet.columns = [
                 { header: 'No', key: 'no', width: 5 },
                 { header: 'Waktu Absen', key: 'waktu', width: 25 },
                 { header: 'Nama Peserta', key: 'nama', width: 35 },
-                { header: 'Nomor HP', key: 'hp', width: 25 },
-                { header: 'Unit/Ruangan', key: 'unit', width: 30 }, // Kolom Unit Ditambahkan
+                { header: 'Nomor HP', key: 'hp', width: 25, style: { numFmt: '@' } }, 
+                { header: 'Unit/Ruangan', key: 'unit', width: 30 },
                 { header: 'Tanda Tangan', key: 'ttd', width: 25 } 
             ];
 
@@ -559,7 +560,7 @@
             const titleRow = worksheet.addRow(['DAFTAR HADIR']);
             titleRow.font = { size: 14, bold: true };
             titleRow.alignment = { vertical: 'middle', horizontal: 'center' };
-            worksheet.mergeCells('A1:F1'); // Updated merge range for 6 columns
+            worksheet.mergeCells('A1:F1'); 
 
             // Baris 2: Judul Rapat
             const agendaRow = worksheet.addRow([currentMeetingTitle]);
@@ -589,12 +590,14 @@
             // --- ISI DATA ---
             for (let i = 0; i < currentAttendanceData.length; i++) {
                 const rowData = currentAttendanceData[i];
+                
+                // [MODIFIKASI] Pastikan HP dipaksa jadi String untuk keamanan
                 const row = worksheet.addRow([
                     i + 1,
                     rowData.waktu,
                     rowData.nama,
-                    rowData.hp,
-                    rowData.unit || '-', // Add Unit here
+                    String(rowData.hp || ''), // Force String
+                    rowData.unit || '-', 
                     '' // Placeholder TTD
                 ]);
                 
@@ -610,17 +613,14 @@
                 row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
                 row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
 
-                // Insert Image (Kolom TTD ada di index 5/kolom ke-6)
+                // Insert Image
                 if (rowData.ttdBase64) {
                     const imageId = workbook.addImage({
                         base64: rowData.ttdBase64,
                         extension: 'png',
                     });
 
-                    // [PERBAIKAN POSISI IMAGE]
-                    // tl.col: 5.2 (Kolom ke-6, geser dikit ke kanan biar centered)
-                    // tl.row: row.number - 1 + 0.15 (Index row saat ini, + padding atas dikit)
-                    // ext: ukuran fix biar proporsional
+                    // Posisi Image yang sudah dirapikan sebelumnya
                     worksheet.addImage(imageId, {
                         tl: { col: 5.2, row: row.number - 1 + 0.15 }, 
                         ext: { width: 90, height: 40 },
