@@ -543,22 +543,12 @@
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Daftar Hadir');
 
-            // [MODIFIKASI] Pengaturan Lebar Kolom (Lebih Hemat Tempat)
-            // Waktu: 25 -> 18 (Turun 30%)
-            // HP: 25 -> 15 (Turun 40%)
-            // TTD: 25 -> 15 (Turun 40%)
-            worksheet.columns = [
-                { header: 'No', key: 'no', width: 5 },
-                { header: 'Waktu Absen', key: 'waktu', width: 18 }, 
-                { header: 'Nama Peserta', key: 'nama', width: 35 },
-                { header: 'Nomor HP', key: 'hp', width: 15, style: { numFmt: '@' } }, 
-                { header: 'Unit/Ruangan', key: 'unit', width: 30 },
-                { header: 'Tanda Tangan', key: 'ttd', width: 15 } 
-            ];
-
+            // [PERBAIKAN] Jangan set columns di awal karena akan otomatis membuat header di baris 1
+            // Kita atur lebar kolom secara manual nanti
+            
             // --- HEADER CUSTOM (MERGED CELLS) ---
             
-            // Baris 1: Judul Utama
+            // Baris 1: Judul Utama (Tanpa Header "No" yang otomatis muncul)
             const titleRow = worksheet.addRow(['DAFTAR HADIR']);
             titleRow.font = { size: 14, bold: true };
             titleRow.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -570,8 +560,8 @@
             agendaRow.alignment = { vertical: 'middle', horizontal: 'center' };
             worksheet.mergeCells('A2:F2');
 
-            // Baris 3: Tanggal & Waktu
-            const dateRow = worksheet.addRow([`Pelaksanaan: ${currentMeetingDate} - Pukul ${currentMeetingTime}`]);
+            // Baris 3: Tanggal (Format Baru: Tuban, [Tanggal])
+            const dateRow = worksheet.addRow([`Tuban, ${currentMeetingDate}`]);
             dateRow.font = { size: 11, italic: true };
             dateRow.alignment = { vertical: 'middle', horizontal: 'center' };
             worksheet.mergeCells('A3:F3');
@@ -579,7 +569,7 @@
             // Baris 4: Spasi Kosong
             worksheet.addRow([]);
 
-            // Baris 5: Header Tabel
+            // Baris 5: Header Tabel Manual
             const headerRow = worksheet.addRow(['No', 'Waktu Absen', 'Nama Peserta', 'Nomor HP', 'Unit/Ruangan', 'Tanda Tangan']);
             headerRow.height = 25;
             headerRow.eachCell((cell) => {
@@ -589,11 +579,21 @@
                 cell.alignment = { vertical: 'middle', horizontal: 'center' };
             });
 
+            // [PERBAIKAN] Atur Lebar Kolom Manual (Setelah addRow agar tidak overlap)
+            worksheet.getColumn(1).width = 5;  // No
+            worksheet.getColumn(2).width = 18; // Waktu (30% less)
+            worksheet.getColumn(3).width = 35; // Nama
+            worksheet.getColumn(4).width = 15; // HP (40% less)
+            worksheet.getColumn(5).width = 30; // Unit
+            worksheet.getColumn(6).width = 15; // TTD (40% less)
+            
+            // Set format Text untuk kolom HP (Kolom D / 4)
+            worksheet.getColumn(4).numFmt = '@';
+
             // --- ISI DATA ---
             for (let i = 0; i < currentAttendanceData.length; i++) {
                 const rowData = currentAttendanceData[i];
                 
-                // [MODIFIKASI] Pastikan HP dipaksa jadi String untuk keamanan
                 const row = worksheet.addRow([
                     i + 1,
                     rowData.waktu,
@@ -622,7 +622,7 @@
                         extension: 'png',
                     });
 
-                    // Posisi Image yang sudah dirapikan sebelumnya
+                    // Posisi Image yang sudah dirapikan
                     worksheet.addImage(imageId, {
                         tl: { col: 5.2, row: row.number - 1 + 0.15 }, 
                         ext: { width: 90, height: 40 },
