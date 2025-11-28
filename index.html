@@ -543,15 +543,17 @@
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Daftar Hadir');
 
-            // Atur Lebar Kolom (Width Increased for Date)
-            // [MODIFIKASI] Tambahkan style: { numFmt: '@' } agar kolom HP dianggap Teks
+            // [MODIFIKASI] Pengaturan Lebar Kolom (Lebih Hemat Tempat)
+            // Waktu: 25 -> 18 (Turun 30%)
+            // HP: 25 -> 15 (Turun 40%)
+            // TTD: 25 -> 15 (Turun 40%)
             worksheet.columns = [
                 { header: 'No', key: 'no', width: 5 },
-                { header: 'Waktu Absen', key: 'waktu', width: 25 },
+                { header: 'Waktu Absen', key: 'waktu', width: 18 }, 
                 { header: 'Nama Peserta', key: 'nama', width: 35 },
-                { header: 'Nomor HP', key: 'hp', width: 25, style: { numFmt: '@' } }, 
+                { header: 'Nomor HP', key: 'hp', width: 15, style: { numFmt: '@' } }, 
                 { header: 'Unit/Ruangan', key: 'unit', width: 30 },
-                { header: 'Tanda Tangan', key: 'ttd', width: 25 } 
+                { header: 'Tanda Tangan', key: 'ttd', width: 15 } 
             ];
 
             // --- HEADER CUSTOM (MERGED CELLS) ---
