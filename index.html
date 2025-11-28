@@ -617,9 +617,13 @@
                         extension: 'png',
                     });
 
+                    // [PERBAIKAN POSISI IMAGE]
+                    // tl.col: 5.2 (Kolom ke-6, geser dikit ke kanan biar centered)
+                    // tl.row: row.number - 1 + 0.15 (Index row saat ini, + padding atas dikit)
+                    // ext: ukuran fix biar proporsional
                     worksheet.addImage(imageId, {
-                        tl: { col: 5.1, row: row.number - 1.1 }, // Posisi sedikit geser agar di tengah (Column index is 5 for 6th column)
-                        ext: { width: 80, height: 40 },
+                        tl: { col: 5.2, row: row.number - 1 + 0.15 }, 
+                        ext: { width: 90, height: 40 },
                         editAs: 'oneCell'
                     });
                 }
