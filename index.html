@@ -549,7 +549,7 @@
                 { header: 'Waktu Absen', key: 'waktu', width: 25 },
                 { header: 'Nama Peserta', key: 'nama', width: 35 },
                 { header: 'Nomor HP', key: 'hp', width: 25 },
-                { header: 'Unit/Ruangan', key: 'unit', width: 30 },
+                { header: 'Unit/Ruangan', key: 'unit', width: 30 }, // Kolom Unit Ditambahkan
                 { header: 'Tanda Tangan', key: 'ttd', width: 25 } 
             ];
 
@@ -610,7 +610,7 @@
                 row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
                 row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
 
-                // Insert Image
+                // Insert Image (Kolom TTD ada di index 5/kolom ke-6)
                 if (rowData.ttdBase64) {
                     const imageId = workbook.addImage({
                         base64: rowData.ttdBase64,
