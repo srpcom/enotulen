@@ -40,7 +40,7 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-image 0.5s ease, background-color 0.5s ease; }
         
-        /* [MODIFIKASI] TEMA PRESET BARU */
+        /* TEMA PRESET BARU */
         /* Tema Biru (Default) */
         .theme-blue { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%); background-attachment: fixed; }
         /* Tema Hijau (Eks AM) */
@@ -71,37 +71,27 @@
         .theme-btn.active-theme { ring-width: 2px; ring-offset-width: 2px; ring-color: #64748b; transform: scale(1.1); }
     </style>
 </head>
-<!-- [MODIFIKASI] Hapus class hardcode, biarkan JS mengatur -->
 <body class="h-screen flex overflow-hidden text-slate-800">
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbzj1mWjE3EC2KmtKbaHoz8yNEcnNFffDKXJ2xQg0mAKsSBB9QWGtIfwDw65z0OnnHWV/exec"; 
         const CLIENT_ID = "783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com";
 
-        // [MODIFIKASI] LOGIKA TEMA BARU (Tanpa Waktu)
+        // LOGIKA TEMA BARU (Tanpa Waktu)
         function setTheme(themeName) {
-            // Hapus semua class tema yang mungkin ada
             document.body.classList.remove('theme-blue', 'theme-green', 'theme-yellow');
-            
-            // Tambahkan class tema yang dipilih
             document.body.classList.add(themeName);
-            
-            // Simpan preferensi
             localStorage.setItem('rsud_theme_pref', themeName);
-
-            // Update UI tombol (Visual feedback)
             document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active-theme', 'ring-2', 'ring-slate-400'));
             const activeBtn = document.querySelector(`[data-theme="${themeName}"]`);
             if(activeBtn) activeBtn.classList.add('active-theme', 'ring-2', 'ring-slate-400');
         }
 
         function initTheme() {
-            // Default adalah 'theme-blue' jika belum ada settingan
             const savedTheme = localStorage.getItem('rsud_theme_pref') || 'theme-blue';
             setTheme(savedTheme);
         }
 
-        // Jalankan saat load
         initTheme();
     </script>
 
@@ -189,7 +179,7 @@
                 </div>
             </nav>
             <div class="p-4 border-t border-white/10 bg-white/20 backdrop-blur-sm">
-                <!-- [MODIFIKASI] BUTTON GANTI TEMA -->
+                <!-- BUTTON GANTI TEMA -->
                 <div class="flex flex-col gap-2 mb-4 px-2">
                     <div class="flex justify-between items-center">
                         <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">TEMA APLIKASI</span>
@@ -328,7 +318,7 @@
                             </div>
                             <div class="mb-6"><label class="block text-xs font-bold text-slate-700 uppercase mb-2">Agenda Rapat <span class="text-red-500">*</span></label><input type="text" name="agenda" id="inp-agenda" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm" placeholder="Contoh: Rapat Koordinasi Bulanan"></div>
                             
-                            <!-- [MODIFIKASI] Label diganti dari 'Peserta (Ringkasan)' menjadi 'Pimpinan Rapat' -->
+                            <!-- Label diganti dari 'Peserta (Ringkasan)' menjadi 'Pimpinan Rapat' -->
                             <div class="mb-6"><label class="block text-xs font-bold text-slate-700 uppercase mb-2">Pimpinan Rapat</label><input type="text" name="peserta" id="inp-peserta" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm" placeholder="Nama Pimpinan Rapat..."></div>
                             
                             <div class="mb-6 bg-blue-50/50 p-5 rounded-xl border-2 border-dashed border-blue-200 transition hover:border-blue-400">
@@ -379,6 +369,19 @@
                 <button onclick="downloadAttendanceWithImages()" id="btn-download-att" class="hidden px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 shadow-sm flex items-center gap-2"><i class="fa-solid fa-file-excel"></i> Download Excel (.xlsx)</button>
                 <button onclick="closeAttendanceModal()" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition">Tutup</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL QR CODE [BARU] -->
+    <div id="modal-qrcode" class="hidden fixed inset-0 z-[80] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center animate-fade-in relative">
+            <button onclick="closeQrModal()" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">QR Code Absensi</h3>
+            <p class="text-xs text-slate-500 mb-6">Scan untuk mengisi daftar hadir</p>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 inline-block mb-4">
+                <img id="qr-image" src="" alt="QR Code" class="w-48 h-48 object-contain">
+            </div>
+            <p class="text-[10px] text-slate-400">Gunakan scanner HP atau aplikasi QR Code</p>
         </div>
     </div>
 
@@ -541,6 +544,20 @@
             const baseUrl = window.location.href.split('?')[0];
             const fullUrl = `${baseUrl}?v=absensi&id=${id}`;
             navigator.clipboard.writeText(fullUrl).then(() => { alert("Link Absensi Berhasil Disalin!"); });
+        }
+        
+        // [BARU] Fungsi Show QR Code
+        function showQrCode(id) {
+            const baseUrl = window.location.href.split('?')[0];
+            const fullUrl = `${baseUrl}?v=absensi&id=${id}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}`;
+            
+            document.getElementById('qr-image').src = qrUrl;
+            document.getElementById('modal-qrcode').classList.remove('hidden');
+        }
+
+        function closeQrModal() {
+            document.getElementById('modal-qrcode').classList.add('hidden');
         }
 
         function viewAttendance(id, title, date, time) {
@@ -722,7 +739,7 @@
         function loadData() { if(!currentUser) return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'read', email: currentUser.email }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { allData = resp.data; handleFilter(); renderDashboard(); } else alert(resp.message); }).catch(() => { toggleLoader(false); alert("Error Jaringan"); }); }
         function handleFilter() { const searchVal = document.getElementById('search-input').value.toLowerCase(); const sortVal = document.getElementById('sort-select').value; let temp = allData.filter(item => (item.agenda && item.agenda.toLowerCase().includes(searchVal)) || (item.unit && item.unit.toLowerCase().includes(searchVal))); if (sortVal === 'newest') temp.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)); else if (sortVal === 'oldest') temp.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)); else if (sortVal === 'az') temp.sort((a, b) => a.agenda.localeCompare(b.agenda)); else if (sortVal === 'za') temp.sort((a, b) => b.agenda.localeCompare(a.agenda)); filteredData = temp; currentPage = 1; renderPaginatedTable(); }
         
-        // [MODIFIKASI] Render table dengan tombol hapus
+        // [MODIFIKASI] Render table dengan tombol hapus dan QR Code
         function renderPaginatedTable() { 
             const tbody = document.getElementById('table-body'); 
             const footer = document.getElementById('pagination-footer'); 
@@ -739,8 +756,13 @@
                 let btn = '-'; 
                 if(canEdit) { 
                     btn = `<div class="flex items-center justify-center gap-2">
-                        <button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-green-600 text-lg transition" title="Salin Link Absensi"><i class="fa-solid fa-qrcode"></i></button>
-                        <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}')" class="text-slate-400 hover:text-blue-600 text-lg transition" title="Lihat Daftar Hadir"><i class="fa-solid fa-users"></i></button>
+                        <!-- Button Copy Link Absensi (Icon Copy) -->
+                        <button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-blue-600 text-lg transition" title="Salin Link Absensi"><i class="fa-regular fa-copy"></i></button>
+                        
+                        <!-- Button Lihat QR Code (Icon QR) -->
+                        <button onclick="showQrCode('${item.id}')" class="text-slate-400 hover:text-slate-800 text-lg transition" title="Tampilkan QR Code"><i class="fa-solid fa-qrcode"></i></button>
+                        
+                        <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}')" class="text-slate-400 hover:text-green-600 text-lg transition" title="Lihat Daftar Hadir"><i class="fa-solid fa-users"></i></button>
                         <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 font-bold text-xs border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition">EDIT</button>`;
                     
                     // Tombol Hapus KHUSUS ADMIN
