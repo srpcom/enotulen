@@ -20,7 +20,7 @@
 
     <script>
         tailwind.config = {
-            darkMode: 'class', // Tetap support class dark jika dibutuhkan nanti, tapi default kita kontrol manual
+            darkMode: 'class', 
             theme: {
                 extend: {
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
@@ -40,35 +40,35 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-image 0.5s ease, background-color 0.5s ease; }
         
-        /* TEMA PRESET BARU */
-        /* Tema Biru (Default) */
+        /* TEMA PRESET */
         .theme-blue { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%); background-attachment: fixed; }
-        /* Tema Hijau (Eks AM) */
         .theme-green { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%); background-attachment: fixed; }
-        /* Tema Kuning */
         .theme-yellow { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%); background-attachment: fixed; }
 
-        /* Glass Effects menyesuaikan light mode dominan */
         .glass-card { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); }
         .glass-input { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(0,0,0,0.1); }
-        
         .hidden { display: none !important; }
-        
-        /* Nav Active States - disesuaikan agar netral atau mengikuti tema nanti bisa diupdate via JS, tapi hijau aman untuk RS */
         .nav-item.active { background: rgba(255, 255, 255, 0.5); color: #0f172a; border-right: 3px solid #0f172a; font-weight: 700; }
         
-        /* Signature Canvas Style */
         #signature-pad { 
             touch-action: none; 
             background-color: white; 
             display: block;
             width: 100%;
             height: 100%;
-            border-radius: 0.75rem; /* rounded-xl */
+            border-radius: 0.75rem; 
         }
-
-        /* Indicator Tema Aktif */
         .theme-btn.active-theme { ring-width: 2px; ring-offset-width: 2px; ring-color: #64748b; transform: scale(1.1); }
+
+        /* [MODIFIKASI] Styles Khusus Print untuk Halaman Hasil */
+        @media print {
+            body { background: white !important; }
+            .no-print { display: none !important; }
+            #view-public-result { display: block !important; width: 100%; padding: 0; }
+            .print-container { box-shadow: none !important; border: none !important; }
+            /* Memaksa background color tercetak */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden text-slate-800">
@@ -77,7 +77,6 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbzj1mWjE3EC2KmtKbaHoz8yNEcnNFffDKXJ2xQg0mAKsSBB9QWGtIfwDw65z0OnnHWV/exec"; 
         const CLIENT_ID = "783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com";
 
-        // LOGIKA TEMA BARU (Tanpa Waktu)
         function setTheme(themeName) {
             document.body.classList.remove('theme-blue', 'theme-green', 'theme-yellow');
             document.body.classList.add(themeName);
@@ -91,12 +90,12 @@
             const savedTheme = localStorage.getItem('rsud_theme_pref') || 'theme-blue';
             setTheme(savedTheme);
         }
-
         initTheme();
     </script>
 
     <!-- VIEW: ABSENSI -->
     <div id="app-absensi" class="hidden w-full h-full overflow-y-auto p-4 flex flex-col items-center">
+        <!-- Content Absensi (Sama seperti sebelumnya) -->
         <div class="glass-card max-w-md w-full p-6 rounded-3xl shadow-2xl border-t border-white/60 animate-fade-in my-auto">
             <div class="text-center mb-6">
                 <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-20 h-20 object-contain mx-auto mb-3 drop-shadow-sm" alt="Logo RSUD">
@@ -113,8 +112,6 @@
                     <input type="hidden" id="abs-meeting-id">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Lengkap</label><input type="text" id="abs-nama" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Nama beserta gelar..."></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nomor HP / WhatsApp</label><input type="tel" id="abs-phone" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500" placeholder="08xx / 628xx / +628xx"></div>
-                    
-                    <!-- INPUT UNIT/RUANGAN PADA ABSENSI -->
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Unit / Ruangan</label>
                         <select id="abs-unit" onchange="handleAbsensiUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500">
@@ -132,7 +129,6 @@
                              <input type="text" id="abs-unit-lainnya" placeholder="Tulis nama unit/ruangan..." class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Tanda Tangan Digital</label>
                         <div class="relative border-2 border-dashed border-slate-300 rounded-xl overflow-hidden bg-white touch-none h-48 w-full">
@@ -155,7 +151,114 @@
         <p class="mt-8 text-[10px] text-slate-500">© 2025 E-Notulen RSUD Koesma</p>
     </div>
 
-    <!-- VIEW: ADMIN -->
+    <!-- [MODIFIKASI] VIEW: PUBLIC RESULT (HASIL RAPAT) -->
+    <div id="view-public-result" class="hidden w-full h-full overflow-y-auto p-4 md:p-8 flex justify-center bg-slate-50">
+        <div class="print-container bg-white w-full max-w-4xl p-8 md:p-12 rounded-xl shadow-2xl animate-fade-in relative min-h-screen md:min-h-0">
+            
+            <!-- HEADER KOP SURAT (Simplified) -->
+            <div class="border-b-4 border-slate-700 pb-6 mb-8 flex items-center gap-4 md:gap-6">
+                <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-20 h-20 object-contain">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-slate-800 uppercase tracking-wide">RSUD dr. R. Koesma</h1>
+                    <p class="text-slate-500 text-sm font-medium">Kabupaten Tuban</p>
+                    <p class="text-xs text-slate-400 mt-1">Sistem E-Notulen Terintegrasi</p>
+                </div>
+            </div>
+
+            <!-- LOADING STATE -->
+            <div id="result-loading" class="text-center py-12">
+                <div class="w-12 h-12 rounded-full border-4 border-slate-200 border-t-slate-600 animate-spin mx-auto mb-4"></div>
+                <p class="text-slate-500 text-sm">Mengambil Data Notulen...</p>
+            </div>
+
+            <!-- ERROR STATE -->
+            <div id="result-error" class="hidden text-center py-12">
+                <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500"><i class="fa-solid fa-triangle-exclamation text-2xl"></i></div>
+                <h3 class="text-xl font-bold text-slate-800">Data Tidak Ditemukan</h3>
+                <p class="text-slate-500 text-sm mt-1">Notulen mungkin belum diisi atau ID salah.</p>
+            </div>
+
+            <!-- CONTENT RESULT -->
+            <div id="result-content" class="hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-xl font-bold text-slate-800 uppercase underline underline-offset-4 decoration-2">NOTULENSI RAPAT</h2>
+                </div>
+
+                <!-- METADATA -->
+                <table class="w-full text-sm text-slate-700 mb-8 border-collapse">
+                    <tr class="border-b border-slate-100">
+                        <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Agenda Rapat</td>
+                        <td class="py-2 pl-4" id="res-agenda">...</td>
+                    </tr>
+                    <tr class="border-b border-slate-100">
+                        <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Hari / Tanggal</td>
+                        <td class="py-2 pl-4" id="res-tanggal">...</td>
+                    </tr>
+                    <tr class="border-b border-slate-100">
+                        <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Waktu</td>
+                        <td class="py-2 pl-4" id="res-waktu">...</td>
+                    </tr>
+                    <tr class="border-b border-slate-100">
+                        <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Unit Penyelenggara</td>
+                        <td class="py-2 pl-4" id="res-unit">...</td>
+                    </tr>
+                    <tr class="border-b border-slate-100">
+                        <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Pimpinan Rapat</td>
+                        <td class="py-2 pl-4" id="res-pimpinan">...</td>
+                    </tr>
+                </table>
+
+                <!-- ISI -->
+                <div class="mb-8">
+                    <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">A. Pembahasan</h3>
+                    <div id="res-isi" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pl-2 border-l-2 border-slate-200">
+                        ...
+                    </div>
+                </div>
+
+                <!-- TINDAK LANJUT -->
+                <div class="mb-8">
+                    <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">B. Rencana Tindak Lanjut</h3>
+                    <div id="res-tindak" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pl-2 border-l-2 border-slate-200 bg-green-50/50 p-2 rounded-r-lg">
+                        ...
+                    </div>
+                </div>
+
+                <!-- DOKUMENTASI -->
+                <div class="mb-8 break-inside-avoid">
+                    <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">C. Dokumentasi & Lampiran</h3>
+                    
+                    <!-- Grid Foto -->
+                    <div id="res-gallery" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4"></div>
+                    
+                    <!-- List Link -->
+                    <div id="res-links" class="space-y-2"></div>
+                    
+                    <p id="res-no-docs" class="text-xs text-slate-400 italic hidden">Tidak ada dokumentasi terlampir.</p>
+                </div>
+
+                <!-- FOOTER / TTD AREA (Visual Only) -->
+                <div class="mt-12 pt-8 border-t border-slate-200 flex justify-end break-inside-avoid">
+                    <div class="text-center w-48">
+                        <p class="text-xs text-slate-500 mb-16">Mengetahui,</p>
+                        <p class="text-sm font-bold text-slate-800 underline" id="res-ttd-nama">Pimpinan Rapat</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FLOATING ACTIONS (Hidden on Print) -->
+            <div class="no-print fixed bottom-6 right-6 flex flex-col gap-3">
+                <button onclick="window.print()" class="bg-blue-600 text-white w-12 h-12 rounded-full shadow-lg hover:bg-blue-700 transition flex items-center justify-center text-lg" title="Cetak / Simpan PDF">
+                    <i class="fa-solid fa-print"></i>
+                </button>
+                <a href="index.html" class="bg-slate-600 text-white w-12 h-12 rounded-full shadow-lg hover:bg-slate-700 transition flex items-center justify-center text-lg" title="Ke Halaman Utama">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: ADMIN (Existing) -->
     <div id="app-admin" class="flex w-full h-full overflow-hidden">
         <aside id="sidebar" class="hidden fixed md:relative z-50 w-72 h-full flex-col border-r border-white/20 shadow-2xl transition-transform duration-300 md:translate-x-0 -translate-x-full glass-card">
             <div class="h-20 flex items-center px-8 border-b border-white/10">
@@ -231,7 +334,7 @@
                         <!-- Card Arsip Notulen -->
                         <div onclick="navTo('list')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden"><div class="flex items-center gap-5 relative z-10"><div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:rotate-6 transition"><i class="fa-solid fa-folder-open text-2xl"></i></div><div><h3 class="font-bold text-xl text-slate-800">Arsip Notulen</h3><p class="text-sm text-slate-500 mt-1">Anda memiliki <span id="dash-total-count" class="font-bold text-blue-500">...</span> dokumen tersimpan.</p></div></div></div>
                         
-                        <!-- Card Booking Ruang Rapat (BARU) -->
+                        <!-- Card Booking Ruang Rapat -->
                         <div onclick="window.open('https://sibora.tubankab.cloud/', '_blank')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden">
                             <div class="absolute right-0 top-0 w-32 h-32 bg-red-400/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
                             <div class="flex items-center gap-5 relative z-10">
@@ -333,7 +436,7 @@
                                     <div class="flex items-center justify-between mb-4">
                                         <label class="block text-xs font-bold text-slate-700 uppercase"><i class="fa-solid fa-images mr-1"></i> Dokumentasi Kegiatan</label>
                                         <div class="flex gap-2">
-                                            <!-- Tombol Tambah URL [BARU] -->
+                                            <!-- Tombol Tambah URL -->
                                             <button type="button" onclick="addUrlRow()" class="text-xs bg-orange-50 text-orange-600 px-3 py-1.5 rounded-lg font-bold hover:bg-orange-100 transition border border-orange-200"><i class="fa-solid fa-link mr-1"></i> Tambah Link/URL</button>
                                             <!-- Tombol Tambah Dokumen -->
                                             <button type="button" onclick="addDocRow()" class="text-xs bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-100 transition border border-indigo-200"><i class="fa-solid fa-plus mr-1"></i> Tambah Dokumen</button>
@@ -443,12 +546,18 @@
         const meetingId = urlParams.get('id');
 
         if (mode === 'absensi' && meetingId) {
+            // VIEW ABSENSI
             const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.add('hidden');
             const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.remove('hidden');
             loadMeetingInfo(meetingId); 
-            // Delay resize agar container render dulu
             setTimeout(resizeCanvas, 300);
+        } else if (mode === 'result' && meetingId) {
+            // [MODIFIKASI] VIEW RESULT (HASIL NOTULEN)
+            const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.add('hidden');
+            const resultApp = document.getElementById('view-public-result'); if(resultApp) resultApp.classList.remove('hidden');
+            loadMeetingResult(meetingId);
         } else {
+            // VIEW ADMIN
             const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.add('hidden');
             const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.remove('hidden');
             const googleBtn = document.getElementById('g_id_onload'); if(googleBtn) googleBtn.setAttribute('data-client_id', CLIENT_ID);
@@ -497,6 +606,85 @@
             };
 
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { document.getElementById('absensi-content').classList.add('hidden'); document.getElementById('absensi-success').classList.remove('hidden'); } else { alert("Gagal: " + resp.message); } }).catch(err => { toggleLoader(false); alert("Terjadi kesalahan sistem."); });
+        }
+
+        // --- 3.5 [MODIFIKASI] RESULT LOGIC ---
+        function loadMeetingResult(id) {
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getMeetingInfo', id: id }) })
+            .then(res => res.json())
+            .then(resp => {
+                document.getElementById('result-loading').classList.add('hidden');
+                if(resp.status === 'success') {
+                    document.getElementById('result-content').classList.remove('hidden');
+                    const d = resp.data;
+                    document.getElementById('res-agenda').textContent = d.agenda;
+                    document.getElementById('res-tanggal').textContent = d.tanggal;
+                    document.getElementById('res-waktu').textContent = d.waktu;
+                    document.getElementById('res-unit').textContent = d.unit || '-';
+                    document.getElementById('res-pimpinan').textContent = d.pimpinan || '-';
+                    document.getElementById('res-ttd-nama').textContent = d.pimpinan || 'Pimpinan Rapat';
+                    
+                    document.getElementById('res-isi').textContent = d.isi || 'Belum ada pembahasan.';
+                    document.getElementById('res-tindak').textContent = d.tindakLanjut || '-';
+
+                    // Parse Documentation
+                    let docs = [];
+                    try { docs = JSON.parse(d.dokumentasi); } catch(e) {}
+                    
+                    const gallery = document.getElementById('res-gallery');
+                    const links = document.getElementById('res-links');
+                    gallery.innerHTML = ''; links.innerHTML = '';
+
+                    let hasDocs = false;
+                    docs.forEach(item => {
+                        const isDrive = item.url && item.url.includes('drive.google.com');
+                        if (isDrive) {
+                            // Render Image Thumbnail
+                            // Convert drive view link to thumbnail/preview link if possible, or just link
+                            // Since we can't easily get thumbnail without Auth, we use standard placeholder or generic
+                            // Here we assume standard file link logic
+                            let thumb = item.url; // In simple logic
+                            // Try to format drive link for image preview if it's an image
+                            if(item.name.match(/\.(jpeg|jpg|gif|png)$/i)) {
+                                const fileId = item.url.match(/\/d\/(.+?)\//);
+                                if(fileId) thumb = `https://lh3.googleusercontent.com/d/${fileId[1]}=s400`;
+                            }
+                            
+                            gallery.insertAdjacentHTML('beforeend', `
+                                <a href="${item.url}" target="_blank" class="block group relative overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                                    <div class="h-32 bg-cover bg-center" style="background-image: url('${thumb}');">
+                                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition"></div>
+                                    </div>
+                                    <div class="p-2 text-[10px] text-center font-bold text-slate-600 truncate">${item.desc || item.name}</div>
+                                </a>
+                            `);
+                            hasDocs = true;
+                        } else {
+                            // Render Web Link
+                            links.insertAdjacentHTML('beforeend', `
+                                <a href="${item.url}" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100 transition">
+                                    <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-blue-500 shadow-sm"><i class="fa-solid fa-link"></i></div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold truncate">${item.desc}</p>
+                                        <p class="text-[10px] text-blue-400 truncate">${item.url}</p>
+                                    </div>
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            `);
+                            hasDocs = true;
+                        }
+                    });
+
+                    if(!hasDocs) document.getElementById('res-no-docs').classList.remove('hidden');
+
+                } else { 
+                    document.getElementById('result-error').classList.remove('hidden');
+                }
+            })
+            .catch(err => { 
+                document.getElementById('result-loading').classList.add('hidden');
+                document.getElementById('result-error').classList.remove('hidden');
+            });
         }
 
         // --- 4. ADMIN LOGIC ---
@@ -561,6 +749,13 @@
             const baseUrl = window.location.href.split('?')[0];
             const fullUrl = `${baseUrl}?v=absensi&id=${id}`;
             navigator.clipboard.writeText(fullUrl).then(() => { alert("Link Absensi Berhasil Disalin!"); });
+        }
+
+        // [BARU] Fungsi Copy Link Result
+        function copyResultLink(id) {
+            const baseUrl = window.location.href.split('?')[0];
+            const fullUrl = `${baseUrl}?v=result&id=${id}`;
+            navigator.clipboard.writeText(fullUrl).then(() => { alert("Link Hasil Notulen Berhasil Disalin!"); });
         }
         
         // [BARU] Fungsi Show QR Code (Resolusi Tinggi)
@@ -774,6 +969,9 @@
                 let btn = '-'; 
                 if(canEdit) { 
                     btn = `<div class="flex items-center justify-center gap-2">
+                        <!-- Button Copy Link Result (Share Icon) [BARU] -->
+                        <button onclick="copyResultLink('${item.id}')" class="text-slate-400 hover:text-indigo-600 text-lg transition" title="Bagikan Hasil Notulen"><i class="fa-solid fa-share-nodes"></i></button>
+
                         <!-- Button Copy Link Absensi (Icon Copy) -->
                         <button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-blue-600 text-lg transition" title="Salin Link Absensi"><i class="fa-regular fa-copy"></i></button>
                         
