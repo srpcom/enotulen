@@ -50,36 +50,16 @@
         .glass-input:disabled { background: rgba(200, 200, 200, 0.3); color: #64748b; cursor: not-allowed; border: 1px solid rgba(0,0,0,0.05); }
         .hidden { display: none !important; }
         
-        /* [MODIFIKASI] Nav Item Active State dengan Efek Blok/Fill Sesuai Tema */
-        
-        /* Reset border lama */
+        /* Nav Item Active State */
         .nav-item.active { 
             border-right: none !important; 
-            font-weight: 800 !important; /* Lebih tebal sedikit */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Shadow halus */
-            transform: scale(1.02); /* Sedikit membesar agar menonjol */
+            font-weight: 800 !important; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+            transform: scale(1.02); 
         }
-
-        /* 1. Tema Biru (Default) */
-        body.theme-blue .nav-item.active {
-            background: linear-gradient(to right, #dbeafe, #eff6ff); /* blue-100 */
-            color: #1e40af; /* blue-800 */
-            border: 1px solid #bfdbfe; /* blue-200 */
-        }
-
-        /* 2. Tema Hijau */
-        body.theme-green .nav-item.active {
-            background: linear-gradient(to right, #dcfce7, #f0fdf4); /* green-100 */
-            color: #166534; /* green-800 */
-            border: 1px solid #bbf7d0; /* green-200 */
-        }
-
-        /* 3. Tema Kuning */
-        body.theme-yellow .nav-item.active {
-            background: linear-gradient(to right, #fef3c7, #fffbeb); /* amber-100 */
-            color: #92400e; /* amber-800 */
-            border: 1px solid #fde68a; /* amber-200 */
-        }
+        body.theme-blue .nav-item.active { background: linear-gradient(to right, #dbeafe, #eff6ff); color: #1e40af; border: 1px solid #bfdbfe; }
+        body.theme-green .nav-item.active { background: linear-gradient(to right, #dcfce7, #f0fdf4); color: #166534; border: 1px solid #bbf7d0; }
+        body.theme-yellow .nav-item.active { background: linear-gradient(to right, #fef3c7, #fffbeb); color: #92400e; border: 1px solid #fde68a; }
         
         #signature-pad { 
             touch-action: none; 
@@ -91,12 +71,58 @@
         }
         .theme-btn.active-theme { ring-width: 2px; ring-offset-width: 2px; ring-color: #64748b; transform: scale(1.1); }
 
+        /* [MODIFIKASI] A4 Paper Style & Print Logic */
+        .a4-paper {
+            width: 210mm;
+            min-height: 297mm; /* Tinggi minimal A4 */
+            background: white;
+            margin: 0 auto;
+            padding: 20mm; /* Margin standar dokumen */
+            box-shadow: 0 0 20px rgba(0,0,0,0.15); /* Shadow lebih tebal agar terlihat seperti kertas */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Responsif untuk layar kecil (HP) */
+        @media (max-width: 215mm) {
+            .a4-paper {
+                width: 100%;
+                min-height: auto;
+                padding: 1.5rem;
+                box-shadow: none;
+            }
+        }
+
         /* Styles Khusus Print */
         @media print {
-            body { background: white !important; }
+            @page {
+                size: A4;
+                margin: 0; /* Hilangkan margin browser, kita pakai padding .a4-paper */
+            }
+            body { 
+                background: white !important; 
+                margin: 0;
+                padding: 0;
+            }
             .no-print { display: none !important; }
-            #view-public-result { display: block !important; width: 100%; padding: 0; }
-            .print-container { box-shadow: none !important; border: none !important; }
+            #view-public-result { 
+                display: block !important; 
+                width: 100%; 
+                height: auto !important; 
+                padding: 0 !important; 
+                overflow: visible !important;
+                background: white !important;
+            }
+            .a4-paper { 
+                box-shadow: none !important; 
+                border: none !important; 
+                width: 100% !important;
+                min-height: 296mm !important; /* Paksa tinggi saat print */
+                margin: 0 !important;
+                padding: 20mm !important; /* Kembalikan padding kertas */
+            }
+            /* Paksa background color tercetak */
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
@@ -180,81 +206,86 @@
         <p class="mt-8 text-[10px] text-slate-500">© 2025 E-Notulen RSUD Koesma</p>
     </div>
 
-    <!-- VIEW: PUBLIC RESULT (HASIL RAPAT) -->
-    <div id="view-public-result" class="hidden w-full h-full overflow-y-auto p-4 md:p-8 flex justify-center bg-slate-50">
-        <div class="print-container bg-white w-full max-w-4xl p-8 md:p-12 rounded-xl shadow-2xl animate-fade-in relative min-h-screen md:min-h-0">
+    <!-- [MODIFIKASI] VIEW: PUBLIC RESULT (HASIL RAPAT) - FORMAT A4 -->
+    <div id="view-public-result" class="hidden w-full h-full overflow-y-auto p-0 md:p-8 flex justify-center bg-slate-200/50">
+        <!-- Container A4 Class Applied Here -->
+        <div class="a4-paper animate-fade-in relative">
             
-            <div class="border-b-4 border-slate-700 pb-6 mb-8 flex items-center gap-4 md:gap-6">
-                <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-20 h-20 object-contain">
-                <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-slate-800 uppercase tracking-wide">RSUD dr. R. Koesma</h1>
-                    <p class="text-slate-500 text-sm font-medium">Kabupaten Tuban</p>
-                    <p class="text-xs text-slate-400 mt-1">Sistem E-Notulen Terintegrasi</p>
-                </div>
-            </div>
-
-            <div id="result-loading" class="text-center py-12">
-                <div class="w-12 h-12 rounded-full border-4 border-slate-200 border-t-slate-600 animate-spin mx-auto mb-4"></div>
-                <p class="text-slate-500 text-sm">Mengambil Data Notulen...</p>
-            </div>
-
-            <div id="result-error" class="hidden text-center py-12">
-                <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500"><i class="fa-solid fa-triangle-exclamation text-2xl"></i></div>
-                <h3 class="text-xl font-bold text-slate-800">Data Tidak Ditemukan</h3>
-                <p class="text-slate-500 text-sm mt-1">Notulen mungkin belum diisi atau ID salah.</p>
-            </div>
-
-            <div id="result-content" class="hidden">
-                <input type="hidden" id="res-meeting-id">
-                <div class="text-center mb-8">
-                    <h2 class="text-xl font-bold text-slate-800 uppercase underline underline-offset-4 decoration-2">NOTULENSI RAPAT</h2>
-                </div>
-
-                <table class="w-full text-sm text-slate-700 mb-8 border-collapse">
-                    <tr class="border-b border-slate-100">
-                        <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Agenda Rapat</td>
-                        <td class="py-2 pl-4" id="res-agenda">...</td>
-                    </tr>
-                    <tr class="border-b border-slate-100">
-                        <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Hari / Tanggal</td>
-                        <td class="py-2 pl-4" id="res-tanggal">...</td>
-                    </tr>
-                    <tr class="border-b border-slate-100">
-                        <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Waktu</td>
-                        <td class="py-2 pl-4" id="res-waktu">...</td>
-                    </tr>
-                    <tr class="border-b border-slate-100">
-                        <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Unit Penyelenggara</td>
-                        <td class="py-2 pl-4" id="res-unit">...</td>
-                    </tr>
-                    <tr class="border-b border-slate-100">
-                        <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Pimpinan Rapat</td>
-                        <td class="py-2 pl-4" id="res-pimpinan">...</td>
-                    </tr>
-                </table>
-
-                <div class="mb-8">
-                    <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">A. Pembahasan</h3>
-                    <div id="res-isi" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pl-2 border-l-2 border-slate-200">...</div>
-                </div>
-
-                <div class="mb-8">
-                    <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">B. Rencana Tindak Lanjut</h3>
-                    <div id="res-tindak" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pl-2 border-l-2 border-slate-200 bg-green-50/50 p-2 rounded-r-lg">...</div>
-                </div>
-
-                <div class="mb-8 break-inside-avoid">
-                    <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">C. Dokumentasi & Lampiran</h3>
-                    <div id="res-gallery" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4"></div>
-                    <div id="res-links" class="space-y-2"></div>
-                    <p id="res-no-docs" class="text-xs text-slate-400 italic hidden">Tidak ada dokumentasi terlampir.</p>
-                </div>
-
-                <div class="mt-12 pt-8 border-t border-slate-200 flex justify-end break-inside-avoid">
-                    <div class="text-center w-48">
-                        <p class="text-xs text-slate-500 mb-16">Mengetahui,</p>
-                        <p class="text-sm font-bold text-slate-800 underline" id="res-ttd-nama">Pimpinan Rapat</p>
+            <!-- Konten yang akan "push" footer ke bawah -->
+            <div class="flex-1">
+                <div class="border-b-4 border-slate-700 pb-6 mb-8 flex items-center gap-4 md:gap-6">
+                    <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-20 h-20 object-contain">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-slate-800 uppercase tracking-wide">RSUD dr. R. Koesma</h1>
+                        <p class="text-slate-500 text-sm font-medium">Kabupaten Tuban</p>
+                        <p class="text-xs text-slate-400 mt-1">Sistem E-Notulen Terintegrasi</p>
                     </div>
+                </div>
+
+                <div id="result-loading" class="text-center py-12">
+                    <div class="w-12 h-12 rounded-full border-4 border-slate-200 border-t-slate-600 animate-spin mx-auto mb-4"></div>
+                    <p class="text-slate-500 text-sm">Mengambil Data Notulen...</p>
+                </div>
+
+                <div id="result-error" class="hidden text-center py-12">
+                    <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500"><i class="fa-solid fa-triangle-exclamation text-2xl"></i></div>
+                    <h3 class="text-xl font-bold text-slate-800">Data Tidak Ditemukan</h3>
+                    <p class="text-slate-500 text-sm mt-1">Notulen mungkin belum diisi atau ID salah.</p>
+                </div>
+
+                <div id="result-content" class="hidden">
+                    <input type="hidden" id="res-meeting-id">
+                    <div class="text-center mb-8">
+                        <h2 class="text-xl font-bold text-slate-800 uppercase underline underline-offset-4 decoration-2">NOTULENSI RAPAT</h2>
+                    </div>
+
+                    <table class="w-full text-sm text-slate-700 mb-8 border-collapse">
+                        <tr class="border-b border-slate-100">
+                            <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Agenda Rapat</td>
+                            <td class="py-2 pl-4" id="res-agenda">...</td>
+                        </tr>
+                        <tr class="border-b border-slate-100">
+                            <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Hari / Tanggal</td>
+                            <td class="py-2 pl-4" id="res-tanggal">...</td>
+                        </tr>
+                        <tr class="border-b border-slate-100">
+                            <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Waktu</td>
+                            <td class="py-2 pl-4" id="res-waktu">...</td>
+                        </tr>
+                        <tr class="border-b border-slate-100">
+                            <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Unit Penyelenggara</td>
+                            <td class="py-2 pl-4" id="res-unit">...</td>
+                        </tr>
+                        <tr class="border-b border-slate-100">
+                            <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Pimpinan Rapat</td>
+                            <td class="py-2 pl-4" id="res-pimpinan">...</td>
+                        </tr>
+                    </table>
+
+                    <div class="mb-8">
+                        <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">A. Pembahasan</h3>
+                        <div id="res-isi" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pl-2 border-l-2 border-slate-200">...</div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">B. Rencana Tindak Lanjut</h3>
+                        <div id="res-tindak" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pl-2 border-l-2 border-slate-200 bg-green-50/50 p-2 rounded-r-lg">...</div>
+                    </div>
+
+                    <div class="mb-8 break-inside-avoid">
+                        <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">C. Dokumentasi & Lampiran</h3>
+                        <div id="res-gallery" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4"></div>
+                        <div id="res-links" class="space-y-2"></div>
+                        <p id="res-no-docs" class="text-xs text-slate-400 italic hidden">Tidak ada dokumentasi terlampir.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOOTER / TTD AREA (Menggunakan mt-auto agar selalu di bawah) -->
+            <div class="mt-auto pt-16 flex justify-end break-inside-avoid">
+                <div class="text-center w-48">
+                    <p class="text-xs text-slate-500 mb-16">Mengetahui,</p>
+                    <p class="text-sm font-bold text-slate-800 underline" id="res-ttd-nama">Pimpinan Rapat</p>
                 </div>
             </div>
 
@@ -1037,6 +1068,7 @@
             }
         }
 
+        // [BARU] Handler untuk Unit di Form Buat Jadwal
         function handleCreateUnitChange(select) {
             const div = document.getElementById('inp-unit-lainnya-group');
             const input = document.getElementById('inp-unit-lainnya');
