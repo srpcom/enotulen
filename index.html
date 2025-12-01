@@ -77,7 +77,7 @@
         }
         .theme-btn.active-theme { ring-width: 2px; ring-offset-width: 2px; ring-color: #64748b; transform: scale(1.1); }
 
-        /* A4 PAPER STYLING */
+        /* A4 PAPER STYLING - SCREEN MODE */
         .a4-paper {
             width: 210mm;
             min-height: 297mm; 
@@ -86,13 +86,21 @@
             padding: 20mm; 
             box-shadow: 0 0 25px rgba(0,0,0,0.1); 
             position: relative;
+            /* Menggunakan flex di layar agar footer bisa di bawah jika konten sedikit */
+            display: flex;
+            flex-direction: column; 
+        }
+
+        /* WRAPPER KONTEN AGAR FLEX BEKERJA BAIK DI LAYAR */
+        .paper-content-wrapper {
+            flex: 1; /* Mengisi ruang kosong */
             display: flex;
             flex-direction: column;
         }
 
         /* HEADER DOUBLE LINE (Kop Surat Style) */
         .header-double-line {
-            border-bottom: 4px double #1e293b; /* Garis ganda tebal */
+            border-bottom: 4px double #1e293b; 
             padding-bottom: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -115,7 +123,7 @@
         }
         .ql-editor { min-height: 150px; }
         
-        /* Rich Text Content Styling in Result View */
+        /* Rich Text Content Styling */
         .rich-text-content ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 0.5em; }
         .rich-text-content ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 0.5em; }
         .rich-text-content p { margin-bottom: 0.5em; text-align: justify; }
@@ -127,11 +135,11 @@
             .a4-paper { width: 100%; min-height: auto; padding: 1.5rem; box-shadow: none; }
         }
 
-        /* PRINT CONFIGURATION (A4 DEFAULT) */
+        /* === PRINT CONFIGURATION (FIXED) === */
         @media print {
             @page { 
-                size: A4 portrait; /* Force A4 Portrait */
-                margin: 0; /* Remove browser default margins */
+                size: A4 portrait;
+                margin: 0; /* Browser margin 0, kita atur padding di .a4-paper */
             }
             body { 
                 background: white !important; 
@@ -140,44 +148,57 @@
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important; 
             }
-            html, body { height: 100%; }
             
-            .no-print { display: none !important; }
+            /* Sembunyikan elemen UI */
+            .no-print, #sidebar, header, .ql-toolbar, #btn-broadcast { display: none !important; }
             
+            /* Reset Container Utama */
             #view-public-result { 
                 display: block !important; 
-                width: 100%; 
+                position: static !important;
+                width: 100% !important; 
                 height: auto !important; 
                 overflow: visible !important; 
                 background: white !important; 
-                position: static !important;
                 padding: 0 !important;
+                margin: 0 !important;
             }
             
+            /* Reset A4 Paper agar menjadi BLOCK biasa (PENTING untuk pagination) */
             .a4-paper { 
-                width: 210mm !important;
-                min-height: 297mm !important;
+                display: block !important; /* JANGAN FLEX saat print */
+                width: 100% !important;
+                max-width: 210mm !important; /* Pastikan tidak melebar */
+                min-height: auto !important;
+                height: auto !important;
                 margin: 0 auto !important;
-                padding: 20mm !important; /* Standard A4 padding */
+                padding: 20mm !important; 
                 box-shadow: none !important; 
                 border: none !important; 
-                page-break-after: always;
             }
 
-            /* Make text black for printing */
-            .text-slate-500, .text-slate-400, .text-slate-600, .text-slate-700 { 
-                color: #000 !important; 
+            /* Reset Wrapper Konten */
+            .paper-content-wrapper {
+                display: block !important;
+                flex: none !important;
             }
-            
-            /* Ensure background colors print */
+
+            /* Signature agar tidak error di flex */
+            .signature-section {
+                margin-top: 30px !important;
+                page-break-inside: avoid !important;
+            }
+
+            /* Pastikan background warna tercetak */
             .bg-slate-50 { background-color: #f8fafc !important; }
             .bg-green-50\/50 { background-color: #f0fdf4 !important; }
             
-            /* Header adjustments for print */
-            .header-double-line { border-bottom: 2px solid #000 !important; padding-bottom: 15px; margin-bottom: 20px; }
+            /* Cegah pemotongan elemen penting */
+            tr, img, .break-inside-avoid { page-break-inside: avoid; }
+            h1, h2, h3, h4 { page-break-after: avoid; }
             
-            /* Avoid page breaks inside elements */
-            tr, .break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
+            /* Header adjustments */
+            .header-double-line { border-bottom: 2px solid #000 !important; }
         }
     </style>
 </head>
@@ -290,7 +311,10 @@
     <!-- VIEW: PUBLIC RESULT (HASIL RAPAT) - FORMAT A4 -->
     <div id="view-public-result" class="hidden w-full h-full overflow-y-auto p-0 md:p-8 flex justify-center bg-slate-200/50">
         <div class="a4-paper animate-fade-in relative">
-            <div class="flex-1">
+            
+            <!-- Wrapper Utama Konten -->
+            <div class="paper-content-wrapper">
+                
                 <!-- Header Kop Surat Style -->
                 <div class="header-double-line flex items-center gap-6">
                     <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-24 h-24 object-contain">
@@ -320,7 +344,7 @@
                     </div>
 
                     <!-- Informasi Rapat Table Style -->
-                    <table class="w-full text-sm text-slate-800 mb-8 border border-slate-300">
+                    <table class="w-full text-sm text-slate-800 mb-8 border border-slate-300 break-inside-avoid">
                         <tr class="border-b border-slate-200">
                             <td class="w-48 py-3 px-4 font-bold bg-slate-50 border-r border-slate-200 uppercase text-xs tracking-wider">Agenda Rapat</td>
                             <td class="py-3 px-4" id="res-agenda">...</td>
@@ -363,7 +387,8 @@
             </div>
 
             <!-- Tanda Tangan Section -->
-            <div class="mt-auto pt-16 flex justify-end break-inside-avoid page-break-inside-avoid">
+            <!-- mt-auto dihapus, diganti class khusus. Di layar menggunakan margin-top auto dari flex parent -->
+            <div class="signature-section mt-auto pt-16 flex justify-end break-inside-avoid page-break-inside-avoid">
                 <div class="text-center w-64">
                     <p class="text-sm text-slate-600 mb-20">Mengetahui,</p>
                     <p class="text-sm font-bold text-slate-900 underline underline-offset-4" id="res-ttd-nama">Pimpinan Rapat</p>
