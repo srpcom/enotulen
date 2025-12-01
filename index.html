@@ -74,16 +74,24 @@
         }
         .theme-btn.active-theme { ring-width: 2px; ring-offset-width: 2px; ring-color: #64748b; transform: scale(1.1); }
 
+        /* A4 PAPER STYLING */
         .a4-paper {
             width: 210mm;
             min-height: 297mm; 
             background: white;
             margin: 0 auto;
             padding: 20mm; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.15); 
+            box-shadow: 0 0 25px rgba(0,0,0,0.1); 
             position: relative;
             display: flex;
             flex-direction: column;
+        }
+
+        /* HEADER DOUBLE LINE (Kop Surat Style) */
+        .header-double-line {
+            border-bottom: 4px double #1e293b; /* Garis ganda tebal */
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         /* QUILL CUSTOM STYLES */
@@ -100,29 +108,73 @@
             border-bottom-left-radius: 0.75rem;
             border-bottom-right-radius: 0.75rem;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
-            font-size: 0.875rem !important; /* text-sm equivalent */
+            font-size: 0.875rem !important;
         }
-        .ql-editor {
-            min-height: 150px;
-        }
-        /* Style list inside result view */
-        .rich-text-content ul { list-style-type: disc; margin-left: 1.5em; }
-        .rich-text-content ol { list-style-type: decimal; margin-left: 1.5em; }
-        .rich-text-content p { margin-bottom: 0.5em; }
-        .rich-text-content strong { font-weight: 700; }
+        .ql-editor { min-height: 150px; }
+        
+        /* Rich Text Content Styling in Result View */
+        .rich-text-content ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 0.5em; }
+        .rich-text-content ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 0.5em; }
+        .rich-text-content p { margin-bottom: 0.5em; text-align: justify; }
+        .rich-text-content strong { font-weight: 700; color: #0f172a; }
         .rich-text-content em { font-style: italic; }
+        .rich-text-content h1, .rich-text-content h2, .rich-text-content h3 { font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; }
 
         @media (max-width: 215mm) {
             .a4-paper { width: 100%; min-height: auto; padding: 1.5rem; box-shadow: none; }
         }
 
+        /* PRINT CONFIGURATION (A4 DEFAULT) */
         @media print {
-            @page { size: A4; margin: 0; }
-            body { background: white !important; margin: 0; padding: 0; }
+            @page { 
+                size: A4 portrait; /* Force A4 Portrait */
+                margin: 0; /* Remove browser default margins */
+            }
+            body { 
+                background: white !important; 
+                margin: 0; 
+                padding: 0; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
+            html, body { height: 100%; }
+            
             .no-print { display: none !important; }
-            #view-public-result { display: block !important; width: 100%; height: auto !important; padding: 0 !important; overflow: visible !important; background: white !important; }
-            .a4-paper { box-shadow: none !important; border: none !important; width: 100% !important; min-height: 296mm !important; margin: 0 !important; padding: 20mm !important; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            
+            #view-public-result { 
+                display: block !important; 
+                width: 100%; 
+                height: auto !important; 
+                overflow: visible !important; 
+                background: white !important; 
+                position: static !important;
+                padding: 0 !important;
+            }
+            
+            .a4-paper { 
+                width: 210mm !important;
+                min-height: 297mm !important;
+                margin: 0 auto !important;
+                padding: 20mm !important; /* Standard A4 padding */
+                box-shadow: none !important; 
+                border: none !important; 
+                page-break-after: always;
+            }
+
+            /* Make text black for printing */
+            .text-slate-500, .text-slate-400, .text-slate-600, .text-slate-700 { 
+                color: #000 !important; 
+            }
+            
+            /* Ensure background colors print */
+            .bg-slate-50 { background-color: #f8fafc !important; }
+            .bg-green-50\/50 { background-color: #f0fdf4 !important; }
+            
+            /* Header adjustments for print */
+            .header-double-line { border-bottom: 2px solid #000 !important; padding-bottom: 15px; margin-bottom: 20px; }
+            
+            /* Avoid page breaks inside elements */
+            tr, .break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
         }
     </style>
 </head>
@@ -210,12 +262,14 @@
     <div id="view-public-result" class="hidden w-full h-full overflow-y-auto p-0 md:p-8 flex justify-center bg-slate-200/50">
         <div class="a4-paper animate-fade-in relative">
             <div class="flex-1">
-                <div class="border-b-4 border-slate-700 pb-6 mb-8 flex items-center gap-4 md:gap-6">
-                    <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-20 h-20 object-contain">
-                    <div>
-                        <h1 class="text-2xl md:text-3xl font-bold text-slate-800 uppercase tracking-wide">RSUD dr. R. Koesma</h1>
-                        <p class="text-slate-500 text-sm font-medium">Kabupaten Tuban</p>
-                        <p class="text-xs text-slate-400 mt-1">Sistem E-Notulen Terintegrasi</p>
+                <!-- Header Kop Surat Style -->
+                <div class="header-double-line flex items-center gap-6">
+                    <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-24 h-24 object-contain">
+                    <div class="w-full text-center md:text-left">
+                        <h2 class="text-lg font-bold text-slate-600 uppercase tracking-widest">PEMERINTAH KABUPATEN TUBAN</h2>
+                        <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 uppercase tracking-wide">RSUD dr. R. KOESMA</h1>
+                        <p class="text-slate-500 text-sm">Jl. Dr. Wahidin Sudirohusodo No. 800 Tuban, Jawa Timur 62315</p>
+                        <p class="text-xs text-slate-400 mt-1">Telp: (0356) 321010 | Email: rsud@tubankab.go.id</p>
                     </div>
                 </div>
 
@@ -232,45 +286,46 @@
 
                 <div id="result-content" class="hidden">
                     <input type="hidden" id="res-meeting-id">
-                    <div class="text-center mb-8">
-                        <h2 class="text-xl font-bold text-slate-800 uppercase underline underline-offset-4 decoration-2">NOTULENSI RAPAT</h2>
+                    <div class="text-center mb-10">
+                        <h2 class="text-xl font-bold text-slate-800 uppercase underline underline-offset-4 decoration-2 decoration-slate-400">NOTULENSI RAPAT</h2>
                     </div>
 
-                    <table class="w-full text-sm text-slate-700 mb-8 border-collapse">
-                        <tr class="border-b border-slate-100">
-                            <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Agenda Rapat</td>
-                            <td class="py-2 pl-4" id="res-agenda">...</td>
+                    <!-- Informasi Rapat Table Style -->
+                    <table class="w-full text-sm text-slate-800 mb-8 border border-slate-300">
+                        <tr class="border-b border-slate-200">
+                            <td class="w-48 py-3 px-4 font-bold bg-slate-50 border-r border-slate-200 uppercase text-xs tracking-wider">Agenda Rapat</td>
+                            <td class="py-3 px-4" id="res-agenda">...</td>
                         </tr>
-                        <tr class="border-b border-slate-100">
-                            <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Hari / Tanggal</td>
-                            <td class="py-2 pl-4" id="res-tanggal">...</td>
+                        <tr class="border-b border-slate-200">
+                            <td class="w-48 py-3 px-4 font-bold bg-slate-50 border-r border-slate-200 uppercase text-xs tracking-wider">Hari / Tanggal</td>
+                            <td class="py-3 px-4" id="res-tanggal">...</td>
                         </tr>
-                        <tr class="border-b border-slate-100">
-                            <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Waktu</td>
-                            <td class="py-2 pl-4" id="res-waktu">...</td>
+                        <tr class="border-b border-slate-200">
+                            <td class="w-48 py-3 px-4 font-bold bg-slate-50 border-r border-slate-200 uppercase text-xs tracking-wider">Waktu</td>
+                            <td class="py-3 px-4" id="res-waktu">...</td>
                         </tr>
-                        <tr class="border-b border-slate-100">
-                            <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Unit Penyelenggara</td>
-                            <td class="py-2 pl-4" id="res-unit">...</td>
+                        <tr class="border-b border-slate-200">
+                            <td class="w-48 py-3 px-4 font-bold bg-slate-50 border-r border-slate-200 uppercase text-xs tracking-wider">Unit Penyelenggara</td>
+                            <td class="py-3 px-4" id="res-unit">...</td>
                         </tr>
-                        <tr class="border-b border-slate-100">
-                            <td class="w-40 py-2 font-bold bg-slate-50 pl-2">Pimpinan Rapat</td>
-                            <td class="py-2 pl-4" id="res-pimpinan">...</td>
+                        <tr>
+                            <td class="w-48 py-3 px-4 font-bold bg-slate-50 border-r border-slate-200 uppercase text-xs tracking-wider">Pimpinan Rapat</td>
+                            <td class="py-3 px-4" id="res-pimpinan">...</td>
                         </tr>
                     </table>
 
                     <div class="mb-8">
-                        <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">A. Pembahasan</h3>
-                        <div id="res-isi" class="rich-text-content text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pl-2 border-l-2 border-slate-200">...</div>
+                        <h3 class="text-sm font-bold text-slate-800 border-b-2 border-slate-200 pb-1 mb-3 uppercase tracking-wider block w-full">A. Pembahasan</h3>
+                        <div id="res-isi" class="rich-text-content text-sm text-slate-800 leading-relaxed whitespace-pre-wrap pl-1">...</div>
                     </div>
 
                     <div class="mb-8">
-                        <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">B. Rencana Tindak Lanjut</h3>
-                        <div id="res-tindak" class="rich-text-content text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pl-2 border-l-2 border-slate-200 bg-green-50/50 p-2 rounded-r-lg">...</div>
+                        <h3 class="text-sm font-bold text-slate-800 border-b-2 border-slate-200 pb-1 mb-3 uppercase tracking-wider block w-full">B. Rencana Tindak Lanjut</h3>
+                        <div id="res-tindak" class="rich-text-content text-sm text-slate-800 leading-relaxed whitespace-pre-wrap pl-4 border-l-4 border-green-200 bg-green-50/30 p-3 rounded-r-lg italic">...</div>
                     </div>
 
                     <div class="mb-8 break-inside-avoid">
-                        <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">C. Dokumentasi & Lampiran</h3>
+                        <h3 class="text-sm font-bold text-slate-800 border-b-2 border-slate-200 pb-1 mb-3 uppercase tracking-wider block w-full">C. Dokumentasi & Lampiran</h3>
                         <div id="res-gallery" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4"></div>
                         <div id="res-links" class="space-y-2"></div>
                         <p id="res-no-docs" class="text-xs text-slate-400 italic hidden">Tidak ada dokumentasi terlampir.</p>
@@ -278,10 +333,12 @@
                 </div>
             </div>
 
-            <div class="mt-auto pt-16 flex justify-end break-inside-avoid">
-                <div class="text-center w-48">
-                    <p class="text-xs text-slate-500 mb-16">Mengetahui,</p>
-                    <p class="text-sm font-bold text-slate-800 underline" id="res-ttd-nama">Pimpinan Rapat</p>
+            <!-- Tanda Tangan Section -->
+            <div class="mt-auto pt-16 flex justify-end break-inside-avoid page-break-inside-avoid">
+                <div class="text-center w-64">
+                    <p class="text-sm text-slate-600 mb-20">Mengetahui,</p>
+                    <p class="text-sm font-bold text-slate-900 underline underline-offset-4" id="res-ttd-nama">Pimpinan Rapat</p>
+                    <p class="text-xs text-slate-500 mt-1">Pimpinan Rapat</p>
                 </div>
             </div>
 
