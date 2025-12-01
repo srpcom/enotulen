@@ -86,19 +86,16 @@
             padding: 20mm; 
             box-shadow: 0 0 25px rgba(0,0,0,0.1); 
             position: relative;
-            /* Menggunakan flex di layar agar footer bisa di bawah jika konten sedikit */
             display: flex;
             flex-direction: column; 
         }
 
-        /* WRAPPER KONTEN AGAR FLEX BEKERJA BAIK DI LAYAR */
         .paper-content-wrapper {
-            flex: 1; /* Mengisi ruang kosong */
+            flex: 1; 
             display: flex;
             flex-direction: column;
         }
 
-        /* HEADER DOUBLE LINE (Kop Surat Style) */
         .header-double-line {
             border-bottom: 4px double #1e293b; 
             padding-bottom: 1.5rem;
@@ -123,7 +120,6 @@
         }
         .ql-editor { min-height: 150px; }
         
-        /* Rich Text Content Styling */
         .rich-text-content ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 0.5em; }
         .rich-text-content ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 0.5em; }
         .rich-text-content p { margin-bottom: 0.5em; text-align: justify; }
@@ -139,7 +135,7 @@
         @media print {
             @page { 
                 size: A4 portrait;
-                margin: 0; /* Browser margin 0, kita atur padding di .a4-paper */
+                margin: 0; 
             }
             body { 
                 background: white !important; 
@@ -149,10 +145,8 @@
                 print-color-adjust: exact !important; 
             }
             
-            /* Sembunyikan elemen UI */
             .no-print, #sidebar, header, .ql-toolbar, #btn-broadcast { display: none !important; }
             
-            /* Reset Container Utama */
             #view-public-result { 
                 display: block !important; 
                 position: static !important;
@@ -164,11 +158,10 @@
                 margin: 0 !important;
             }
             
-            /* Reset A4 Paper agar menjadi BLOCK biasa (PENTING untuk pagination) */
             .a4-paper { 
-                display: block !important; /* JANGAN FLEX saat print */
+                display: block !important;
                 width: 100% !important;
-                max-width: 210mm !important; /* Pastikan tidak melebar */
+                max-width: 210mm !important;
                 min-height: auto !important;
                 height: auto !important;
                 margin: 0 auto !important;
@@ -177,27 +170,22 @@
                 border: none !important; 
             }
 
-            /* Reset Wrapper Konten */
             .paper-content-wrapper {
                 display: block !important;
                 flex: none !important;
             }
 
-            /* Signature agar tidak error di flex */
             .signature-section {
                 margin-top: 30px !important;
                 page-break-inside: avoid !important;
             }
 
-            /* Pastikan background warna tercetak */
             .bg-slate-50 { background-color: #f8fafc !important; }
             .bg-green-50\/50 { background-color: #f0fdf4 !important; }
             
-            /* Cegah pemotongan elemen penting */
             tr, img, .break-inside-avoid { page-break-inside: avoid; }
             h1, h2, h3, h4 { page-break-after: avoid; }
             
-            /* Header adjustments */
             .header-double-line { border-bottom: 2px solid #000 !important; }
         }
     </style>
@@ -227,8 +215,8 @@
                 text: text,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3b82f6', // Tailwind Blue 500
-                cancelButtonColor: '#ef4444', // Tailwind Red 500
+                confirmButtonColor: '#3b82f6', 
+                cancelButtonColor: '#ef4444', 
                 confirmButtonText: confirmText,
                 cancelButtonText: 'Batal'
             });
@@ -387,7 +375,6 @@
             </div>
 
             <!-- Tanda Tangan Section -->
-            <!-- mt-auto dihapus, diganti class khusus. Di layar menggunakan margin-top auto dari flex parent -->
             <div class="signature-section mt-auto pt-16 flex justify-end break-inside-avoid page-break-inside-avoid">
                 <div class="text-center w-64">
                     <p class="text-sm text-slate-600 mb-20">Mengetahui,</p>
@@ -405,7 +392,7 @@
     </div>
 
     <!-- VIEW: ADMIN -->
-    <div id="app-admin" class="flex w-full h-full overflow-hidden">
+    <div id="app-admin" class="hidden w-full h-full overflow-hidden">
         <aside id="sidebar" class="hidden fixed md:relative z-50 w-72 h-full flex-col border-r border-white/20 shadow-2xl transition-transform duration-300 md:translate-x-0 -translate-x-full glass-card">
             <div class="h-20 flex items-center px-8 border-b border-white/10">
                 <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-10 h-10 object-contain mr-3 filter drop-shadow-sm" alt="Logo">
@@ -450,8 +437,8 @@
                 <button onclick="toggleSidebar()" class="text-slate-600 p-2 rounded-lg active:bg-slate-100"><i class="fa-solid fa-bars text-xl"></i></button>
             </header>
 
-            <!-- LOGIN -->
-            <div id="view-login" class="absolute inset-0 z-[60] flex flex-col items-center justify-center p-4 bg-white">
+            <!-- LOGIN (HIDDEN BY DEFAULT, SHOWN ONLY IF NO SESSION) -->
+            <div id="view-login" class="hidden absolute inset-0 z-[60] flex flex-col items-center justify-center p-4 bg-white">
                 <div class="glass-card max-w-md w-full p-8 rounded-3xl text-center shadow-2xl border-t border-white/60 animate-fade-in relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-indigo-600"></div>
                     <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-24 h-24 object-contain mx-auto mb-6 drop-shadow-md" alt="Logo RSUD">
@@ -568,7 +555,6 @@
                                     </div>
                                 </div>
                                 
-                                <!-- [BARU] Tombol Create Spreadsheet Mode -->
                                 <div class="mb-8 flex justify-end">
                                     <button type="button" onclick="createSpreadsheetNotulen()" class="text-xs bg-green-100 text-green-700 px-4 py-2 rounded-lg font-bold hover:bg-green-200 transition border border-green-300 flex items-center shadow-sm">
                                         <i class="fa-solid fa-file-excel mr-2"></i> Buat Notulen Mode Spreadsheet
@@ -672,8 +658,8 @@
         <p class="mt-8 text-sm font-medium text-slate-400 text-center animate-pulse">Gunakan kamera HP atau aplikasi QR Code</p>
     </div>
 
-    <!-- LOADER -->
-    <div id="loader" class="hidden fixed inset-0 z-[100] bg-slate-100/50 backdrop-blur-sm flex flex-col items-center justify-center transition-all duration-300">
+    <!-- LOADER (SHOW DEFAULT = FIX FLASH) -->
+    <div id="loader" class="fixed inset-0 z-[100] bg-slate-100/50 backdrop-blur-sm flex flex-col items-center justify-center transition-all duration-300">
         <div class="relative"><div class="w-16 h-16 rounded-full border-4 border-blue-200 animate-pulse"></div><div class="absolute top-0 left-0 w-16 h-16 rounded-full border-4 border-t-blue-600 animate-spin"></div></div>
         <p class="text-slate-600 font-bold mt-4 tracking-wider animate-pulse">MEMPROSES...</p>
     </div>
@@ -704,20 +690,58 @@
         const meetingId = urlParams.get('id');
 
         if (mode === 'absensi' && meetingId) {
+            document.getElementById('loader').classList.add('hidden'); // Hide initial loader
             const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.add('hidden');
             const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.remove('hidden');
             loadMeetingInfo(meetingId); 
             setTimeout(resizeCanvas, 300);
         } else if (mode === 'result' && meetingId) {
+            document.getElementById('loader').classList.add('hidden'); // Hide initial loader
             const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.add('hidden');
             const resultApp = document.getElementById('view-public-result'); if(resultApp) resultApp.classList.remove('hidden');
             loadMeetingResult(meetingId);
         } else {
             const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.add('hidden');
             const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.remove('hidden');
-            const googleBtn = document.getElementById('g_id_onload'); if(googleBtn) googleBtn.setAttribute('data-client_id', CLIENT_ID);
-            const savedUser = localStorage.getItem('rsud_user_pro_v2'); 
-            if(savedUser) { try { currentUser = JSON.parse(savedUser); initApp(); } catch(e) { localStorage.removeItem('rsud_user_pro_v2'); } }
+            
+            // [FIXED] LOGIN PERSISTENCE CHECKER
+            checkLoginSession();
+        }
+
+        function checkLoginSession() {
+            // Google ID Config setup
+            const googleBtn = document.getElementById('g_id_onload'); 
+            if(googleBtn) googleBtn.setAttribute('data-client_id', CLIENT_ID);
+
+            try {
+                const savedUser = localStorage.getItem('rsud_user_pro_v2'); 
+                if(savedUser) { 
+                    try { 
+                        currentUser = JSON.parse(savedUser); 
+                        if(currentUser && currentUser.email) {
+                            // User found, init App (Loader will be handled by loadData inside initApp)
+                            // But since loadData uses toggleLoader(true), we don't need to do anything here, it will just continue visually
+                            initApp(); 
+                        } else {
+                             throw new Error("Invalid User Data");
+                        }
+                    } catch(e) { 
+                        localStorage.removeItem('rsud_user_pro_v2');
+                        showLoginScreen();
+                    } 
+                } else {
+                    showLoginScreen();
+                }
+            } catch (e) {
+                // If localStorage is blocked (SecurityError)
+                console.error("Storage Access Error:", e);
+                showLoginScreen();
+            }
+        }
+
+        function showLoginScreen() {
+            document.getElementById('view-login').classList.remove('hidden');
+            document.getElementById('loader').classList.add('hidden');
         }
 
         // --- QUILL INITIALIZATION ---
@@ -809,7 +833,6 @@
                     document.getElementById('res-pimpinan').textContent = d.pimpinan || '-';
                     document.getElementById('res-ttd-nama').textContent = d.pimpinan || 'Pimpinan Rapat';
                     
-                    // [MODIFIED] Use innerHTML to render Rich Text
                     document.getElementById('res-isi').innerHTML = d.isi || 'Belum ada pembahasan.';
                     document.getElementById('res-tindak').innerHTML = d.tindakLanjut || '-';
                     
@@ -874,10 +897,15 @@
             toggleLoader(true);
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', email: googleUser.email, name: googleUser.name }) })
             .then(res => res.json()).then(resp => { 
-                toggleLoader(false); 
+                toggleLoader(false); // Only hide loader if login failed or success and initApp handles the rest
                 if(resp.status === 'success') { 
                     currentUser = resp.user; 
-                    localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); 
+                    try {
+                        localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); 
+                    } catch(e) {
+                        console.error("Storage save failed", e);
+                        Swal.fire('Warning', 'Browser memblokir penyimpanan sesi. Anda mungkin harus login lagi jika refresh.', 'warning');
+                    }
                     initApp(); 
                     Toast.fire({ icon: 'success', title: 'Login Berhasil' });
                 } else {
@@ -894,12 +922,15 @@
             document.getElementById('sb-avatar').src = currentUser.picture || `https://ui-avatars.com/api/?name=${currentUser.name}&background=16a34a&color=fff`;
             document.getElementById('sb-name').textContent = currentUser.name;
             document.getElementById('sb-role').textContent = currentUser.role;
+            
+            // [FIXED] Ensure login screen is hidden
             document.getElementById('view-login').classList.add('hidden');
+            
             document.getElementById('sidebar').classList.remove('hidden'); document.getElementById('sidebar').classList.add('flex');
             document.getElementById('content-area').classList.remove('hidden');
             if(currentUser.role === 'ADMIN') document.getElementById('menu-admin').classList.remove('hidden');
             
-            initQuillEditors(); // Initialize Quill here
+            initQuillEditors(); 
             
             navTo('dashboard'); loadData();
         }
@@ -1016,10 +1047,8 @@
                 const isOwner = (item.pencatatEmail === currentUser.email); const isAdmin = (currentUser.role === 'ADMIN'); const canEdit = (isAdmin || isOwner); 
                 const fileIcon = (item.fileUrl && item.fileUrl.length > 5) ? `<a href="${item.fileUrl}" target="_blank" class="text-red-500 ml-2"><i class="fa-solid fa-file-pdf"></i></a>` : ''; 
                 
-                // [MODIFIKASI] Buat Link URL ke Result Page
                 const resultUrl = `?v=result&id=${item.id}`;
 
-                // Check rich text content length safely (strip tags)
                 const tempDiv = document.createElement("div"); tempDiv.innerHTML = item.isi || ""; const textContent = tempDiv.textContent || tempDiv.innerText || "";
                 
                 let statusBadge = textContent.length > 5 ? `<span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-200">Selesai</span>` : `<span class="bg-amber-100 text-amber-700 text-[10px] px-3 py-1 rounded-full font-bold border border-amber-200">Terjadwal</span>`; 
@@ -1030,7 +1059,6 @@
                     btn += `</div>`; 
                 } 
                 
-                // [MODIFIKASI] Render baris tabel dengan Judul yang bisa diklik
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/50 transition">
                         <td class="px-6 py-4">
@@ -1124,7 +1152,6 @@
             document.getElementById('inp-unit').value = currentUser.unit || ""; 
             handleCreateUnitChange(document.getElementById('inp-unit')); 
             document.getElementById('section-recording').classList.add('hidden'); 
-            // document.getElementById('inp-isi').removeAttribute('required'); // No longer needed with Quill
             document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-plus"></i></span> Buat Jadwal Rapat'; 
             document.getElementById('btn-submit-text').innerText = "Simpan Jadwal"; 
         }
@@ -1133,7 +1160,6 @@
             const item = JSON.parse(decodeURIComponent(itemStr)); 
             navTo('create'); 
             document.getElementById('section-recording').classList.remove('hidden'); 
-            // document.getElementById('inp-isi').setAttribute('required', 'true'); // Quill validation is manual
             document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-to-square"></i></span> Isi Hasil Rapat'; 
             document.getElementById('btn-submit-text').innerText = "Simpan Hasil Notulen"; 
             document.getElementById('form-action').value = 'update'; 
@@ -1160,10 +1186,9 @@
             document.getElementById('inp-agenda').value = item.agenda; 
             document.getElementById('inp-peserta').value = item.peserta; 
             
-            // [MODIFIED] Set Content to Quill
             if(quillIsi) {
                 if(item.isi && item.isi.includes('<')) quillIsi.clipboard.dangerouslyPasteHTML(item.isi);
-                else quillIsi.setText(item.isi || ""); // Fallback for old plain text
+                else quillIsi.setText(item.isi || ""); 
             }
             if(quillTindak) {
                 if(item.tindakLanjut && item.tindakLanjut.includes('<')) quillTindak.clipboard.dangerouslyPasteHTML(item.tindakLanjut);
@@ -1237,9 +1262,7 @@
             toggleLoader(true); 
             const form = document.getElementById('mainForm'); 
             
-            // [MODIFIED] Manual Validation for Quill
             const formAction = document.getElementById('form-action').value;
-            // Hanya validasi isi notulen jika mode update (saat menulis hasil rapat)
             if (formAction === 'update' && quillIsi.getText().trim().length === 0) {
                  toggleLoader(false);
                  Swal.fire({ icon: 'warning', title: 'Belum Lengkap', text: 'Mohon isi pembahasan rapat terlebih dahulu.' });
@@ -1259,7 +1282,6 @@
                 waktu: document.getElementById('inp-waktu').value, 
                 agenda: document.getElementById('inp-agenda').value, 
                 peserta: document.getElementById('inp-peserta').value, 
-                // [MODIFIED] Get HTML from Quill
                 isi: quillIsi.root.innerHTML, 
                 tindakLanjut: quillTindak.root.innerHTML, 
                 pencatatNama: currentUser.name, 
@@ -1329,7 +1351,6 @@
             }); 
         }
 
-        // [BARU] Fungsi Create Spreadsheet Notulen dengan Requester Email
         function createSpreadsheetNotulen() {
             const formAction = document.getElementById('form-action').value;
             const formId = document.getElementById('form-id').value;
@@ -1355,7 +1376,7 @@
                         tanggal: tanggal,
                         unit: unit,
                         pimpinan: pimpinan,
-                        requesterEmail: currentUser.email // [MODIFIKASI] Kirim email user login
+                        requesterEmail: currentUser.email 
                     };
 
                     fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
@@ -1363,7 +1384,6 @@
                     .then(resp => {
                         toggleLoader(false);
                         if(resp.status === 'success') {
-                            // Otomatis tambahkan ke list URL
                             const container = document.getElementById('new-docs-container');
                             const rowId = 'url-' + Date.now();
                             
