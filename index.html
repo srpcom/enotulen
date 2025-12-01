@@ -727,12 +727,20 @@
         function handleFilter() { const searchVal = document.getElementById('search-input').value.toLowerCase(); const sortVal = document.getElementById('sort-select').value; let temp = allData.filter(item => (item.agenda && item.agenda.toLowerCase().includes(searchVal)) || (item.unit && item.unit.toLowerCase().includes(searchVal))); if (sortVal === 'newest') temp.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)); else if (sortVal === 'oldest') temp.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)); else if (sortVal === 'az') temp.sort((a, b) => a.agenda.localeCompare(b.agenda)); else if (sortVal === 'za') temp.sort((a, b) => b.agenda.localeCompare(a.agenda)); filteredData = temp; currentPage = 1; renderPaginatedTable(); }
         
         function renderPaginatedTable() { 
-            const tbody = document.getElementById('table-body'); const footer = document.getElementById('pagination-footer'); tbody.innerHTML = ''; 
+            const tbody = document.getElementById('table-body'); 
+            const footer = document.getElementById('pagination-footer'); 
+            tbody.innerHTML = ''; 
             if (filteredData.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400">Data tidak ditemukan.</td></tr>`; footer.classList.add('hidden'); return; } 
-            footer.classList.remove('hidden'); const start = (currentPage - 1) * itemsPerPage; const end = start + itemsPerPage; const pageData = filteredData.slice(start, end); 
+            footer.classList.remove('hidden'); 
+            const start = (currentPage - 1) * itemsPerPage; 
+            const end = start + itemsPerPage; 
+            const pageData = filteredData.slice(start, end); 
+            
             pageData.forEach(item => { 
-                const isOwner = (item.pencatatEmail === currentUser.email); const isAdmin = (currentUser.role === 'ADMIN'); const canEdit = (isAdmin || isOwner); 
-                const fileIcon = (item.fileUrl && item.fileUrl.length > 5) ? `<a href="${item.fileUrl}" target="_blank" class="text-red-500 ml-2"><i class="fa-solid fa-file-pdf"></i></a>` : ''; 
+                const isOwner = (item.pencatatEmail === currentUser.email); 
+                const isAdmin = (currentUser.role === 'ADMIN'); 
+                const canEdit = (isAdmin || isOwner); 
+                const fileIcon = (item.fileUrl && item.fileUrl.length > 5) ? `<a href="${item.fileUrl}" target="_blank" class="text-red-500 ml-2" title="Lihat Undangan"><i class="fa-solid fa-file-pdf"></i></a>` : ''; 
                 let statusBadge = item.isi && item.isi.length > 5 ? `<span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-200">Selesai</span>` : `<span class="bg-amber-100 text-amber-700 text-[10px] px-3 py-1 rounded-full font-bold border border-amber-200">Terjadwal</span>`; 
                 let btn = '-'; 
                 if(canEdit) { 
@@ -740,9 +748,30 @@
                     if (currentUser.role === 'ADMIN') btn += `<button onclick="deleteNotulen('${item.id}')" class="text-red-500 hover:text-red-700 text-lg transition ml-1" title="Hapus Notulen"><i class="fa-solid fa-trash-can"></i></button>`;
                     btn += `</div>`; 
                 } 
-                tbody.innerHTML += `<tr class="hover:bg-slate-50/50 transition"><td class="px-6 py-4"><span class="font-bold block">${item.displayTanggal}</span><span class="text-xs text-slate-500">${item.waktu || '-'}</span></td><td class="px-6 py-4 font-semibold">${item.agenda} ${fileIcon}</td><td class="px-6 py-4"><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">${item.unit}</span></td><td class="px-6 py-4">${statusBadge}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`; 
+                
+                // [MODIFIKASI] Agenda menjadi Link ke Halaman Result
+                // Menggunakan ?v=result&id=... agar otomatis menyesuaikan domain saat ini
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/50 transition">
+                        <td class="px-6 py-4">
+                            <span class="font-bold block">${item.displayTanggal}</span>
+                            <span class="text-xs text-slate-500">${item.waktu || '-'}</span>
+                        </td>
+                        <td class="px-6 py-4 font-semibold">
+                            <a href="?v=result&id=${item.id}" target="_blank" class="hover:text-blue-600 hover:underline transition" title="Klik untuk melihat hasil notulen">${item.agenda}</a> 
+                            ${fileIcon}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">${item.unit}</span>
+                        </td>
+                        <td class="px-6 py-4">${statusBadge}</td>
+                        <td class="px-6 py-4 text-center">${btn}</td>
+                    </tr>`; 
             }); 
-            const totalPages = Math.ceil(filteredData.length / itemsPerPage); document.getElementById('page-info').innerText = `Halaman ${currentPage} dari ${totalPages}`; document.getElementById('btn-prev').disabled = (currentPage === 1); document.getElementById('btn-next').disabled = (currentPage === totalPages); 
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage); 
+            document.getElementById('page-info').innerText = `Halaman ${currentPage} dari ${totalPages}`; 
+            document.getElementById('btn-prev').disabled = (currentPage === 1); 
+            document.getElementById('btn-next').disabled = (currentPage === totalPages); 
         }
 
         function renderWriteTable() {
