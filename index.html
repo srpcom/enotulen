@@ -22,6 +22,9 @@
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
+    <!-- SWEETALERT2 (Modern Alerts) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class', 
@@ -183,6 +186,32 @@
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbzj1mWjE3EC2KmtKbaHoz8yNEcnNFffDKXJ2xQg0mAKsSBB9QWGtIfwDw65z0OnnHWV/exec"; 
         const CLIENT_ID = "783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com";
+
+        // --- SWEETALERT2 MIXINS ---
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        const showConfirm = (title, text, confirmText = 'Ya, Lanjutkan') => {
+            return Swal.fire({
+                title: title,
+                text: text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3b82f6', // Tailwind Blue 500
+                cancelButtonColor: '#ef4444', // Tailwind Red 500
+                confirmButtonText: confirmText,
+                cancelButtonText: 'Batal'
+            });
+        };
 
         function setTheme(themeName) {
             document.body.classList.remove('theme-blue', 'theme-green', 'theme-yellow');
@@ -706,19 +735,36 @@
                     document.getElementById('abs-tanggal').textContent = resp.data.tanggal;
                     document.getElementById('abs-waktu').textContent = resp.data.waktu;
                     resizeCanvas();
-                } else { alert("Data Rapat Tidak Ditemukan."); }
+                } else { 
+                    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Data Rapat Tidak Ditemukan.' });
+                }
             })
             .catch(err => { document.getElementById('absensi-loading').innerHTML = '<span class="text-red-500">Gagal memuat data. Periksa koneksi.</span>'; });
         }
 
         function submitAbsensi(e) {
             e.preventDefault(); toggleLoader(true);
-            if(signaturePad.isEmpty()) { toggleLoader(false); alert("Mohon tanda tangan terlebih dahulu."); return; }
+            if(signaturePad.isEmpty()) { 
+                toggleLoader(false); 
+                Swal.fire({ icon: 'warning', title: 'Tanda Tangan Kosong', text: 'Mohon bubuhkan tanda tangan terlebih dahulu.' });
+                return; 
+            }
             const signatureData = signaturePad.toDataURL('image/png');
             let unitValue = document.getElementById('abs-unit').value;
             if (unitValue === 'Lainnya') { unitValue = document.getElementById('abs-unit-lainnya').value; }
             const payload = { action: 'submitAttendance', meetingId: document.getElementById('abs-meeting-id').value, nama: document.getElementById('abs-nama').value, phone: document.getElementById('abs-phone').value, unit: unitValue, signatureData: signatureData };
-            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { document.getElementById('absensi-content').classList.add('hidden'); document.getElementById('absensi-success').classList.remove('hidden'); } else { alert("Gagal: " + resp.message); } }).catch(err => { toggleLoader(false); alert("Terjadi kesalahan sistem."); });
+            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { 
+                toggleLoader(false); 
+                if(resp.status === 'success') { 
+                    document.getElementById('absensi-content').classList.add('hidden'); 
+                    document.getElementById('absensi-success').classList.remove('hidden'); 
+                } else { 
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: resp.message });
+                } 
+            }).catch(err => { 
+                toggleLoader(false); 
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan sistem.' });
+            });
         }
 
         // ... (Result Logic Updated for HTML) ...
@@ -762,9 +808,25 @@
 
         function broadcastResult() {
             const id = document.getElementById('res-meeting-id').value; if(!id) return;
-            if(!confirm("Kirim Notifikasi Hasil Notulen ke SEMUA Peserta yang Hadir via WhatsApp?")) return;
-            toggleLoader(true); const currentUrl = window.location.href;
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'broadcastResult', meetingId: id, url: currentUrl }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert(resp.message); } else { alert("Gagal: " + resp.message); } }).catch(() => { toggleLoader(false); alert("Gagal koneksi server."); });
+            
+            showConfirm('Kirim Broadcast?', 'Kirim Notifikasi Hasil Notulen ke SEMUA Peserta yang Hadir via WhatsApp?').then((result) => {
+                if (result.isConfirmed) {
+                    toggleLoader(true); const currentUrl = window.location.href;
+                    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'broadcastResult', meetingId: id, url: currentUrl }) })
+                    .then(res => res.json())
+                    .then(resp => { 
+                        toggleLoader(false); 
+                        if(resp.status === 'success') { 
+                            Swal.fire('Terikirim!', resp.message, 'success');
+                        } else { 
+                            Swal.fire('Gagal!', resp.message, 'error'); 
+                        } 
+                    }).catch(() => { 
+                        toggleLoader(false); 
+                        Swal.fire('Error!', 'Gagal koneksi server.', 'error');
+                    });
+                }
+            });
         }
 
         // --- 4. ADMIN LOGIC ---
@@ -786,8 +848,21 @@
         function loginBackend(googleUser) {
             toggleLoader(true);
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', email: googleUser.email, name: googleUser.name }) })
-            .then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { currentUser = resp.user; localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); initApp(); } else alert("Login Gagal: " + resp.message); })
-            .catch(() => { toggleLoader(false); alert("Gagal koneksi server."); });
+            .then(res => res.json()).then(resp => { 
+                toggleLoader(false); 
+                if(resp.status === 'success') { 
+                    currentUser = resp.user; 
+                    localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); 
+                    initApp(); 
+                    Toast.fire({ icon: 'success', title: 'Login Berhasil' });
+                } else {
+                    Swal.fire('Login Gagal', resp.message, 'error');
+                }
+            })
+            .catch(() => { 
+                toggleLoader(false); 
+                Swal.fire('Error', 'Gagal koneksi server.', 'error');
+            });
         }
 
         function initApp() {
@@ -830,8 +905,20 @@
         function logout() { localStorage.removeItem('rsud_user_pro_v2'); location.reload(); }
 
         // ... (Helpers: Copy, View Attendance, Download Excel, Delete, Load Data) ...
-        function copyAbsensiLink(id) { const baseUrl = window.location.href.split('?')[0]; const fullUrl = `${baseUrl}?v=absensi&id=${id}`; navigator.clipboard.writeText(fullUrl).then(() => { alert("Link Absensi Berhasil Disalin!"); }); }
-        function copyResultLink(id) { const baseUrl = window.location.href.split('?')[0]; const fullUrl = `${baseUrl}?v=result&id=${id}`; navigator.clipboard.writeText(fullUrl).then(() => { alert("Link Hasil Notulen Berhasil Disalin!"); }); }
+        function copyAbsensiLink(id) { 
+            const baseUrl = window.location.href.split('?')[0]; 
+            const fullUrl = `${baseUrl}?v=absensi&id=${id}`; 
+            navigator.clipboard.writeText(fullUrl).then(() => { 
+                Toast.fire({ icon: 'success', title: 'Link Absensi Disalin!' });
+            }); 
+        }
+        function copyResultLink(id) { 
+            const baseUrl = window.location.href.split('?')[0]; 
+            const fullUrl = `${baseUrl}?v=result&id=${id}`; 
+            navigator.clipboard.writeText(fullUrl).then(() => { 
+                Toast.fire({ icon: 'success', title: 'Link Hasil Notulen Disalin!' });
+            }); 
+        }
         function showQrCode(id) { const baseUrl = window.location.href.split('?')[0]; const fullUrl = `${baseUrl}?v=absensi&id=${id}`; const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(fullUrl)}`; document.getElementById('qr-image').src = qrUrl; document.getElementById('modal-qrcode').classList.remove('hidden'); }
         function closeQrModal() { document.getElementById('modal-qrcode').classList.add('hidden'); }
         
@@ -854,9 +941,45 @@
             const buffer = await workbook.xlsx.writeBuffer(); const safeTitle = (currentMeetingTitle || "Rapat").replace(/[^a-zA-Z0-9]/g, "_"); saveAs(new Blob([buffer]), `Absensi_${safeTitle}.xlsx`); btn.innerHTML = originalText; btn.disabled = false;
         }
 
-        function deleteNotulen(id) { if(!confirm("Yakin ingin menghapus notulen ini? Data yang dihapus tidak dapat dikembalikan.")) return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id, requesterEmail: currentUser.email }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil menghapus notulen."); loadData(); } else { alert("Gagal: " + resp.message); } }).catch(() => { toggleLoader(false); alert("Error koneksi server."); }); }
+        function deleteNotulen(id) { 
+            showConfirm('Hapus Notulen?', 'Yakin ingin menghapus notulen ini? Data yang dihapus tidak dapat dikembalikan.', 'Ya, Hapus').then((result) => {
+                if (result.isConfirmed) {
+                    toggleLoader(true); 
+                    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id, requesterEmail: currentUser.email }) })
+                    .then(res => res.json()).then(resp => { 
+                        toggleLoader(false); 
+                        if(resp.status === 'success') { 
+                            Swal.fire('Terhapus!', 'Berhasil menghapus notulen.', 'success');
+                            loadData(); 
+                        } else { 
+                            Swal.fire('Gagal!', resp.message, 'error'); 
+                        } 
+                    }).catch(() => { 
+                        toggleLoader(false); 
+                        Swal.fire('Error!', 'Gagal koneksi server.', 'error');
+                    });
+                }
+            });
+        }
+
         function closeAttendanceModal() { document.getElementById('modal-attendance').classList.add('hidden'); }
-        function loadData() { if(!currentUser) return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'read', email: currentUser.email }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { allData = resp.data; handleFilter(); renderDashboard(); renderWriteTable(); } else alert(resp.message); }).catch(() => { toggleLoader(false); alert("Error Jaringan"); }); }
+        function loadData() { 
+            if(!currentUser) return; 
+            toggleLoader(true); 
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'read', email: currentUser.email }) })
+            .then(res => res.json()).then(resp => { 
+                toggleLoader(false); 
+                if(resp.status === 'success') { 
+                    allData = resp.data; 
+                    handleFilter(); 
+                    renderDashboard(); 
+                    renderWriteTable(); 
+                } else Swal.fire('Error', resp.message, 'error'); 
+            }).catch(() => { 
+                toggleLoader(false); 
+                Swal.fire('Error', 'Gagal memuat data (Jaringan)', 'error');
+            }); 
+        }
         
         function handleFilter() { const searchVal = document.getElementById('search-input').value.toLowerCase(); const sortVal = document.getElementById('sort-select').value; let temp = allData.filter(item => (item.agenda && item.agenda.toLowerCase().includes(searchVal)) || (item.unit && item.unit.toLowerCase().includes(searchVal))); if (sortVal === 'newest') temp.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)); else if (sortVal === 'oldest') temp.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)); else if (sortVal === 'az') temp.sort((a, b) => a.agenda.localeCompare(b.agenda)); else if (sortVal === 'za') temp.sort((a, b) => b.agenda.localeCompare(a.agenda)); filteredData = temp; currentPage = 1; renderPaginatedTable(); }
         
@@ -1064,8 +1187,25 @@
             }); 
         }
 
-        function removeKeptDoc(i) { const k = JSON.parse(document.getElementById('form-kept-docs').value); if(confirm("Hapus?")) { k.splice(i,1); document.getElementById('form-kept-docs').value = JSON.stringify(k); renderKeptDocs(k); } }
-        function deleteExistingFile() { if(confirm("Hapus lampiran?")) { document.getElementById('form-existing-file').value = ""; document.getElementById('existing-file-display').classList.add('hidden'); } }
+        function removeKeptDoc(i) { 
+            showConfirm('Hapus Dokumen?', 'Dokumen ini akan dihapus dari daftar.').then((result) => {
+                if (result.isConfirmed) {
+                    const k = JSON.parse(document.getElementById('form-kept-docs').value);
+                    k.splice(i,1); 
+                    document.getElementById('form-kept-docs').value = JSON.stringify(k); 
+                    renderKeptDocs(k); 
+                }
+            });
+        }
+
+        function deleteExistingFile() { 
+            showConfirm('Hapus Lampiran?', 'File lampiran akan dihapus dari form ini.').then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('form-existing-file').value = ""; 
+                    document.getElementById('existing-file-display').classList.add('hidden'); 
+                }
+            });
+        }
         
         async function submitData(e) { 
             e.preventDefault(); 
@@ -1077,7 +1217,7 @@
             // Hanya validasi isi notulen jika mode update (saat menulis hasil rapat)
             if (formAction === 'update' && quillIsi.getText().trim().length === 0) {
                  toggleLoader(false);
-                 alert("Mohon isi pembahasan rapat.");
+                 Swal.fire({ icon: 'warning', title: 'Belum Lengkap', text: 'Mohon isi pembahasan rapat terlebih dahulu.' });
                  quillIsi.focus();
                  return;
             }
@@ -1102,7 +1242,15 @@
                 existingFileUrl: document.getElementById('form-existing-file').value 
             }; 
             const fileInput = document.getElementById('inp-file'); 
-            if(fileInput.files.length > 0) { const f = fileInput.files[0]; if(f.size > 5*1024*1024) { toggleLoader(false); alert("File Max 5MB"); return; } payload.fileData = (await toBase64(f)).split(',')[1]; payload.fileName = f.name; payload.mimeType = f.type; } 
+            if(fileInput.files.length > 0) { 
+                const f = fileInput.files[0]; 
+                if(f.size > 5*1024*1024) { 
+                    toggleLoader(false); 
+                    Swal.fire('File Terlalu Besar', 'Maksimal ukuran file adalah 5MB', 'warning'); 
+                    return; 
+                } 
+                payload.fileData = (await toBase64(f)).split(',')[1]; payload.fileName = f.name; payload.mimeType = f.type; 
+            } 
             
             const newDocs = []; 
             for(const row of document.querySelectorAll('.doc-row')) { 
@@ -1110,7 +1258,11 @@
                 const di = row.querySelector('.doc-desc'); 
                 if(fi.files.length > 0) { 
                     const f = fi.files[0]; 
-                    if(f.size > 3*1024*1024) { toggleLoader(false); alert("Foto Dokumentasi Max 3MB"); return; } 
+                    if(f.size > 3*1024*1024) { 
+                        toggleLoader(false); 
+                        Swal.fire('Foto Terlalu Besar', 'Maksimal ukuran foto adalah 3MB', 'warning'); 
+                        return; 
+                    } 
                     newDocs.push({ fileData: (await toBase64(f)).split(',')[1], fileName: f.name, mimeType: f.type, description: di.value }); 
                 } 
             } 
@@ -1132,7 +1284,24 @@
             }
             payload.keptDokumentasi = JSON.stringify(keptDocsArray);
             
-            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); resetForm(); navTo('list'); loadData(); } else alert("Gagal: " + resp.message); }).catch(() => { toggleLoader(false); alert("Error Server"); }); 
+            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+            .then(res => res.json())
+            .then(resp => { 
+                toggleLoader(false); 
+                if(resp.status === 'success') { 
+                    Swal.fire('Berhasil!', 'Data telah disimpan.', 'success').then(() => {
+                        resetForm(); 
+                        navTo('list'); 
+                        loadData();
+                    });
+                } else {
+                    Swal.fire('Gagal!', resp.message, 'error'); 
+                }
+            })
+            .catch(() => { 
+                toggleLoader(false); 
+                Swal.fire('Error Server', 'Gagal menghubungi server.', 'error'); 
+            }); 
         }
 
         // [BARU] Fungsi Create Spreadsheet Notulen dengan Requester Email
@@ -1146,65 +1315,111 @@
             const pimpinan = document.getElementById('inp-peserta').value;
 
             if(!agenda || !tanggal) {
-                alert("Mohon lengkapi Agenda dan Tanggal terlebih dahulu.");
+                Swal.fire('Data Belum Lengkap', 'Mohon lengkapi Agenda dan Tanggal terlebih dahulu.', 'warning');
                 return;
             }
 
-            if(!confirm("Buat file Spreadsheet baru untuk notulen ini?")) return;
+            showConfirm('Buat Spreadsheet?', 'Buat file Spreadsheet baru untuk notulen ini?').then((result) => {
+                if (result.isConfirmed) {
+                    toggleLoader(true);
 
-            toggleLoader(true);
+                    const payload = {
+                        action: 'createSpreadsheet',
+                        id: formId, 
+                        agenda: agenda,
+                        tanggal: tanggal,
+                        unit: unit,
+                        pimpinan: pimpinan,
+                        requesterEmail: currentUser.email // [MODIFIKASI] Kirim email user login
+                    };
 
-            const payload = {
-                action: 'createSpreadsheet',
-                id: formId, 
-                agenda: agenda,
-                tanggal: tanggal,
-                unit: unit,
-                pimpinan: pimpinan,
-                requesterEmail: currentUser.email // [MODIFIKASI] Kirim email user login
-            };
+                    fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+                    .then(res => res.json())
+                    .then(resp => {
+                        toggleLoader(false);
+                        if(resp.status === 'success') {
+                            // Otomatis tambahkan ke list URL
+                            const container = document.getElementById('new-docs-container');
+                            const rowId = 'url-' + Date.now();
+                            
+                            document.getElementById('empty-docs-msg').classList.add('hidden');
+                            
+                            container.insertAdjacentHTML('beforeend', `
+                                <div id="${rowId}" class="url-row flex gap-2 bg-green-50/50 p-3 rounded-lg border border-green-200">
+                                    <div class="flex items-center justify-center w-8 text-green-600"><i class="fa-solid fa-file-excel"></i></div>
+                                    <div class="flex-1 space-y-2 md:space-y-0 md:flex md:gap-2">
+                                        <input type="text" value="Notulen Matriks Spreadsheet" class="url-desc glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300">
+                                        <input type="url" value="${resp.url}" class="url-link glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300">
+                                    </div>
+                                    <div class="flex items-center">
+                                        <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-xmark"></i></button>
+                                    </div>
+                                </div>
+                            `);
 
-            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-            .then(res => res.json())
-            .then(resp => {
-                toggleLoader(false);
-                if(resp.status === 'success') {
-                    // Otomatis tambahkan ke list URL
-                    const container = document.getElementById('new-docs-container');
-                    const rowId = 'url-' + Date.now();
-                    
-                    document.getElementById('empty-docs-msg').classList.add('hidden');
-                    
-                    container.insertAdjacentHTML('beforeend', `
-                        <div id="${rowId}" class="url-row flex gap-2 bg-green-50/50 p-3 rounded-lg border border-green-200">
-                            <div class="flex items-center justify-center w-8 text-green-600"><i class="fa-solid fa-file-excel"></i></div>
-                            <div class="flex-1 space-y-2 md:space-y-0 md:flex md:gap-2">
-                                <input type="text" value="Notulen Matriks Spreadsheet" class="url-desc glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300">
-                                <input type="url" value="${resp.url}" class="url-link glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300">
-                            </div>
-                            <div class="flex items-center">
-                                <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                        </div>
-                    `);
-
-                    alert(resp.message); // Tampilkan pesan sukses dari server (termasuk info akses edit)
-                    window.open(resp.url, '_blank');
-                } else {
-                    alert("Gagal membuat spreadsheet: " + resp.message);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: resp.message,
+                                footer: '<a href="' + resp.url + '" target="_blank">Buka Spreadsheet</a>'
+                            });
+                            window.open(resp.url, '_blank');
+                        } else {
+                            Swal.fire('Gagal!', resp.message, 'error');
+                        }
+                    })
+                    .catch(() => {
+                        toggleLoader(false);
+                        Swal.fire('Error', 'Gagal koneksi server.', 'error');
+                    });
                 }
-            })
-            .catch(() => {
-                toggleLoader(false);
-                alert("Gagal koneksi server.");
             });
         }
 
         const toBase64 = file => new Promise((r, j) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => r(reader.result); reader.onerror = j; });
         function loadProfileView() { document.getElementById('prof-img').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=16a34a&color=fff`; document.getElementById('prof-name-disp').innerText = currentUser.name; document.getElementById('prof-email-disp').innerText = currentUser.email; document.getElementById('prof-role-disp').innerText = currentUser.role; document.getElementById('prof-email').value = currentUser.email; document.getElementById('prof-name').value = currentUser.name; document.getElementById('prof-unit').value = currentUser.unit || ""; document.getElementById('prof-phone').value = currentUser.phone || ""; }
-        function saveProfile(e) { e.preventDefault(); toggleLoader(true); const newData = { action: 'updateProfile', email: currentUser.email, name: document.getElementById('prof-name').value, unit: document.getElementById('prof-unit').value, phone: document.getElementById('prof-phone').value }; fetch(API_URL, { method: 'POST', body: JSON.stringify(newData) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); currentUser.name = newData.name; currentUser.unit = newData.unit; currentUser.phone = newData.phone; localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); initApp(); loadProfileView(); } else alert("Gagal: " + resp.message); }); }
+        
+        function saveProfile(e) { 
+            e.preventDefault(); 
+            toggleLoader(true); 
+            const newData = { action: 'updateProfile', email: currentUser.email, name: document.getElementById('prof-name').value, unit: document.getElementById('prof-unit').value, phone: document.getElementById('prof-phone').value }; 
+            fetch(API_URL, { method: 'POST', body: JSON.stringify(newData) })
+            .then(res => res.json()).then(resp => { 
+                toggleLoader(false); 
+                if(resp.status === 'success') { 
+                    Toast.fire({ icon: 'success', title: 'Profil Diperbarui!' });
+                    currentUser.name = newData.name; 
+                    currentUser.unit = newData.unit; 
+                    currentUser.phone = newData.phone; 
+                    localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); 
+                    initApp(); 
+                    loadProfileView(); 
+                } else {
+                    Swal.fire('Gagal', resp.message, 'error');
+                }
+            }); 
+        }
+        
         function loadUsers() { if(currentUser.role !== 'ADMIN') return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getUsers', requesterEmail: currentUser.email }) }).then(res => res.json()).then(resp => { toggleLoader(false); const tbody = document.getElementById('users-table-body'); tbody.innerHTML = ''; resp.data.forEach(u => { const isSuper = u.email === "ridwankoramil9@gmail.com"; let btn = isSuper ? "SUPER" : `<button onclick="changeRole('${u.email}', '${u.role==='ADMIN'?'USER':'ADMIN'}')" class="text-xs bg-gray-100 px-2 py-1 rounded">Role</button>`; tbody.innerHTML += `<tr class="border-b"><td class="px-6 py-4">${u.name}</td><td class="px-6 py-4 text-xs">${u.email}</td><td class="px-6 py-4">${u.role}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`; }); }); }
-        function changeRole(email, newRole) { if(!confirm("Ubah role?")) return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'toggleAdmin', targetEmail: email, newRole: newRole }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') loadUsers(); else alert(resp.message); }); }
+        
+        function changeRole(email, newRole) { 
+            showConfirm('Ubah Role?', `Ubah role user ini menjadi ${newRole}?`).then((result) => {
+                if(result.isConfirmed) {
+                    toggleLoader(true); 
+                    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'toggleAdmin', targetEmail: email, newRole: newRole }) })
+                    .then(res => res.json()).then(resp => { 
+                        toggleLoader(false); 
+                        if(resp.status === 'success') {
+                            Toast.fire({ icon: 'success', title: 'Role Berhasil Diubah' });
+                            loadUsers(); 
+                        } else {
+                            Swal.fire('Gagal', resp.message, 'error');
+                        }
+                    }); 
+                }
+            });
+        }
+        
         function toggleLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
         
         function handleProfileUnitChange(select) {
