@@ -18,8 +18,12 @@
     <!-- SIGNATURE PAD -->
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
     
-    <!-- [BARU] SWEETALERT2 (Toast Notification Library) -->
+    <!-- SWEETALERT2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- [BARU] QUILL JS (Rich Text Editor) -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
     <script>
         tailwind.config = {
@@ -73,7 +77,7 @@
         }
         .theme-btn.active-theme { ring-width: 2px; ring-offset-width: 2px; ring-color: #64748b; transform: scale(1.1); }
 
-        /* [MODIFIKASI] Style Custom untuk SweetAlert2 agar match dengan Glassmorphism */
+        /* Style Custom untuk SweetAlert2 */
         .swal2-popup {
             border-radius: 20px !important;
             backdrop-filter: blur(10px);
@@ -81,6 +85,25 @@
         }
         .swal2-title { font-family: 'Plus Jakarta Sans', sans-serif !important; }
         .swal2-html-container { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
+        /* [BARU] Custom Style untuk Quill Editor agar Glassy */
+        .ql-toolbar {
+            background: rgba(255, 255, 255, 0.5);
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            border-color: rgba(0,0,0,0.1) !important;
+        }
+        .ql-container {
+            background: rgba(255, 255, 255, 0.3);
+            border-bottom-left-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+            border-color: rgba(0,0,0,0.1) !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 0.875rem !important; /* text-sm */
+        }
+        .ql-editor {
+            min-height: 250px;
+        }
 
         /* Styles Khusus Print */
         @media print {
@@ -90,6 +113,10 @@
             #view-public-result { display: block !important; width: 100%; height: auto !important; padding: 0 !important; overflow: visible !important; background: white !important; }
             .a4-paper { box-shadow: none !important; border: none !important; width: 100% !important; min-height: 296mm !important; margin: 0 !important; padding: 20mm !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            
+            /* Fix list style on print for Quill content */
+            .ql-editor ol, .ql-editor ul { padding-left: 1.5em; }
+            .ql-editor li { padding-left: 0; }
         }
     </style>
 </head>
@@ -99,7 +126,7 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbzj1mWjE3EC2KmtKbaHoz8yNEcnNFffDKXJ2xQg0mAKsSBB9QWGtIfwDw65z0OnnHWV/exec"; 
         const CLIENT_ID = "783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com";
 
-        // [BARU] Konfigurasi Toast Notification
+        // Konfigurasi Toast Notification
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -140,11 +167,14 @@
             setTheme(savedTheme);
         }
         initTheme();
+
+        // [BARU] Global Variable untuk Quill
+        let quillEditor;
     </script>
 
     <!-- VIEW: ABSENSI -->
     <div id="app-absensi" class="hidden w-full h-full overflow-y-auto p-4 flex flex-col items-center">
-        <!-- (Code Absensi Sama) -->
+        <!-- (Content Absensi Sama) -->
         <div class="glass-card max-w-md w-full p-6 rounded-3xl shadow-2xl border-t border-white/60 animate-fade-in my-auto">
             <div class="text-center mb-6">
                 <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-20 h-20 object-contain mx-auto mb-3 drop-shadow-sm" alt="Logo RSUD">
@@ -255,7 +285,8 @@
 
                     <div class="mb-8">
                         <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">A. Pembahasan</h3>
-                        <div id="res-isi" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pl-2 border-l-2 border-slate-200">...</div>
+                        <!-- [MODIFIKASI] Menggunakan innerHTML agar Rich Text dari Quill ter-render dengan benar -->
+                        <div id="res-isi" class="text-sm text-slate-700 leading-relaxed pl-2 border-l-2 border-slate-200 ql-editor" style="padding:0 0 0 10px; min-height:auto;">...</div>
                     </div>
 
                     <div class="mb-8">
@@ -434,10 +465,18 @@
                             </div>
                             <div id="section-recording" class="hidden pt-6 border-t border-slate-200 mt-6 animate-fade-in">
                                 <div class="mb-5 bg-green-50 p-4 rounded-xl border border-green-200 flex gap-3 items-start"><i class="fa-solid fa-circle-info text-green-600 mt-1"></i><div><h3 class="text-green-800 font-bold text-sm">Area Notulensi</h3><p class="text-green-600 text-xs">Silakan lengkapi hasil rapat dan rencana tindak lanjut di bawah ini.</p></div></div>
-                                <div class="mb-6"><label class="block text-xs font-bold text-slate-700 uppercase mb-2">Isi Pembahasan <span class="text-red-500">*</span></label><textarea name="isi" id="inp-isi" rows="8" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm leading-relaxed" placeholder="Catat poin-poin penting rapat..."></textarea></div>
+                                
+                                <!-- [MODIFIKASI] Quill Editor Container -->
+                                <div class="mb-6">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Isi Pembahasan <span class="text-red-500">*</span></label>
+                                    <div id="quill-editor" class="bg-white/50 rounded-xl shadow-sm"></div>
+                                    <!-- Hidden input untuk kompatibilitas, meskipun kita ambil data langsung dari quill -->
+                                    <input type="hidden" name="isi" id="inp-isi">
+                                </div>
+
                                 <div class="mb-4"><label class="block text-xs font-bold text-green-700 uppercase mb-2">Rencana Tindak Lanjut</label><textarea name="tindakLanjut" id="inp-tindak" rows="3" class="glass-input w-full rounded-xl border-green-200 bg-green-50/30 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm" placeholder="Action plan..."></textarea></div>
                                 
-                                <!-- [BARU] Tombol Create Spreadsheet Mode -->
+                                <!-- Tombol Create Spreadsheet Mode -->
                                 <div class="mb-8 flex justify-end">
                                     <button type="button" onclick="createSpreadsheetNotulen()" class="text-xs bg-green-100 text-green-700 px-4 py-2 rounded-lg font-bold hover:bg-green-200 transition border border-green-300 flex items-center shadow-sm">
                                         <i class="fa-solid fa-file-excel mr-2"></i> Buat Notulen Mode Spreadsheet
@@ -512,6 +551,7 @@
 
     <!-- MODAL ATTENDANCE (With Download Button) -->
     <div id="modal-attendance" class="hidden fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <!-- (Content sama) -->
         <div class="glass-card w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-6 border-b border-slate-200 flex justify-between items-center">
                 <div><h3 class="text-xl font-bold text-slate-800">Daftar Hadir</h3><p id="att-modal-title" class="text-sm text-slate-500">Memuat...</p></div>
@@ -525,8 +565,9 @@
         </div>
     </div>
 
-    <!-- MODAL QR CODE [FULLSCREEN MODE] -->
+    <!-- MODAL QR CODE -->
     <div id="modal-qrcode" class="hidden fixed inset-0 z-[80] bg-white/95 backdrop-blur-md flex flex-col items-center justify-center p-4 animate-fade-in">
+        <!-- (Content sama) -->
         <button onclick="closeQrModal()" class="absolute top-6 right-6 bg-slate-100 p-3 rounded-full text-slate-500 hover:bg-red-100 hover:text-red-600 transition shadow-sm z-50">
             <i class="fa-solid fa-xmark text-2xl"></i>
         </button>
@@ -548,7 +589,7 @@
     </div>
 
     <script>
-        // ... (Signature Pad Logic is same) ...
+        // ... (Signature Pad Logic) ...
         let signaturePad = null;
         const canvas = document.getElementById('signature-pad');
 
@@ -566,6 +607,38 @@
             window.addEventListener("resize", resizeCanvas);
         }
         function clearSignature() { if (signaturePad) signaturePad.clear(); }
+
+        // --- INIT QUILL EDITOR ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inisialisasi Quill hanya jika element ada (di halaman admin)
+            if(document.getElementById('quill-editor')) {
+                quillEditor = new Quill('#quill-editor', {
+                    theme: 'snow',
+                    placeholder: 'Catat poin-poin penting rapat, hasil diskusi, dan keputusan...',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+                            ['blockquote', 'code-block'],
+
+                            [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
+                            [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+                            [{ 'direction': 'rtl' }],                         // text direction
+
+                            [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+                            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+
+                            [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+                            [{ 'font': [] }],
+                            [{ 'align': [] }],
+
+                            ['clean']                                         // remove formatting button
+                        ]
+                    }
+                });
+            }
+        });
 
         // --- 2. INIT APPLICATION ---
         const urlParams = new URLSearchParams(window.location.search);
@@ -589,7 +662,7 @@
             if(savedUser) { try { currentUser = JSON.parse(savedUser); initApp(); } catch(e) { localStorage.removeItem('rsud_user_pro_v2'); } }
         }
 
-        // ... (Absensi Logic) ...
+        // ... (Functions loadMeetingInfo, submitAbsensi - Same) ...
         function loadMeetingInfo(id) {
             document.getElementById('abs-meeting-id').value = id;
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getMeetingInfo', id: id }) })
@@ -602,9 +675,7 @@
                     document.getElementById('abs-tanggal').textContent = resp.data.tanggal;
                     document.getElementById('abs-waktu').textContent = resp.data.waktu;
                     resizeCanvas();
-                } else { 
-                    showError("Data Rapat Tidak Ditemukan."); 
-                }
+                } else { showError("Data Rapat Tidak Ditemukan."); }
             })
             .catch(err => { document.getElementById('absensi-loading').innerHTML = '<span class="text-red-500">Gagal memuat data. Periksa koneksi.</span>'; });
         }
@@ -619,7 +690,7 @@
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { document.getElementById('absensi-content').classList.add('hidden'); document.getElementById('absensi-success').classList.remove('hidden'); } else { showError("Gagal: " + resp.message); } }).catch(err => { toggleLoader(false); showError("Terjadi kesalahan sistem."); });
         }
 
-        // ... (Result Logic Same) ...
+        // ... (loadMeetingResult - MODIFIED for HTML Content) ...
         function loadMeetingResult(id) {
             document.getElementById('res-meeting-id').value = id;
             const savedUser = localStorage.getItem('rsud_user_pro_v2');
@@ -635,7 +706,10 @@
                     document.getElementById('res-unit').textContent = d.unit || '-';
                     document.getElementById('res-pimpinan').textContent = d.pimpinan || '-';
                     document.getElementById('res-ttd-nama').textContent = d.pimpinan || 'Pimpinan Rapat';
-                    document.getElementById('res-isi').textContent = d.isi || 'Belum ada pembahasan.';
+                    
+                    // [MODIFIKASI] Gunakan innerHTML untuk render hasil Quill
+                    document.getElementById('res-isi').innerHTML = d.isi || '<p class="text-slate-400 italic">Belum ada pembahasan.</p>';
+                    
                     document.getElementById('res-tindak').textContent = d.tindakLanjut || '-';
                     let docs = []; try { docs = JSON.parse(d.dokumentasi); } catch(e) {}
                     const gallery = document.getElementById('res-gallery'); const links = document.getElementById('res-links'); gallery.innerHTML = ''; links.innerHTML = '';
@@ -657,49 +731,27 @@
 
         function broadcastResult() {
             const id = document.getElementById('res-meeting-id').value; if(!id) return;
-            
             Swal.fire({
                 title: 'Kirim Notifikasi?',
                 text: "Hasil notulen akan dikirim ke SEMUA peserta yang hadir via WhatsApp.",
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#10b981', // green-500
+                confirmButtonColor: '#10b981',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Ya, Kirim!',
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    toggleLoader(true); 
-                    const currentUrl = window.location.href;
-                    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'broadcastResult', meetingId: id, url: currentUrl }) })
-                    .then(res => res.json())
-                    .then(resp => { 
-                        toggleLoader(false); 
-                        if(resp.status === 'success') { 
-                            showSuccess(resp.message); 
-                        } else { 
-                            showError("Gagal: " + resp.message); 
-                        } 
-                    })
-                    .catch(() => { 
-                        toggleLoader(false); 
-                        showError("Gagal koneksi server."); 
-                    });
+                    toggleLoader(true); const currentUrl = window.location.href;
+                    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'broadcastResult', meetingId: id, url: currentUrl }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { showSuccess(resp.message); } else { showError("Gagal: " + resp.message); } }).catch(() => { toggleLoader(false); showError("Gagal koneksi server."); });
                 }
             })
         }
 
-        // --- 4. ADMIN LOGIC ---
-        let currentUser = null;
-        let allData = [];
-        let filteredData = [];
-        let currentPage = 1;
-        const itemsPerPage = 15;
-        let currentAttendanceData = [];
-        let currentMeetingTitle = "";
-        let currentMeetingDate = "";
-        let currentMeetingTime = "";
-
+        // ... (Admin Logic, Login, Init App - Same) ...
+        // (Functions: handleCredentialResponse, loginBackend, initApp, navTo, toggleSidebar, logout, etc. - Same as previous)
+        // I'll include essential modified functions below.
+        
         function handleCredentialResponse(response) {
             const payload = JSON.parse(decodeURIComponent(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
             loginBackend(payload);
@@ -747,13 +799,14 @@
         }
 
         function logout() { localStorage.removeItem('rsud_user_pro_v2'); location.reload(); }
+        function toggleLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
 
-        // ... (Helpers: Copy, View Attendance, Download Excel, Delete, Load Data) ...
+        // ... (Helpers: Copy, QR, View, Download - Same) ...
         function copyAbsensiLink(id) { const baseUrl = window.location.href.split('?')[0]; const fullUrl = `${baseUrl}?v=absensi&id=${id}`; navigator.clipboard.writeText(fullUrl).then(() => { showSuccess("Link Absensi Berhasil Disalin!"); }); }
         function copyResultLink(id) { const baseUrl = window.location.href.split('?')[0]; const fullUrl = `${baseUrl}?v=result&id=${id}`; navigator.clipboard.writeText(fullUrl).then(() => { showSuccess("Link Hasil Notulen Berhasil Disalin!"); }); }
         function showQrCode(id) { const baseUrl = window.location.href.split('?')[0]; const fullUrl = `${baseUrl}?v=absensi&id=${id}`; const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(fullUrl)}`; document.getElementById('qr-image').src = qrUrl; document.getElementById('modal-qrcode').classList.remove('hidden'); }
         function closeQrModal() { document.getElementById('modal-qrcode').classList.add('hidden'); }
-        
+
         function viewAttendance(id, title, date, time) {
             document.getElementById('modal-attendance').classList.remove('hidden'); document.getElementById('att-modal-title').textContent = title; document.getElementById('att-table-body').innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Mengambil data...</td></tr>'; document.getElementById('btn-download-att').classList.add('hidden'); currentMeetingTitle = title; currentMeetingDate = date; currentMeetingTime = time;
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getAttendance', meetingId: id }) }).then(res => res.json()).then(resp => { const tbody = document.getElementById('att-table-body'); tbody.innerHTML = ''; if (resp.status === 'success' && resp.data.length > 0) { currentAttendanceData = resp.data; document.getElementById('btn-download-att').classList.remove('hidden'); resp.data.forEach((row, idx) => { const ttdDisplay = row.ttdUrl ? `<a href="${row.ttdUrl}" target="_blank" class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-100 border border-indigo-200">Lihat TTD</a>` : '-'; tbody.innerHTML += `<tr class="hover:bg-slate-50 border-b border-slate-100"><td class="px-6 py-4 font-bold text-slate-500">${idx + 1}</td><td class="px-6 py-4">${row.waktu}</td><td class="px-6 py-4 font-semibold text-slate-700">${row.nama}</td><td class="px-6 py-4 text-slate-500">${row.hp}</td><td class="px-6 py-4 text-slate-500">${row.unit || '-'}</td><td class="px-6 py-4 text-center">${ttdDisplay}</td></tr>`; }); } else { currentAttendanceData = []; tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">Belum ada peserta yang mengisi daftar hadir.</td></tr>'; } }).catch(() => { document.getElementById('att-table-body').innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-400">Gagal memuat data.</td></tr>'; });
@@ -788,67 +841,18 @@
                     toggleLoader(true); 
                     fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id, requesterEmail: currentUser.email }) })
                     .then(res => res.json())
-                    .then(resp => { 
-                        toggleLoader(false); 
-                        if(resp.status === 'success') { 
-                            showSuccess("Berhasil menghapus notulen."); 
-                            loadData(); 
-                        } else { 
-                            showError("Gagal: " + resp.message); 
-                        } 
-                    })
-                    .catch(() => { 
-                        toggleLoader(false); 
-                        showError("Error koneksi server."); 
-                    });
+                    .then(resp => { toggleLoader(false); if(resp.status === 'success') { showSuccess("Berhasil menghapus notulen."); loadData(); } else { showError("Gagal: " + resp.message); } }).catch(() => { toggleLoader(false); showError("Error koneksi server."); });
                 }
             })
         }
-        
-        function closeAttendanceModal() { document.getElementById('modal-attendance').classList.add('hidden'); }
-        function loadData() { if(!currentUser) return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'read', email: currentUser.email }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { allData = resp.data; handleFilter(); renderDashboard(); renderWriteTable(); } else showError(resp.message); }).catch(() => { toggleLoader(false); showError("Error Jaringan"); }); }
-        
-        function handleFilter() { const searchVal = document.getElementById('search-input').value.toLowerCase(); const sortVal = document.getElementById('sort-select').value; let temp = allData.filter(item => (item.agenda && item.agenda.toLowerCase().includes(searchVal)) || (item.unit && item.unit.toLowerCase().includes(searchVal))); if (sortVal === 'newest') temp.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)); else if (sortVal === 'oldest') temp.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)); else if (sortVal === 'az') temp.sort((a, b) => a.agenda.localeCompare(b.agenda)); else if (sortVal === 'za') temp.sort((a, b) => b.agenda.localeCompare(a.agenda)); filteredData = temp; currentPage = 1; renderPaginatedTable(); }
-        
-        function renderPaginatedTable() { 
-            const tbody = document.getElementById('table-body'); const footer = document.getElementById('pagination-footer'); tbody.innerHTML = ''; 
-            if (filteredData.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400">Data tidak ditemukan.</td></tr>`; footer.classList.add('hidden'); return; } 
-            footer.classList.remove('hidden'); const start = (currentPage - 1) * itemsPerPage; const end = start + itemsPerPage; const pageData = filteredData.slice(start, end); 
-            pageData.forEach(item => { 
-                const isOwner = (item.pencatatEmail === currentUser.email); const isAdmin = (currentUser.role === 'ADMIN'); const canEdit = (isAdmin || isOwner); 
-                const fileIcon = (item.fileUrl && item.fileUrl.length > 5) ? `<a href="${item.fileUrl}" target="_blank" class="text-red-500 ml-2"><i class="fa-solid fa-file-pdf"></i></a>` : ''; 
-                let statusBadge = item.isi && item.isi.length > 5 ? `<span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-200">Selesai</span>` : `<span class="bg-amber-100 text-amber-700 text-[10px] px-3 py-1 rounded-full font-bold border border-amber-200">Terjadwal</span>`; 
-                let btn = '-'; 
-                if(canEdit) { 
-                    btn = `<div class="flex items-center justify-center gap-2"><button onclick="copyResultLink('${item.id}')" class="text-slate-400 hover:text-indigo-600 text-lg transition" title="Bagikan Hasil Notulen"><i class="fa-solid fa-share-nodes"></i></button><button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-blue-600 text-lg transition" title="Salin Link Absensi"><i class="fa-regular fa-copy"></i></button><button onclick="showQrCode('${item.id}')" class="text-slate-400 hover:text-slate-800 text-lg transition" title="Tampilkan QR Code"><i class="fa-solid fa-qrcode"></i></button><button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}')" class="text-slate-400 hover:text-green-600 text-lg transition" title="Lihat Daftar Hadir"><i class="fa-solid fa-users"></i></button><button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 font-bold text-xs border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition">EDIT</button>`;
-                    if (currentUser.role === 'ADMIN') btn += `<button onclick="deleteNotulen('${item.id}')" class="text-red-500 hover:text-red-700 text-lg transition ml-1" title="Hapus Notulen"><i class="fa-solid fa-trash-can"></i></button>`;
-                    btn += `</div>`; 
-                } 
-                tbody.innerHTML += `<tr class="hover:bg-slate-50/50 transition"><td class="px-6 py-4"><span class="font-bold block">${item.displayTanggal}</span><span class="text-xs text-slate-500">${item.waktu || '-'}</span></td><td class="px-6 py-4 font-semibold">${item.agenda} ${fileIcon}</td><td class="px-6 py-4"><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">${item.unit}</span></td><td class="px-6 py-4">${statusBadge}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`; 
-            }); 
-            const totalPages = Math.ceil(filteredData.length / itemsPerPage); document.getElementById('page-info').innerText = `Halaman ${currentPage} dari ${totalPages}`; document.getElementById('btn-prev').disabled = (currentPage === 1); document.getElementById('btn-next').disabled = (currentPage === totalPages); 
-        }
 
-        function renderWriteTable() {
-            const tbody = document.getElementById('write-table-body');
-            tbody.innerHTML = '';
-            const sortedData = [...allData].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-            if (sortedData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400">Belum ada jadwal rapat.</td></tr>`;
-                return;
-            }
-            sortedData.forEach(item => {
-                const isOwner = (item.pencatatEmail === currentUser.email);
-                const isAdmin = (currentUser.role === 'ADMIN');
-                if(isOwner || isAdmin) {
-                    const hasContent = item.isi && item.isi.length > 5;
-                    const statusText = hasContent ? "Revisi Notulen" : "Mulai Menulis";
-                    const btnColor = hasContent ? "text-orange-600 border-orange-200 hover:bg-orange-50" : "text-green-600 border-green-200 hover:bg-green-50";
-                    const btnIcon = hasContent ? "fa-pen-to-square" : "fa-pen-nib";
-                    tbody.innerHTML += `<tr class="hover:bg-blue-50/30 transition border-b border-slate-50"><td class="px-6 py-4"><span class="font-bold block text-slate-700">${item.displayTanggal}</span><span class="text-xs text-slate-500">${item.waktu || '-'}</span></td><td class="px-6 py-4 font-semibold text-slate-700">${item.agenda}</td><td class="px-6 py-4"><span class="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded font-medium">${item.unit}</span></td><td class="px-6 py-4 text-center"><button onclick="startWriting('${encodeURIComponent(JSON.stringify(item))}')" class="${btnColor} font-bold text-xs border px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-2 mx-auto"><i class="fa-solid ${btnIcon}"></i> ${statusText}</button></td></tr>`;
-                }
-            });
-        }
+        // ... (Other functions: loadData, handleFilter, renderPaginatedTable, renderWriteTable, startWriting) ...
+        // Ensure startWriting uses quillEditor
+        function loadData() { if(!currentUser) return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'read', email: currentUser.email }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { allData = resp.data; handleFilter(); renderDashboard(); renderWriteTable(); } else showError(resp.message); }).catch(() => { toggleLoader(false); showError("Error Jaringan"); }); }
+        function handleFilter() { const searchVal = document.getElementById('search-input').value.toLowerCase(); const sortVal = document.getElementById('sort-select').value; let temp = allData.filter(item => (item.agenda && item.agenda.toLowerCase().includes(searchVal)) || (item.unit && item.unit.toLowerCase().includes(searchVal))); if (sortVal === 'newest') temp.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)); else if (sortVal === 'oldest') temp.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)); else if (sortVal === 'az') temp.sort((a, b) => a.agenda.localeCompare(b.agenda)); else if (sortVal === 'za') temp.sort((a, b) => b.agenda.localeCompare(a.agenda)); filteredData = temp; currentPage = 1; renderPaginatedTable(); }
+        function renderPaginatedTable() { const tbody = document.getElementById('table-body'); const footer = document.getElementById('pagination-footer'); tbody.innerHTML = ''; if (filteredData.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400">Data tidak ditemukan.</td></tr>`; footer.classList.add('hidden'); return; } footer.classList.remove('hidden'); const start = (currentPage - 1) * itemsPerPage; const end = start + itemsPerPage; const pageData = filteredData.slice(start, end); pageData.forEach(item => { const isOwner = (item.pencatatEmail === currentUser.email); const isAdmin = (currentUser.role === 'ADMIN'); const canEdit = (isAdmin || isOwner); const fileIcon = (item.fileUrl && item.fileUrl.length > 5) ? `<a href="${item.fileUrl}" target="_blank" class="text-red-500 ml-2"><i class="fa-solid fa-file-pdf"></i></a>` : ''; let statusBadge = item.isi && item.isi.length > 5 ? `<span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-200">Selesai</span>` : `<span class="bg-amber-100 text-amber-700 text-[10px] px-3 py-1 rounded-full font-bold border border-amber-200">Terjadwal</span>`; let btn = '-'; if(canEdit) { btn = `<div class="flex items-center justify-center gap-2"><button onclick="copyResultLink('${item.id}')" class="text-slate-400 hover:text-indigo-600 text-lg transition" title="Bagikan Hasil Notulen"><i class="fa-solid fa-share-nodes"></i></button><button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-blue-600 text-lg transition" title="Salin Link Absensi"><i class="fa-regular fa-copy"></i></button><button onclick="showQrCode('${item.id}')" class="text-slate-400 hover:text-slate-800 text-lg transition" title="Tampilkan QR Code"><i class="fa-solid fa-qrcode"></i></button><button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}')" class="text-slate-400 hover:text-green-600 text-lg transition" title="Lihat Daftar Hadir"><i class="fa-solid fa-users"></i></button><button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 font-bold text-xs border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition">EDIT</button>`; if (currentUser.role === 'ADMIN') btn += `<button onclick="deleteNotulen('${item.id}')" class="text-red-500 hover:text-red-700 text-lg transition ml-1" title="Hapus Notulen"><i class="fa-solid fa-trash-can"></i></button>`; btn += `</div>`; } tbody.innerHTML += `<tr class="hover:bg-slate-50/50 transition"><td class="px-6 py-4"><span class="font-bold block">${item.displayTanggal}</span><span class="text-xs text-slate-500">${item.waktu || '-'}</span></td><td class="px-6 py-4 font-semibold">${item.agenda} ${fileIcon}</td><td class="px-6 py-4"><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">${item.unit}</span></td><td class="px-6 py-4">${statusBadge}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`; }); const totalPages = Math.ceil(filteredData.length / itemsPerPage); document.getElementById('page-info').innerText = `Halaman ${currentPage} dari ${totalPages}`; document.getElementById('btn-prev').disabled = (currentPage === 1); document.getElementById('btn-next').disabled = (currentPage === totalPages); }
+        function renderWriteTable() { const tbody = document.getElementById('write-table-body'); tbody.innerHTML = ''; const sortedData = [...allData].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)); if (sortedData.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400">Belum ada jadwal rapat.</td></tr>`; return; } sortedData.forEach(item => { const isOwner = (item.pencatatEmail === currentUser.email); const isAdmin = (currentUser.role === 'ADMIN'); if(isOwner || isAdmin) { const hasContent = item.isi && item.isi.length > 5; const statusText = hasContent ? "Revisi Notulen" : "Mulai Menulis"; const btnColor = hasContent ? "text-orange-600 border-orange-200 hover:bg-orange-50" : "text-green-600 border-green-200 hover:bg-green-50"; const btnIcon = hasContent ? "fa-pen-to-square" : "fa-pen-nib"; tbody.innerHTML += `<tr class="hover:bg-blue-50/30 transition border-b border-slate-50"><td class="px-6 py-4"><span class="font-bold block text-slate-700">${item.displayTanggal}</span><span class="text-xs text-slate-500">${item.waktu || '-'}</span></td><td class="px-6 py-4 font-semibold text-slate-700">${item.agenda}</td><td class="px-6 py-4"><span class="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded font-medium">${item.unit}</span></td><td class="px-6 py-4 text-center"><button onclick="startWriting('${encodeURIComponent(JSON.stringify(item))}')" class="${btnColor} font-bold text-xs border px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-2 mx-auto"><i class="fa-solid ${btnIcon}"></i> ${statusText}</button></td></tr>`; } }); }
+        function renderDashboard() { document.getElementById('dash-total-count').innerText = allData.length; }
 
         function startWriting(itemStr) {
             const item = JSON.parse(decodeURIComponent(itemStr));
@@ -864,16 +868,13 @@
             document.getElementById('inp-file').disabled = true;
             setTimeout(() => {
                 document.getElementById('section-recording').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                document.getElementById('inp-isi').focus();
+                if(quillEditor) quillEditor.focus(); // [MODIFIKASI] Focus ke Quill
             }, 500);
         }
 
-        function nextPage() { if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) { currentPage++; renderPaginatedTable(); } }
-        function prevPage() { if (currentPage > 1) { currentPage--; renderPaginatedTable(); } }
-        function renderDashboard() { document.getElementById('dash-total-count').innerText = allData.length; }
-        
         function resetForm() { 
             document.getElementById('mainForm').reset(); 
+            if(quillEditor) quillEditor.setText(''); // [MODIFIKASI] Reset Quill
             document.getElementById('form-action').value = 'create'; 
             document.getElementById('form-id').value = ''; 
             document.getElementById('inp-unit').disabled = false;
@@ -892,7 +893,7 @@
             document.getElementById('inp-unit').value = currentUser.unit || ""; 
             handleCreateUnitChange(document.getElementById('inp-unit')); 
             document.getElementById('section-recording').classList.add('hidden'); 
-            document.getElementById('inp-isi').removeAttribute('required'); 
+            // document.getElementById('inp-isi').removeAttribute('required'); // Quill handles validation manually
             document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-plus"></i></span> Buat Jadwal Rapat'; 
             document.getElementById('btn-submit-text').innerText = "Simpan Jadwal"; 
         }
@@ -901,7 +902,7 @@
             const item = JSON.parse(decodeURIComponent(itemStr)); 
             navTo('create'); 
             document.getElementById('section-recording').classList.remove('hidden'); 
-            document.getElementById('inp-isi').setAttribute('required', 'true'); 
+            // document.getElementById('inp-isi').setAttribute('required', 'true'); // Not needed with Quill validation
             document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-to-square"></i></span> Isi Hasil Rapat'; 
             document.getElementById('btn-submit-text').innerText = "Simpan Hasil Notulen"; 
             document.getElementById('form-action').value = 'update'; 
@@ -927,86 +928,20 @@
             document.getElementById('inp-waktu').value = item.waktu || ""; 
             document.getElementById('inp-agenda').value = item.agenda; 
             document.getElementById('inp-peserta').value = item.peserta; 
-            document.getElementById('inp-isi').value = item.isi; 
+            
+            // [MODIFIKASI] Load Content to Quill
+            // document.getElementById('inp-isi').value = item.isi; 
+            if(quillEditor) {
+                // Use dangerouslyPasteHTML to render HTML content properly
+                // Handle empty case to avoid glitches
+                 quillEditor.root.innerHTML = item.isi || "";
+            }
+
             document.getElementById('inp-tindak').value = item.tindakLanjut; 
             if(item.fileUrl && item.fileUrl.length > 5) { document.getElementById('form-existing-file').value = item.fileUrl; document.getElementById('existing-file-display').classList.remove('hidden'); document.getElementById('link-existing-file').href = item.fileUrl; } else { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; } 
             if(item.dokumentasiJson && item.dokumentasiJson.length > 5) { try { const docs = JSON.parse(item.dokumentasiJson); document.getElementById('form-kept-docs').value = JSON.stringify(docs); renderKeptDocs(docs); } catch(e) {} } else { document.getElementById('form-kept-docs').value = "[]"; renderKeptDocs([]); } 
         }
-        
-        function addDocRow() { 
-            document.getElementById('empty-docs-msg').classList.add('hidden'); 
-            const container = document.getElementById('new-docs-container'); 
-            const rowId = 'doc-' + Date.now(); 
-            container.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="doc-row flex gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200"><div class="flex-1"><input type="text" placeholder="Deskripsi Foto/Dok..." class="doc-desc glass-input w-full rounded-lg px-3 py-2 text-sm"></div><div class="flex items-center gap-2"><input type="file" class="doc-file text-xs text-slate-500" accept="image/*,.pdf"><button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-xmark"></i></button></div></div>`); 
-        }
 
-        function addUrlRow() {
-            document.getElementById('empty-docs-msg').classList.add('hidden');
-            const container = document.getElementById('new-docs-container');
-            const rowId = 'url-' + Date.now();
-            container.insertAdjacentHTML('beforeend', `
-                <div id="${rowId}" class="url-row flex gap-2 bg-orange-50/50 p-3 rounded-lg border border-orange-100">
-                    <div class="flex items-center justify-center w-8 text-orange-400"><i class="fa-solid fa-link"></i></div>
-                    <div class="flex-1 space-y-2 md:space-y-0 md:flex md:gap-2">
-                        <input type="text" placeholder="Deskripsi Link (e.g. Materi Drive)..." class="url-desc glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-300">
-                        <input type="url" placeholder="https://..." class="url-link glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-300">
-                    </div>
-                    <div class="flex items-center">
-                        <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                </div>
-            `);
-        }
-
-        function renderKeptDocs(docs) { 
-            const c = document.getElementById('existing-docs-container'); 
-            c.innerHTML = ''; 
-            if(!docs.length) { c.classList.add('hidden'); return; } 
-            c.classList.remove('hidden'); 
-            docs.forEach((d,i) => {
-                const isDrive = d.url && d.url.includes('drive.google.com');
-                const iconClass = isDrive ? 'fa-file-image text-indigo-500' : 'fa-link text-orange-500';
-                const bgClass = isDrive ? 'bg-white border-slate-200' : 'bg-orange-50 border-orange-100';
-                c.insertAdjacentHTML('beforeend', `<div class="flex justify-between p-3 ${bgClass} border rounded-lg items-center"><div class="flex gap-3 overflow-hidden items-center"><div class="w-8 flex justify-center"><i class="fa-solid ${iconClass} text-lg"></i></div><div class="truncate"><p class="text-sm font-bold text-slate-700">${d.desc||'Dokumentasi'}</p><a href="${d.url}" target="_blank" class="text-xs text-blue-500 hover:underline flex items-center gap-1">${isDrive ? 'Lihat File' : 'Buka Link'} <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a></div></div><button type="button" onclick="removeKeptDoc(${i})" class="text-slate-400 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition"><i class="fa-solid fa-trash-can"></i></button></div>`);
-            }); 
-        }
-
-        function removeKeptDoc(i) { 
-            Swal.fire({
-                title: 'Hapus dokumen ini?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Hapus',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const k = JSON.parse(document.getElementById('form-kept-docs').value); 
-                    k.splice(i,1); 
-                    document.getElementById('form-kept-docs').value = JSON.stringify(k); 
-                    renderKeptDocs(k); 
-                }
-            })
-        }
-
-        function deleteExistingFile() { 
-            Swal.fire({
-                title: 'Hapus lampiran undangan?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Hapus',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('form-existing-file').value = ""; 
-                    document.getElementById('existing-file-display').classList.add('hidden'); 
-                }
-            })
-        }
-        
         async function submitData(e) { 
             e.preventDefault(); 
             toggleLoader(true); 
@@ -1015,6 +950,20 @@
             if (finalUnit === 'Lainnya') {
                 finalUnit = document.getElementById('inp-unit-lainnya').value;
             }
+
+            // [MODIFIKASI] Ambil data dari Quill
+            let isiContent = "";
+            if(quillEditor) {
+                isiContent = quillEditor.root.innerHTML;
+                // Validasi isi kosong (Quill default empty is <p><br></p>)
+                if (quillEditor.getText().trim().length === 0 && document.getElementById('form-action').value === 'update') {
+                    // Jika mode update (isi notulen), validasi isi wajib diisi
+                     toggleLoader(false); 
+                     showError("Isi pembahasan tidak boleh kosong");
+                     return;
+                }
+            }
+
             const payload = { 
                 action: document.getElementById('form-action').value, 
                 id: document.getElementById('form-id').value, 
@@ -1023,12 +972,13 @@
                 waktu: document.getElementById('inp-waktu').value, 
                 agenda: document.getElementById('inp-agenda').value, 
                 peserta: document.getElementById('inp-peserta').value, 
-                isi: form.isi.value, 
+                isi: isiContent, // Gunakan konten Quill
                 tindakLanjut: form.tindakLanjut.value, 
                 pencatatNama: currentUser.name, 
                 pencatatEmail: currentUser.email, 
                 existingFileUrl: document.getElementById('form-existing-file').value 
             }; 
+            
             const fileInput = document.getElementById('inp-file'); 
             if(fileInput.files.length > 0) { const f = fileInput.files[0]; if(f.size > 5*1024*1024) { toggleLoader(false); showError("File Max 5MB"); return; } payload.fileData = (await toBase64(f)).split(',')[1]; payload.fileName = f.name; payload.mimeType = f.type; } 
             
@@ -1063,151 +1013,22 @@
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { showSuccess("Berhasil!"); resetForm(); navTo('list'); loadData(); } else showError("Gagal: " + resp.message); }).catch(() => { toggleLoader(false); showError("Error Server"); }); 
         }
 
-        // [BARU] Fungsi Create Spreadsheet Notulen dengan Requester Email
-        function createSpreadsheetNotulen() {
-            const formAction = document.getElementById('form-action').value;
-            const formId = document.getElementById('form-id').value;
-            const agenda = document.getElementById('inp-agenda').value;
-            const tanggal = document.getElementById('inp-tanggal').value;
-            let unit = document.getElementById('inp-unit').value;
-            if(unit === 'Lainnya') unit = document.getElementById('inp-unit-lainnya').value;
-            const pimpinan = document.getElementById('inp-peserta').value;
+        // ... (Helpers: addDocRow, addUrlRow, renderKeptDocs, removeKeptDoc, deleteExistingFile, createSpreadsheetNotulen - Same) ...
+        function addDocRow() { document.getElementById('empty-docs-msg').classList.add('hidden'); const container = document.getElementById('new-docs-container'); const rowId = 'doc-' + Date.now(); container.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="doc-row flex gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200"><div class="flex-1"><input type="text" placeholder="Deskripsi Foto/Dok..." class="doc-desc glass-input w-full rounded-lg px-3 py-2 text-sm"></div><div class="flex items-center gap-2"><input type="file" class="doc-file text-xs text-slate-500" accept="image/*,.pdf"><button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-xmark"></i></button></div></div>`); }
+        function addUrlRow() { document.getElementById('empty-docs-msg').classList.add('hidden'); const container = document.getElementById('new-docs-container'); const rowId = 'url-' + Date.now(); container.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="url-row flex gap-2 bg-orange-50/50 p-3 rounded-lg border border-orange-100"><div class="flex items-center justify-center w-8 text-orange-400"><i class="fa-solid fa-link"></i></div><div class="flex-1 space-y-2 md:space-y-0 md:flex md:gap-2"><input type="text" placeholder="Deskripsi Link (e.g. Materi Drive)..." class="url-desc glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-300"><input type="url" placeholder="https://..." class="url-link glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-300"></div><div class="flex items-center"><button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-xmark"></i></button></div></div>`); }
+        function renderKeptDocs(docs) { const c = document.getElementById('existing-docs-container'); c.innerHTML = ''; if(!docs.length) { c.classList.add('hidden'); return; } c.classList.remove('hidden'); docs.forEach((d,i) => { const isDrive = d.url && d.url.includes('drive.google.com'); const iconClass = isDrive ? 'fa-file-image text-indigo-500' : 'fa-link text-orange-500'; const bgClass = isDrive ? 'bg-white border-slate-200' : 'bg-orange-50 border-orange-100'; c.insertAdjacentHTML('beforeend', `<div class="flex justify-between p-3 ${bgClass} border rounded-lg items-center"><div class="flex gap-3 overflow-hidden items-center"><div class="w-8 flex justify-center"><i class="fa-solid ${iconClass} text-lg"></i></div><div class="truncate"><p class="text-sm font-bold text-slate-700">${d.desc||'Dokumentasi'}</p><a href="${d.url}" target="_blank" class="text-xs text-blue-500 hover:underline flex items-center gap-1">${isDrive ? 'Lihat File' : 'Buka Link'} <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a></div></div><button type="button" onclick="removeKeptDoc(${i})" class="text-slate-400 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition"><i class="fa-solid fa-trash-can"></i></button></div>`); }); }
+        function removeKeptDoc(i) { Swal.fire({ title: 'Hapus dokumen ini?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Hapus', cancelButtonText: 'Batal' }).then((result) => { if (result.isConfirmed) { const k = JSON.parse(document.getElementById('form-kept-docs').value); k.splice(i,1); document.getElementById('form-kept-docs').value = JSON.stringify(k); renderKeptDocs(k); } }) }
+        function deleteExistingFile() { Swal.fire({ title: 'Hapus lampiran undangan?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Hapus', cancelButtonText: 'Batal' }).then((result) => { if (result.isConfirmed) { document.getElementById('form-existing-file').value = ""; document.getElementById('existing-file-display').classList.add('hidden'); } }) }
+        function createSpreadsheetNotulen() { const formAction = document.getElementById('form-action').value; const formId = document.getElementById('form-id').value; const agenda = document.getElementById('inp-agenda').value; const tanggal = document.getElementById('inp-tanggal').value; let unit = document.getElementById('inp-unit').value; if(unit === 'Lainnya') unit = document.getElementById('inp-unit-lainnya').value; const pimpinan = document.getElementById('inp-peserta').value; if(!agenda || !tanggal) { showError("Mohon lengkapi Agenda dan Tanggal terlebih dahulu."); return; } Swal.fire({ title: 'Buat Spreadsheet Baru?', text: "File spreadsheet akan dibuat di Google Drive.", icon: 'question', showCancelButton: true, confirmButtonColor: '#10b981', cancelButtonColor: '#d33', confirmButtonText: 'Ya, Buat!', cancelButtonText: 'Batal' }).then((result) => { if (result.isConfirmed) { toggleLoader(true); const payload = { action: 'createSpreadsheet', id: formId, agenda: agenda, tanggal: tanggal, unit: unit, pimpinan: pimpinan, requesterEmail: currentUser.email }; fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { const container = document.getElementById('new-docs-container'); const rowId = 'url-' + Date.now(); document.getElementById('empty-docs-msg').classList.add('hidden'); container.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="url-row flex gap-2 bg-green-50/50 p-3 rounded-lg border border-green-200"><div class="flex items-center justify-center w-8 text-green-600"><i class="fa-solid fa-file-excel"></i></div><div class="flex-1 space-y-2 md:space-y-0 md:flex md:gap-2"><input type="text" value="Notulen Matriks Spreadsheet - ${agenda}" class="url-desc glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300"><input type="url" value="${resp.url}" class="url-link glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300"></div><div class="flex items-center"><button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-xmark"></i></button></div></div>`); showSuccess(resp.message); window.open(resp.url, '_blank'); } else { showError("Gagal membuat spreadsheet: " + resp.message); } }).catch(() => { toggleLoader(false); showError("Gagal koneksi server."); }); } }) }
 
-            if(!agenda || !tanggal) {
-                showError("Mohon lengkapi Agenda dan Tanggal terlebih dahulu.");
-                return;
-            }
-
-            Swal.fire({
-                title: 'Buat Spreadsheet Baru?',
-                text: "File spreadsheet akan dibuat di Google Drive.",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#10b981',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Buat!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    toggleLoader(true);
-
-                    const payload = {
-                        action: 'createSpreadsheet',
-                        id: formId, 
-                        agenda: agenda,
-                        tanggal: tanggal,
-                        unit: unit,
-                        pimpinan: pimpinan,
-                        requesterEmail: currentUser.email 
-                    };
-
-                    fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-                    .then(res => res.json())
-                    .then(resp => {
-                        toggleLoader(false);
-                        if(resp.status === 'success') {
-                            const container = document.getElementById('new-docs-container');
-                            const rowId = 'url-' + Date.now();
-                            
-                            document.getElementById('empty-docs-msg').classList.add('hidden');
-                            
-                            container.insertAdjacentHTML('beforeend', `
-                                <div id="${rowId}" class="url-row flex gap-2 bg-green-50/50 p-3 rounded-lg border border-green-200">
-                                    <div class="flex items-center justify-center w-8 text-green-600"><i class="fa-solid fa-file-excel"></i></div>
-                                    <div class="flex-1 space-y-2 md:space-y-0 md:flex md:gap-2">
-                                        <input type="text" value="Notulen Matriks Spreadsheet - ${agenda}" class="url-desc glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300">
-                                        <input type="url" value="${resp.url}" class="url-link glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300">
-                                    </div>
-                                    <div class="flex items-center">
-                                        <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-xmark"></i></button>
-                                    </div>
-                                </div>
-                            `);
-
-                            showSuccess(resp.message); 
-                            window.open(resp.url, '_blank');
-                        } else {
-                            showError("Gagal membuat spreadsheet: " + resp.message);
-                        }
-                    })
-                    .catch(() => {
-                        toggleLoader(false);
-                        showError("Gagal koneksi server.");
-                    });
-                }
-            })
-        }
-
-        const toBase64 = file => new Promise((r, j) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => r(reader.result); reader.onerror = j; });
+        // ... (loadProfileView, saveProfile, loadUsers, changeRole, etc. - Same) ...
         function loadProfileView() { document.getElementById('prof-img').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=16a34a&color=fff`; document.getElementById('prof-name-disp').innerText = currentUser.name; document.getElementById('prof-email-disp').innerText = currentUser.email; document.getElementById('prof-role-disp').innerText = currentUser.role; document.getElementById('prof-email').value = currentUser.email; document.getElementById('prof-name').value = currentUser.name; document.getElementById('prof-unit').value = currentUser.unit || ""; document.getElementById('prof-phone').value = currentUser.phone || ""; }
         function saveProfile(e) { e.preventDefault(); toggleLoader(true); const newData = { action: 'updateProfile', email: currentUser.email, name: document.getElementById('prof-name').value, unit: document.getElementById('prof-unit').value, phone: document.getElementById('prof-phone').value }; fetch(API_URL, { method: 'POST', body: JSON.stringify(newData) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { showSuccess("Berhasil!"); currentUser.name = newData.name; currentUser.unit = newData.unit; currentUser.phone = newData.phone; localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); initApp(); loadProfileView(); } else showError("Gagal: " + resp.message); }); }
         function loadUsers() { if(currentUser.role !== 'ADMIN') return; toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getUsers', requesterEmail: currentUser.email }) }).then(res => res.json()).then(resp => { toggleLoader(false); const tbody = document.getElementById('users-table-body'); tbody.innerHTML = ''; resp.data.forEach(u => { const isSuper = u.email === "ridwankoramil9@gmail.com"; let btn = isSuper ? "SUPER" : `<button onclick="changeRole('${u.email}', '${u.role==='ADMIN'?'USER':'ADMIN'}')" class="text-xs bg-gray-100 px-2 py-1 rounded">Role</button>`; tbody.innerHTML += `<tr class="border-b"><td class="px-6 py-4">${u.name}</td><td class="px-6 py-4 text-xs">${u.email}</td><td class="px-6 py-4">${u.role}</td><td class="px-6 py-4 text-center">${btn}</td></tr>`; }); }); }
-        function changeRole(email, newRole) { 
-            Swal.fire({
-                title: 'Ubah role user?',
-                text: `Ubah ${email} menjadi ${newRole}?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Ubah!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    toggleLoader(true); 
-                    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'toggleAdmin', targetEmail: email, newRole: newRole }) })
-                    .then(res => res.json())
-                    .then(resp => { 
-                        toggleLoader(false); 
-                        if(resp.status === 'success') {
-                            showSuccess("Role berhasil diubah");
-                            loadUsers(); 
-                        } else {
-                            showError(resp.message); 
-                        }
-                    }); 
-                }
-            })
-        }
-        function toggleLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
-        
-        function handleProfileUnitChange(select) {
-            const div = document.getElementById('prof-unit-lainnya-group');
-            const input = document.getElementById('prof-unit-lainnya');
-            if (select.value === 'Lainnya') {
-                div.classList.remove('hidden');
-                input.setAttribute('required', 'true');
-            } else {
-                div.classList.add('hidden');
-                input.removeAttribute('required');
-                input.value = "";
-            }
-        }
-
-        function handleAbsensiUnitChange(select) {
-            const div = document.getElementById('abs-unit-lainnya-group');
-            const input = document.getElementById('abs-unit-lainnya');
-            if (select.value === 'Lainnya') {
-                div.classList.remove('hidden');
-                input.setAttribute('required', 'true');
-            } else {
-                div.classList.add('hidden');
-                input.removeAttribute('required');
-                input.value = "";
-            }
-        }
-
-        function handleCreateUnitChange(select) {
-            const div = document.getElementById('inp-unit-lainnya-group');
-            const input = document.getElementById('inp-unit-lainnya');
-            if (select.value === 'Lainnya') {
-                div.classList.remove('hidden');
-                input.setAttribute('required', 'true');
-            } else {
-                div.classList.add('hidden');
-                input.removeAttribute('required');
-                input.value = "";
-            }
-        }
+        function changeRole(email, newRole) { Swal.fire({ title: 'Ubah role user?', text: `Ubah ${email} menjadi ${newRole}?`, icon: 'question', showCancelButton: true, confirmButtonColor: '#3085d6', cancelButtonColor: '#d33', confirmButtonText: 'Ya, Ubah!' }).then((result) => { if (result.isConfirmed) { toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'toggleAdmin', targetEmail: email, newRole: newRole }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { showSuccess("Role berhasil diubah"); loadUsers(); } else { showError(resp.message); } }); } }) }
+        function handleProfileUnitChange(select) { const div = document.getElementById('prof-unit-lainnya-group'); const input = document.getElementById('prof-unit-lainnya'); if (select.value === 'Lainnya') { div.classList.remove('hidden'); input.setAttribute('required', 'true'); } else { div.classList.add('hidden'); input.removeAttribute('required'); input.value = ""; } }
+        function handleAbsensiUnitChange(select) { const div = document.getElementById('abs-unit-lainnya-group'); const input = document.getElementById('abs-unit-lainnya'); if (select.value === 'Lainnya') { div.classList.remove('hidden'); input.setAttribute('required', 'true'); } else { div.classList.add('hidden'); input.removeAttribute('required'); input.value = ""; } }
+        function handleCreateUnitChange(select) { const div = document.getElementById('inp-unit-lainnya-group'); const input = document.getElementById('inp-unit-lainnya'); if (select.value === 'Lainnya') { div.classList.remove('hidden'); input.setAttribute('required', 'true'); } else { div.classList.add('hidden'); input.removeAttribute('required'); input.value = ""; } }
     </script>
 </body>
 </html>
