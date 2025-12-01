@@ -18,6 +18,10 @@
     <!-- SIGNATURE PAD -->
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 
+    <!-- QUILL EDITOR (RICH TEXT) -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class', 
@@ -81,6 +85,22 @@
             display: flex;
             flex-direction: column;
         }
+
+        /* Styling Konten Quill di Hasil Rapat */
+        .ql-content-view ul, .ql-content-view ol { padding-left: 1.5em; margin-bottom: 1em; }
+        .ql-content-view ul { list-style-type: disc; }
+        .ql-content-view ol { list-style-type: decimal; }
+        .ql-content-view p { margin-bottom: 0.5em; }
+        .ql-content-view h1 { font-size: 1.5em; font-weight: bold; }
+        .ql-content-view h2 { font-size: 1.25em; font-weight: bold; }
+        .ql-content-view strong { font-weight: bold; }
+        .ql-content-view em { font-style: italic; }
+        .ql-content-view u { text-decoration: underline; }
+
+        /* Custom Quill Editor Styles */
+        .ql-toolbar { background: rgba(255, 255, 255, 0.8); border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; border-color: rgba(0,0,0,0.1) !important; }
+        .ql-container { background: rgba(255, 255, 255, 0.5); border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; border-color: rgba(0,0,0,0.1) !important; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.875rem; }
+        .ql-editor { min-height: 150px; }
 
         @media (max-width: 215mm) {
             .a4-paper { width: 100%; min-height: auto; padding: 1.5rem; box-shadow: none; }
@@ -231,12 +251,14 @@
 
                     <div class="mb-8">
                         <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">A. Pembahasan</h3>
-                        <div id="res-isi" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pl-2 border-l-2 border-slate-200">...</div>
+                        <!-- Menggunakan class ql-content-view untuk styling list/paragraph -->
+                        <div id="res-isi" class="ql-content-view text-sm text-slate-700 leading-relaxed pl-2 border-l-2 border-slate-200">...</div>
                     </div>
 
                     <div class="mb-8">
                         <h3 class="text-sm font-bold text-white bg-slate-700 px-3 py-1.5 rounded mb-3 inline-block uppercase tracking-wider">B. Rencana Tindak Lanjut</h3>
-                        <div id="res-tindak" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pl-2 border-l-2 border-slate-200 bg-green-50/50 p-2 rounded-r-lg">...</div>
+                         <!-- Menggunakan class ql-content-view untuk styling list/paragraph -->
+                        <div id="res-tindak" class="ql-content-view text-sm text-slate-700 leading-relaxed pl-2 border-l-2 border-slate-200 bg-green-50/50 p-2 rounded-r-lg">...</div>
                     </div>
 
                     <div class="mb-8 break-inside-avoid">
@@ -409,11 +431,20 @@
                                 <div id="existing-file-display" class="hidden mt-4 p-3 bg-white/80 rounded-lg border border-blue-100 flex items-center justify-between shadow-sm"><div class="flex items-center gap-3 overflow-hidden"><div class="bg-blue-100 p-2 rounded text-blue-600"><i class="fa-solid fa-file-lines"></i></div><span class="text-sm font-medium text-slate-700 truncate">File Terlampir</span><a href="#" target="_blank" id="link-existing-file" class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold hover:bg-blue-100 border border-blue-200 transition whitespace-nowrap">BUKA FILE <i class="fa-solid fa-external-link-alt ml-1"></i></a></div><button type="button" onclick="deleteExistingFile()" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition" title="Hapus lampiran"><i class="fa-solid fa-trash-can"></i></button></div>
                             </div>
                             <div id="section-recording" class="hidden pt-6 border-t border-slate-200 mt-6 animate-fade-in">
-                                <div class="mb-5 bg-green-50 p-4 rounded-xl border border-green-200 flex gap-3 items-start"><i class="fa-solid fa-circle-info text-green-600 mt-1"></i><div><h3 class="text-green-800 font-bold text-sm">Area Notulensi</h3><p class="text-green-600 text-xs">Silakan lengkapi hasil rapat dan rencana tindak lanjut di bawah ini.</p></div></div>
-                                <div class="mb-6"><label class="block text-xs font-bold text-slate-700 uppercase mb-2">Isi Pembahasan <span class="text-red-500">*</span></label><textarea name="isi" id="inp-isi" rows="8" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm leading-relaxed" placeholder="Catat poin-poin penting rapat..."></textarea></div>
-                                <div class="mb-4"><label class="block text-xs font-bold text-green-700 uppercase mb-2">Rencana Tindak Lanjut</label><textarea name="tindakLanjut" id="inp-tindak" rows="3" class="glass-input w-full rounded-xl border-green-200 bg-green-50/30 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 text-sm" placeholder="Action plan..."></textarea></div>
+                                <div class="mb-5 bg-green-50 p-4 rounded-xl border border-green-200 flex gap-3 items-start"><i class="fa-solid fa-circle-info text-green-600 mt-1"></i><div><h3 class="text-green-800 font-bold text-sm">Area Notulensi (Rich Text)</h3><p class="text-green-600 text-xs">Gunakan tools di atas editor untuk memformat teks (Bold, List, dll).</p></div></div>
                                 
-                                <!-- [BARU] Tombol Create Spreadsheet Mode -->
+                                <!-- QUILL EDITOR ISI -->
+                                <div class="mb-8">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Isi Pembahasan <span class="text-red-500">*</span></label>
+                                    <div id="editor-isi" class="bg-white/50 rounded-xl" style="height: 300px;"></div>
+                                </div>
+                                
+                                <!-- QUILL EDITOR TINDAK LANJUT -->
+                                <div class="mb-4">
+                                    <label class="block text-xs font-bold text-green-700 uppercase mb-2">Rencana Tindak Lanjut</label>
+                                    <div id="editor-tindak" class="bg-white/50 rounded-xl" style="height: 150px;"></div>
+                                </div>
+                                
                                 <div class="mb-8 flex justify-end">
                                     <button type="button" onclick="createSpreadsheetNotulen()" class="text-xs bg-green-100 text-green-700 px-4 py-2 rounded-lg font-bold hover:bg-green-200 transition border border-green-300 flex items-center shadow-sm">
                                         <i class="fa-solid fa-file-excel mr-2"></i> Buat Notulen Mode Spreadsheet
@@ -524,6 +555,40 @@
     </div>
 
     <script>
+        // --- QUILL INITIALIZATION ---
+        let quillIsi = null;
+        let quillTindak = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Init Quill untuk Isi Pembahasan
+            quillIsi = new Quill('#editor-isi', {
+                theme: 'snow',
+                placeholder: 'Tuliskan jalannya rapat dan poin penting...',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],        
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'indent': '-1'}, { 'indent': '+1' }],          
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['clean']                                         
+                    ]
+                }
+            });
+
+            // Init Quill untuk Tindak Lanjut
+            quillTindak = new Quill('#editor-tindak', {
+                theme: 'snow',
+                placeholder: 'Tuliskan rencana tindak lanjut...',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+        });
+
         // ... (Signature Pad Logic is same) ...
         let signaturePad = null;
         const canvas = document.getElementById('signature-pad');
@@ -593,7 +658,7 @@
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { document.getElementById('absensi-content').classList.add('hidden'); document.getElementById('absensi-success').classList.remove('hidden'); } else { alert("Gagal: " + resp.message); } }).catch(err => { toggleLoader(false); alert("Terjadi kesalahan sistem."); });
         }
 
-        // ... (Result Logic Same) ...
+        // ... (Result Logic) ...
         function loadMeetingResult(id) {
             document.getElementById('res-meeting-id').value = id;
             const savedUser = localStorage.getItem('rsud_user_pro_v2');
@@ -609,8 +674,11 @@
                     document.getElementById('res-unit').textContent = d.unit || '-';
                     document.getElementById('res-pimpinan').textContent = d.pimpinan || '-';
                     document.getElementById('res-ttd-nama').textContent = d.pimpinan || 'Pimpinan Rapat';
-                    document.getElementById('res-isi').textContent = d.isi || 'Belum ada pembahasan.';
-                    document.getElementById('res-tindak').textContent = d.tindakLanjut || '-';
+                    
+                    // [MODIFIED] Use innerHTML for Rich Text
+                    document.getElementById('res-isi').innerHTML = d.isi || 'Belum ada pembahasan.';
+                    document.getElementById('res-tindak').innerHTML = d.tindakLanjut || '-';
+                    
                     let docs = []; try { docs = JSON.parse(d.dokumentasi); } catch(e) {}
                     const gallery = document.getElementById('res-gallery'); const links = document.getElementById('res-links'); gallery.innerHTML = ''; links.innerHTML = '';
                     let hasDocs = false;
@@ -780,7 +848,8 @@
             document.getElementById('inp-file').disabled = true;
             setTimeout(() => {
                 document.getElementById('section-recording').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                document.getElementById('inp-isi').focus();
+                // Focus on Quill Editor
+                if(quillIsi) quillIsi.focus();
             }, 500);
         }
 
@@ -790,6 +859,10 @@
         
         function resetForm() { 
             document.getElementById('mainForm').reset(); 
+            // Reset Quill Editors
+            if(quillIsi) quillIsi.setText('');
+            if(quillTindak) quillTindak.setText('');
+            
             document.getElementById('form-action').value = 'create'; 
             document.getElementById('form-id').value = ''; 
             document.getElementById('inp-unit').disabled = false;
@@ -808,7 +881,7 @@
             document.getElementById('inp-unit').value = currentUser.unit || ""; 
             handleCreateUnitChange(document.getElementById('inp-unit')); 
             document.getElementById('section-recording').classList.add('hidden'); 
-            document.getElementById('inp-isi').removeAttribute('required'); 
+            // document.getElementById('inp-isi').removeAttribute('required'); // Quill doesn't use standard required
             document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-plus"></i></span> Buat Jadwal Rapat'; 
             document.getElementById('btn-submit-text').innerText = "Simpan Jadwal"; 
         }
@@ -817,7 +890,7 @@
             const item = JSON.parse(decodeURIComponent(itemStr)); 
             navTo('create'); 
             document.getElementById('section-recording').classList.remove('hidden'); 
-            document.getElementById('inp-isi').setAttribute('required', 'true'); 
+            // document.getElementById('inp-isi').setAttribute('required', 'true'); 
             document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-to-square"></i></span> Isi Hasil Rapat'; 
             document.getElementById('btn-submit-text').innerText = "Simpan Hasil Notulen"; 
             document.getElementById('form-action').value = 'update'; 
@@ -843,8 +916,11 @@
             document.getElementById('inp-waktu').value = item.waktu || ""; 
             document.getElementById('inp-agenda').value = item.agenda; 
             document.getElementById('inp-peserta').value = item.peserta; 
-            document.getElementById('inp-isi').value = item.isi; 
-            document.getElementById('inp-tindak').value = item.tindakLanjut; 
+            
+            // [MODIFIED] Load Content to Quill
+            if(quillIsi) quillIsi.root.innerHTML = item.isi || "";
+            if(quillTindak) quillTindak.root.innerHTML = item.tindakLanjut || "";
+            
             if(item.fileUrl && item.fileUrl.length > 5) { document.getElementById('form-existing-file').value = item.fileUrl; document.getElementById('existing-file-display').classList.remove('hidden'); document.getElementById('link-existing-file').href = item.fileUrl; } else { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; } 
             if(item.dokumentasiJson && item.dokumentasiJson.length > 5) { try { const docs = JSON.parse(item.dokumentasiJson); document.getElementById('form-kept-docs').value = JSON.stringify(docs); renderKeptDocs(docs); } catch(e) {} } else { document.getElementById('form-kept-docs').value = "[]"; renderKeptDocs([]); } 
         }
@@ -898,6 +974,11 @@
             if (finalUnit === 'Lainnya') {
                 finalUnit = document.getElementById('inp-unit-lainnya').value;
             }
+            
+            // [MODIFIED] Get Content from Quill
+            const isiHtml = quillIsi.root.innerHTML;
+            const tindakHtml = quillTindak.root.innerHTML;
+
             const payload = { 
                 action: document.getElementById('form-action').value, 
                 id: document.getElementById('form-id').value, 
@@ -906,8 +987,8 @@
                 waktu: document.getElementById('inp-waktu').value, 
                 agenda: document.getElementById('inp-agenda').value, 
                 peserta: document.getElementById('inp-peserta').value, 
-                isi: form.isi.value, 
-                tindakLanjut: form.tindakLanjut.value, 
+                isi: isiHtml, 
+                tindakLanjut: tindakHtml, 
                 pencatatNama: currentUser.name, 
                 pencatatEmail: currentUser.email, 
                 existingFileUrl: document.getElementById('form-existing-file').value 
@@ -946,7 +1027,7 @@
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { alert("Berhasil!"); resetForm(); navTo('list'); loadData(); } else alert("Gagal: " + resp.message); }).catch(() => { toggleLoader(false); alert("Error Server"); }); 
         }
 
-        // [BARU] Fungsi Create Spreadsheet Notulen dengan Requester Email
+        // ... (Remaining Logic Same) ...
         function createSpreadsheetNotulen() {
             const formAction = document.getElementById('form-action').value;
             const formId = document.getElementById('form-id').value;
@@ -972,7 +1053,7 @@
                 tanggal: tanggal,
                 unit: unit,
                 pimpinan: pimpinan,
-                requesterEmail: currentUser.email // [MODIFIKASI] Kirim email user login
+                requesterEmail: currentUser.email
             };
 
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
@@ -980,7 +1061,6 @@
             .then(resp => {
                 toggleLoader(false);
                 if(resp.status === 'success') {
-                    // Otomatis tambahkan ke list URL
                     const container = document.getElementById('new-docs-container');
                     const rowId = 'url-' + Date.now();
                     
@@ -990,7 +1070,7 @@
                         <div id="${rowId}" class="url-row flex gap-2 bg-green-50/50 p-3 rounded-lg border border-green-200">
                             <div class="flex items-center justify-center w-8 text-green-600"><i class="fa-solid fa-file-excel"></i></div>
                             <div class="flex-1 space-y-2 md:space-y-0 md:flex md:gap-2">
-                                <input type="text" value="Notulen Matriks Spreadsheet - ${agenda}" class="url-desc glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300">
+                                <input type="text" value="Notulen Matriks Spreadsheet" class="url-desc glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300">
                                 <input type="url" value="${resp.url}" class="url-link glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300">
                             </div>
                             <div class="flex items-center">
@@ -999,7 +1079,7 @@
                         </div>
                     `);
 
-                    alert(resp.message); // Tampilkan pesan sukses dari server (termasuk info akses edit)
+                    alert(resp.message);
                     window.open(resp.url, '_blank');
                 } else {
                     alert("Gagal membuat spreadsheet: " + resp.message);
