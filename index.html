@@ -1239,25 +1239,64 @@
             });
         }
         
+        // --- FUNGSI BARU: KOMPRESI GAMBAR ---
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        // Resize dimensi jika terlalu besar (Max 2048px agar file tidak bengkak)
+                        const MAX_DIM = 2048; 
+                        if (width > height) {
+                            if (width > MAX_DIM) { height *= MAX_DIM / width; width = MAX_DIM; }
+                        } else {
+                            if (height > MAX_DIM) { width *= MAX_DIM / height; height = MAX_DIM; }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Kompres ke JPEG dengan kualitas 70% (0.7)
+                        resolve(canvas.toDataURL('image/jpeg', 0.7)); 
+                    };
+                    img.onerror = (err) => reject(err);
+                };
+                reader.onerror = (err) => reject(err);
+            });
+        }
+
         async function submitData(e) { 
             e.preventDefault(); 
             toggleLoader(true); 
-            const form = document.getElementById('mainForm'); 
             
-            // [MODIFIED] Manual Validation for Quill
+            // --- KONFIGURASI BATAS UKURAN ---
+            const MAX_IMG_SIZE = 10 * 1024 * 1024; // 10 MB
+            const MAX_DOC_SIZE = 20 * 1024 * 1024; // 20 MB
+
             const formAction = document.getElementById('form-action').value;
-            // Hanya validasi isi notulen jika mode update (saat menulis hasil rapat)
+            
+            // Validasi Manual Quill (Isi Notulen)
             if (formAction === 'update' && quillIsi.getText().trim().length === 0) {
-                 toggleLoader(false);
-                 Swal.fire({ icon: 'warning', title: 'Belum Lengkap', text: 'Mohon isi pembahasan rapat terlebih dahulu.' });
-                 quillIsi.focus();
-                 return;
+                    toggleLoader(false);
+                    Swal.fire({ icon: 'warning', title: 'Belum Lengkap', text: 'Mohon isi pembahasan rapat terlebih dahulu.' });
+                    quillIsi.focus();
+                    return;
             }
 
             let finalUnit = document.getElementById('inp-unit').value;
             if (finalUnit === 'Lainnya') {
                 finalUnit = document.getElementById('inp-unit-lainnya').value;
             }
+
             const payload = { 
                 action: document.getElementById('form-action').value, 
                 id: document.getElementById('form-id').value, 
@@ -1266,40 +1305,87 @@
                 waktu: document.getElementById('inp-waktu').value, 
                 agenda: document.getElementById('inp-agenda').value, 
                 peserta: document.getElementById('inp-peserta').value, 
-                // [MODIFIED] Get HTML from Quill
                 isi: quillIsi.root.innerHTML, 
                 tindakLanjut: quillTindak.root.innerHTML, 
                 pencatatNama: currentUser.name, 
                 pencatatEmail: currentUser.email, 
                 existingFileUrl: document.getElementById('form-existing-file').value 
             }; 
+
+            // --- PROSES FILE UTAMA (UNDANGAN) ---
             const fileInput = document.getElementById('inp-file'); 
             if(fileInput.files.length > 0) { 
                 const f = fileInput.files[0]; 
-                if(f.size > 5*1024*1024) { 
-                    toggleLoader(false); 
-                    Swal.fire('File Terlalu Besar', 'Maksimal ukuran file adalah 5MB', 'warning'); 
-                    return; 
-                } 
-                payload.fileData = (await toBase64(f)).split(',')[1]; payload.fileName = f.name; payload.mimeType = f.type; 
+                let base64Result = "";
+                let finalMime = f.type;
+
+                if (f.type.startsWith('image/')) {
+                    // Jika Gambar: Kompres dulu
+                    base64Result = await compressImage(f);
+                    finalMime = "image/jpeg"; // Hasil kompresi selalu JPEG
+                    
+                    // Cek ukuran setelah kompresi (Estimasi dari panjang string Base64)
+                    const sizeInBytes = (base64Result.length * 3) / 4; 
+                    if(sizeInBytes > MAX_IMG_SIZE) { 
+                        toggleLoader(false); 
+                        Swal.fire('File Gambar Terlalu Besar', 'Setelah dikompres ukuran masih di atas 10MB.', 'warning'); 
+                        return; 
+                    }
+                    // Hapus header data url untuk dikirim ke backend
+                    payload.fileData = base64Result.split(',')[1];
+                } else {
+                    // Jika PDF/Lainnya: Cek ukuran asli
+                    if(f.size > MAX_DOC_SIZE) { 
+                        toggleLoader(false); 
+                        Swal.fire('File Terlalu Besar', 'Maksimal ukuran file dokumen (PDF) adalah 20MB', 'warning'); 
+                        return; 
+                    } 
+                    base64Result = await toBase64(f);
+                    payload.fileData = base64Result.split(',')[1];
+                }
+
+                payload.fileName = f.name; 
+                payload.mimeType = finalMime; 
             } 
             
+            // --- PROSES DOKUMENTASI TAMBAHAN ---
             const newDocs = []; 
             for(const row of document.querySelectorAll('.doc-row')) { 
                 const fi = row.querySelector('.doc-file'); 
                 const di = row.querySelector('.doc-desc'); 
+                
                 if(fi.files.length > 0) { 
                     const f = fi.files[0]; 
-                    if(f.size > 3*1024*1024) { 
-                        toggleLoader(false); 
-                        Swal.fire('Foto Terlalu Besar', 'Maksimal ukuran foto adalah 3MB', 'warning'); 
-                        return; 
-                    } 
-                    newDocs.push({ fileData: (await toBase64(f)).split(',')[1], fileName: f.name, mimeType: f.type, description: di.value }); 
+                    let docBase64 = "";
+                    let docMime = f.type;
+
+                    if (f.type.startsWith('image/')) {
+                        // Kompres Gambar Dokumentasi
+                        docBase64 = await compressImage(f);
+                        docMime = "image/jpeg";
+
+                        const sizeInBytes = (docBase64.length * 3) / 4;
+                        if(sizeInBytes > MAX_IMG_SIZE) { 
+                            toggleLoader(false); 
+                            Swal.fire('Foto Dokumentasi Terlalu Besar', `Foto "${f.name}" melebihi 10MB setelah kompresi.`, 'warning'); 
+                            return; 
+                        }
+                        newDocs.push({ fileData: docBase64.split(',')[1], fileName: f.name, mimeType: docMime, description: di.value }); 
+                    } else {
+                        // Dokumen Non-Gambar (PDF)
+                        if(f.size > MAX_DOC_SIZE) { 
+                            toggleLoader(false); 
+                            Swal.fire('Dokumen Terlalu Besar', `File "${f.name}" melebihi 20MB.`, 'warning'); 
+                            return; 
+                        } 
+                        docBase64 = await toBase64(f);
+                        newDocs.push({ fileData: docBase64.split(',')[1], fileName: f.name, mimeType: docMime, description: di.value }); 
+                    }
                 } 
             } 
             payload.newDokumentasi = newDocs; 
 
+            // --- SISA LOGIKA (URL LINKS & KIRIM DATA) ---
             let keptDocsArray = [];
             try { keptDocsArray = JSON.parse(document.getElementById('form-kept-docs').value); } catch(e) { keptDocsArray = []; }
 
