@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Notulen Pro | RSUD Koesma</title>
+    <title>E-Notulen | RSUD dr. R. Koesma</title>
     
     <!-- Favicon RSUD -->
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png">
@@ -938,20 +938,29 @@
 
         // ... (Helpers: Copy, View Attendance, Download Excel, Delete, Load Data) ...
         function copyAbsensiLink(id) { 
-            const baseUrl = window.location.href.split('?')[0]; 
+            // FIXED: Gunakan origin + pathname agar link bersih (tanpa # atau parameter lama)
+            const baseUrl = window.location.origin + window.location.pathname; 
             const fullUrl = `${baseUrl}?v=absensi&id=${id}`; 
             navigator.clipboard.writeText(fullUrl).then(() => { 
                 Toast.fire({ icon: 'success', title: 'Link Absensi Disalin!' });
             }); 
         }
         function copyResultLink(id) { 
-            const baseUrl = window.location.href.split('?')[0]; 
+            // FIXED: Gunakan origin + pathname
+            const baseUrl = window.location.origin + window.location.pathname; 
             const fullUrl = `${baseUrl}?v=result&id=${id}`; 
             navigator.clipboard.writeText(fullUrl).then(() => { 
                 Toast.fire({ icon: 'success', title: 'Link Hasil Notulen Disalin!' });
             }); 
         }
-        function showQrCode(id) { const baseUrl = window.location.href.split('?')[0]; const fullUrl = `${baseUrl}?v=absensi&id=${id}`; const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(fullUrl)}`; document.getElementById('qr-image').src = qrUrl; document.getElementById('modal-qrcode').classList.remove('hidden'); }
+        function showQrCode(id) { 
+            // FIXED: Gunakan origin + pathname
+            const baseUrl = window.location.origin + window.location.pathname; 
+            const fullUrl = `${baseUrl}?v=absensi&id=${id}`; 
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(fullUrl)}`; 
+            document.getElementById('qr-image').src = qrUrl; 
+            document.getElementById('modal-qrcode').classList.remove('hidden'); 
+        }
         function closeQrModal() { document.getElementById('modal-qrcode').classList.add('hidden'); }
         
         function viewAttendance(id, title, date, time) {
