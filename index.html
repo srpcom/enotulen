@@ -81,7 +81,6 @@
         .a4-paper {
             width: 210mm;
             min-height: 297mm; 
-            height: auto; /* Memastikan background memanjang mengikuti konten */
             background: white;
             margin: 0 auto;
             padding: 20mm; 
@@ -133,14 +132,7 @@
         .rich-text-content h1, .rich-text-content h2, .rich-text-content h3 { font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; }
 
         @media (max-width: 215mm) {
-            .a4-paper { 
-                width: 100%; 
-                min-height: auto; 
-                height: auto; 
-                padding: 1.5rem; 
-                padding-bottom: 4rem; /* Tambahan padding bawah untuk mobile */
-                box-shadow: none; 
-            }
+            .a4-paper { width: 100%; min-height: auto; padding: 1.5rem; box-shadow: none; }
         }
 
         /* === PRINT CONFIGURATION (FIXED) === */
@@ -395,8 +387,8 @@
             </div>
 
             <!-- Tanda Tangan Section -->
-            <!-- mt-auto dihapus agar tidak mendorong keluar saat flex/min-height issue terjadi -->
-            <div class="signature-section pt-16 flex justify-end break-inside-avoid page-break-inside-avoid">
+            <!-- mt-auto dihapus, diganti class khusus. Di layar menggunakan margin-top auto dari flex parent -->
+            <div class="signature-section mt-auto pt-16 flex justify-end break-inside-avoid page-break-inside-avoid">
                 <div class="text-center w-64">
                     <p class="text-sm text-slate-600 mb-20">Mengetahui,</p>
                     <p class="text-sm font-bold text-slate-900 underline underline-offset-4" id="res-ttd-nama">Pimpinan Rapat</p>
@@ -405,6 +397,7 @@
             </div>
 
             <div class="no-print fixed bottom-6 right-6 flex flex-col gap-3">
+                <button onclick="exportToWord()" class="bg-blue-800 text-white w-12 h-12 rounded-full shadow-lg hover:bg-blue-900 transition flex items-center justify-center text-lg animate-fade-in" title="Export to Word"><i class="fa-solid fa-file-word"></i></button>
                 <button id="btn-broadcast" onclick="broadcastResult()" class="hidden bg-green-500 text-white w-12 h-12 rounded-full shadow-lg hover:bg-green-600 transition items-center justify-center text-xl animate-fade-in" title="Kirim Broadcast WA ke Peserta"><i class="fa-brands fa-whatsapp"></i></button>
                 <button onclick="window.print()" class="bg-blue-600 text-white w-12 h-12 rounded-full shadow-lg hover:bg-blue-700 transition flex items-center justify-center text-lg" title="Cetak / Simpan PDF"><i class="fa-solid fa-print"></i></button>
                 <a href="index.html" class="bg-slate-600 text-white w-12 h-12 rounded-full shadow-lg hover:bg-slate-700 transition flex items-center justify-center text-lg" title="Ke Halaman Utama"><i class="fa-solid fa-house"></i></a>
@@ -852,6 +845,22 @@
                     });
                 }
             });
+        }
+        
+        function exportToWord() {
+            const content = document.querySelector('.a4-paper').innerHTML;
+            const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML to Word Document with JavaScript</title><style>body{font-family: sans-serif;}</style></head><body>";
+            const postHtml = "</body></html>";
+            const html = preHtml + content + postHtml;
+
+            const blob = new Blob(['\ufeff', html], {
+                type: 'application/msword'
+            });
+            
+            const agenda = document.getElementById('res-agenda').textContent || 'Rapat';
+            const filename = 'Notulen_' + agenda.replace(/[^a-zA-Z0-9]/g, "_") + '.doc';
+            
+            saveAs(blob, filename);
         }
 
         // --- 4. ADMIN LOGIC ---
