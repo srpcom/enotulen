@@ -274,12 +274,12 @@
                         <select id="abs-unit" onchange="handleAbsensiUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Pilih Unit --</option>
                             <option value="Direksi">Direksi</option>
-                            <option value="Yanmed">Yanmed</option>
-                            <option value="Keperawatan">Keperawatan</option>
-                            <option value="Penunjang">Penunjang</option>
-                            <option value="Umum">Umum & Kepegawaian</option>
-                            <option value="Keuangan">Keuangan</option>
-                            <option value="Komite Medis">Komite Medis</option>
+                            <option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option>
+                            <option value="Bagian Keuangan">Bagian Keuangan</option>
+                            <option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option>
+                            <option value="Bidang Keperawatan">Bidang Keperawatan</option>
+                            <option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option>
+                            <option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option>
                             <option value="Lainnya">Lainnya</option>
                         </select>
                         <div id="abs-unit-lainnya-group" class="hidden mt-3 animate-fade-in">
@@ -499,12 +499,12 @@
                                     <select id="prof-unit" onchange="handleProfileUnitChange(this)" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all">
                                         <option value="">-- Pilih Unit --</option>
                                         <option value="Direksi">Direksi</option>
-                                        <option value="Yanmed">Yanmed</option>
-                                        <option value="Keperawatan">Keperawatan</option>
-                                        <option value="Penunjang">Penunjang</option>
-                                        <option value="Umum">Umum & Kepegawaian</option>
-                                        <option value="Keuangan">Keuangan</option>
-                                        <option value="Komite Medis">Komite Medis</option>
+                                        <option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option>
+                                        <option value="Bagian Keuangan">Bagian Keuangan</option>
+                                        <option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option>
+                                        <option value="Bidang Keperawatan">Bidang Keperawatan</option>
+                                        <option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option>
+                                        <option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option>
                                         <option value="Lainnya">Lainnya</option>
                                     </select>
                                     <div id="prof-unit-lainnya-group" class="hidden mt-3 animate-fade-in">
@@ -526,16 +526,16 @@
                             <input type="hidden" name="action" id="form-action" value="create"><input type="hidden" name="id" id="form-id"><input type="hidden" name="existingFileUrl" id="form-existing-file"><input type="hidden" id="form-kept-docs" value="[]">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                 <div class="md:col-span-1">
-                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Unit <span class="text-red-500">*</span></label>
+                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">UNIT PELAKSANA <span class="text-red-500">*</span></label>
                                     <select name="unit" id="inp-unit" onchange="handleCreateUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm">
                                         <option value="">-- Pilih Unit --</option>
                                         <option value="Direksi">Direksi</option>
-                                        <option value="Yanmed">Yanmed</option>
-                                        <option value="Keperawatan">Keperawatan</option>
-                                        <option value="Penunjang">Penunjang</option>
-                                        <option value="Umum">Umum</option>
-                                        <option value="Keuangan">Keuangan</option>
-                                        <option value="Komite Medis">Komite Medis</option>
+                                        <option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option>
+                                        <option value="Bagian Keuangan">Bagian Keuangan</option>
+                                        <option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option>
+                                        <option value="Bidang Keperawatan">Bidang Keperawatan</option>
+                                        <option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option>
+                                        <option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option>
                                         <option value="Lainnya">Lainnya</option>
                                     </select>
                                     <div id="inp-unit-lainnya-group" class="hidden mt-2 animate-fade-in"><input type="text" id="inp-unit-lainnya" placeholder="Tulis nama unit..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"></div>
@@ -1488,4 +1488,3 @@
     </script>
 </body>
 </html>
-
