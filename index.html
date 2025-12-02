@@ -702,23 +702,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const mode = urlParams.get('v');
         const meetingId = urlParams.get('id');
-
-        if (mode === 'absensi' && meetingId) {
-            const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.add('hidden');
-            const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.remove('hidden');
-            loadMeetingInfo(meetingId); 
-            setTimeout(resizeCanvas, 300);
-        } else if (mode === 'result' && meetingId) {
-            const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.add('hidden');
-            const resultApp = document.getElementById('view-public-result'); if(resultApp) resultApp.classList.remove('hidden');
-            loadMeetingResult(meetingId);
-        } else {
-            const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.add('hidden');
-            const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.remove('hidden');
-            const googleBtn = document.getElementById('g_id_onload'); if(googleBtn) googleBtn.setAttribute('data-client_id', CLIENT_ID);
-            const savedUser = localStorage.getItem('rsud_user_pro_v2'); 
-            if(savedUser) { try { currentUser = JSON.parse(savedUser); initApp(); } catch(e) { localStorage.removeItem('rsud_user_pro_v2'); } }
-        }
+        let currentUser = null;
 
         // --- QUILL INITIALIZATION ---
         let quillIsi = null;
@@ -727,24 +711,32 @@
         function initQuillEditors() {
             if(quillIsi || quillTindak) return; // Prevent double init
             
-            const toolbarOptions = [
-                ['bold', 'italic', 'underline'],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                [{ 'indent': '-1'}, { 'indent': '+1' }],
-                ['link', 'clean']
-            ];
+            try {
+                if (typeof Quill === 'undefined') {
+                    console.warn("Quill library not loaded yet.");
+                    return;
+                }
+                const toolbarOptions = [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],
+                    ['link', 'clean']
+                ];
 
-            quillIsi = new Quill('#editor-isi', {
-                theme: 'snow',
-                placeholder: 'Catat poin-poin penting rapat, keputusan, dan diskusi...',
-                modules: { toolbar: toolbarOptions }
-            });
+                quillIsi = new Quill('#editor-isi', {
+                    theme: 'snow',
+                    placeholder: 'Catat poin-poin penting rapat, keputusan, dan diskusi...',
+                    modules: { toolbar: toolbarOptions }
+                });
 
-            quillTindak = new Quill('#editor-tindak', {
-                theme: 'snow',
-                placeholder: 'Rencana tindak lanjut, PIC, dan deadline...',
-                modules: { toolbar: toolbarOptions }
-            });
+                quillTindak = new Quill('#editor-tindak', {
+                    theme: 'snow',
+                    placeholder: 'Rencana tindak lanjut, PIC, dan deadline...',
+                    modules: { toolbar: toolbarOptions }
+                });
+            } catch (err) {
+                console.error("Failed to init Quill:", err);
+            }
         }
 
         // ... (Absensi Logic Same) ...
@@ -855,7 +847,6 @@
         }
 
         // --- 4. ADMIN LOGIC ---
-        let currentUser = null;
         let allData = [];
         let filteredData = [];
         let currentPage = 1;
@@ -891,17 +882,25 @@
         }
 
         function initApp() {
+            if (!currentUser) return;
+            
+            // Hide login screen IMMEDIATELY
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('sidebar').classList.remove('hidden'); 
+            document.getElementById('sidebar').classList.add('flex');
+            document.getElementById('content-area').classList.remove('hidden');
+
             document.getElementById('sb-avatar').src = currentUser.picture || `https://ui-avatars.com/api/?name=${currentUser.name}&background=16a34a&color=fff`;
             document.getElementById('sb-name').textContent = currentUser.name;
             document.getElementById('sb-role').textContent = currentUser.role;
-            document.getElementById('view-login').classList.add('hidden');
-            document.getElementById('sidebar').classList.remove('hidden'); document.getElementById('sidebar').classList.add('flex');
-            document.getElementById('content-area').classList.remove('hidden');
+            
             if(currentUser.role === 'ADMIN') document.getElementById('menu-admin').classList.remove('hidden');
             
-            initQuillEditors(); // Initialize Quill here
-            
-            navTo('dashboard'); loadData();
+            setTimeout(() => {
+                initQuillEditors(); // Delay init slightly to ensure DOM ready
+                navTo('dashboard'); 
+                loadData();
+            }, 100);
         }
 
         function navTo(page) {
@@ -1485,7 +1484,49 @@
                 input.value = "";
             }
         }
+
+        // --- 5. EXECUTE ON LOAD (LOGIC MODIFIED FOR PERSISTENCE) ---
+        if (mode === 'absensi' && meetingId) {
+            const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.add('hidden');
+            const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.remove('hidden');
+            loadMeetingInfo(meetingId); 
+            setTimeout(resizeCanvas, 300);
+        } else if (mode === 'result' && meetingId) {
+            const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.add('hidden');
+            const resultApp = document.getElementById('view-public-result'); if(resultApp) resultApp.classList.remove('hidden');
+            loadMeetingResult(meetingId);
+        } else {
+            // Default Admin/Login view
+            const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.add('hidden');
+            const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.remove('hidden');
+            const googleBtn = document.getElementById('g_id_onload'); if(googleBtn) googleBtn.setAttribute('data-client_id', CLIENT_ID);
+
+            // [MODIFIED] ROBUST LOCAL STORAGE CHECK
+            const savedUser = localStorage.getItem('rsud_user_pro_v2');
+            
+            if(savedUser) {
+                try {
+                    // Hanya parse JSON di dalam try block ini
+                    // Jika JSON valid, kita anggap user ada
+                    currentUser = JSON.parse(savedUser);
+                } catch(e) {
+                    console.error("Local Storage Corrupt, clearing data:", e);
+                    localStorage.removeItem('rsud_user_pro_v2');
+                    currentUser = null;
+                }
+
+                // Jalankan App di luar try-catch penghapusan data
+                // Jika App error, user TIDAK dilogout, melainkan error muncul di console
+                if (currentUser) {
+                    try {
+                        initApp();
+                    } catch (err) {
+                        console.error("Application Init Error (User stays logged in):", err);
+                        // Optional: Bisa tampilkan notifikasi error kecil tanpa logout
+                    }
+                }
+            }
+        }
     </script>
 </body>
 </html>
-
