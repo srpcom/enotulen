@@ -81,6 +81,7 @@
         .a4-paper {
             width: 210mm;
             min-height: 297mm; 
+            height: auto; /* Memastikan background memanjang mengikuti konten */
             background: white;
             margin: 0 auto;
             padding: 20mm; 
@@ -132,7 +133,14 @@
         .rich-text-content h1, .rich-text-content h2, .rich-text-content h3 { font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; }
 
         @media (max-width: 215mm) {
-            .a4-paper { width: 100%; min-height: auto; padding: 1.5rem; box-shadow: none; }
+            .a4-paper { 
+                width: 100%; 
+                min-height: auto; 
+                height: auto; 
+                padding: 1.5rem; 
+                padding-bottom: 4rem; /* Tambahan padding bawah untuk mobile */
+                box-shadow: none; 
+            }
         }
 
         /* === PRINT CONFIGURATION (FIXED) === */
@@ -387,8 +395,8 @@
             </div>
 
             <!-- Tanda Tangan Section -->
-            <!-- mt-auto dihapus, diganti class khusus. Di layar menggunakan margin-top auto dari flex parent -->
-            <div class="signature-section mt-auto pt-16 flex justify-end break-inside-avoid page-break-inside-avoid">
+            <!-- mt-auto dihapus agar tidak mendorong keluar saat flex/min-height issue terjadi -->
+            <div class="signature-section pt-16 flex justify-end break-inside-avoid page-break-inside-avoid">
                 <div class="text-center w-64">
                     <p class="text-sm text-slate-600 mb-20">Mengetahui,</p>
                     <p class="text-sm font-bold text-slate-900 underline underline-offset-4" id="res-ttd-nama">Pimpinan Rapat</p>
