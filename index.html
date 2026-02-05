@@ -41,12 +41,30 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-image 0.5s ease, background-color 0.5s ease; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-image 0.5s ease, background-color 0.5s ease, color 0.5s ease; }
         
         /* TEMA PRESET */
         .theme-blue { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%); background-attachment: fixed; }
         .theme-green { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%); background-attachment: fixed; }
         .theme-yellow { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%); background-attachment: fixed; }
+        
+        /* TEMA DARK MODE */
+        .theme-dark { background: #0f172a; color: #f8fafc; background-attachment: fixed; }
+        .theme-dark .glass-card { background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
+        .theme-dark .glass-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #f1f5f9; }
+        .theme-dark .text-slate-900, .theme-dark .text-slate-800 { color: #f1f5f9 !important; }
+        .theme-dark .text-slate-700 { color: #e2e8f0 !important; }
+        .theme-dark .text-slate-600 { color: #cbd5e1 !important; }
+        .theme-dark .text-slate-500 { color: #94a3b8 !important; }
+        .theme-dark .bg-white { background-color: #1e293b !important; }
+        .theme-dark .bg-slate-50 { background-color: #0f172a !important; }
+        .theme-dark .bg-blue-50 { background-color: rgba(30, 58, 138, 0.2) !important; border-color: rgba(30, 58, 138, 0.4) !important; }
+        .theme-dark .bg-green-50 { background-color: rgba(20, 83, 45, 0.2) !important; border-color: rgba(20, 83, 45, 0.4) !important; }
+        .theme-dark .border-slate-200 { border-color: #334155 !important; }
+        .theme-dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #334155 !important; }
+        .theme-dark .nav-item:hover { background: rgba(255,255,255,0.05) !important; color: #fff !important; }
+        .theme-dark .nav-item.active { background: linear-gradient(to right, #1e293b, #0f172a); color: #60a5fa !important; border: 1px solid #334155; box-shadow: none; }
+        .theme-dark option { background-color: #0f172a; color: white; }
 
         .glass-card { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); }
         .glass-input { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(0,0,0,0.1); }
@@ -150,7 +168,7 @@
         };
 
         function setTheme(themeName) {
-            document.body.classList.remove('theme-blue', 'theme-green', 'theme-yellow');
+            document.body.classList.remove('theme-blue', 'theme-green', 'theme-yellow', 'theme-dark');
             document.body.classList.add(themeName);
             localStorage.setItem('rsud_theme_pref', themeName);
             
@@ -355,15 +373,15 @@
                 <button onclick="toggleSidebar()" class="text-slate-600 p-2 rounded-lg active:bg-slate-100"><i class="fa-solid fa-bars text-xl"></i></button>
             </header>
 
-            <!-- LOGIN -->
-            <div id="view-login" class="absolute inset-0 z-[60] flex flex-col items-center justify-center p-4 bg-white">
-                <div class="glass-card max-w-md w-full p-8 rounded-3xl text-center shadow-2xl border-t border-white/60 animate-fade-in relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-indigo-600"></div>
-                    <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-24 h-24 object-contain mx-auto mb-6 drop-shadow-md" alt="Logo RSUD">
-                    <h2 class="text-3xl font-bold text-slate-800 mb-2">Selamat Datang</h2>
-                    <p class="text-slate-500 text-sm mb-8 leading-relaxed">Sistem Informasi Manajemen Notulen Rapat<br><span class="font-semibold text-blue-700">RSUD dr. R. Koesma Tuban</span></p>
-                    <div class="flex justify-center"><div id="g_id_onload" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div><div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="pill" data-logo_alignment="left" data-width="280"></div></div>
-                    <p class="mt-8 text-xs text-slate-400">© 2025 Bag Adm dan Umum</p>
+            <!-- LOGIN (UPDATED: ELEGANT DARK GRADIENT) -->
+            <div id="view-login" class="absolute inset-0 z-[60] flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+                <div class="glass-card max-w-md w-full p-8 rounded-3xl text-center shadow-2xl border-t border-white/10 animate-fade-in relative overflow-hidden bg-white/10 backdrop-blur-xl">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-cyan-400"></div>
+                    <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-24 h-24 object-contain mx-auto mb-6 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" alt="Logo RSUD">
+                    <h2 class="text-3xl font-bold text-white mb-2 tracking-tight">Selamat Datang</h2>
+                    <p class="text-slate-300 text-sm mb-8 leading-relaxed">Sistem Informasi Manajemen Notulen Rapat<br><span class="font-semibold text-blue-300">RSUD dr. R. Koesma Tuban</span></p>
+                    <div class="flex justify-center"><div id="g_id_onload" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div><div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_blue" data-text="sign_in_with" data-shape="pill" data-logo_alignment="left" data-width="280"></div></div>
+                    <p class="mt-8 text-xs text-slate-400/60">© 2025 Bag Adm dan Umum</p>
                 </div>
             </div>
 
@@ -386,7 +404,7 @@
                     </div>
                 </div>
 
-                <!-- PROFILE -->
+                <!-- PROFILE (UPDATED: ADD DARK THEME BUTTON) -->
                 <div id="view-profile" class="page-view hidden animate-fade-in max-w-3xl mx-auto">
                      <h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg"><i class="fa-solid fa-user-gear"></i></span> Profil & Pengaturan</h1>
                     <div class="glass-card rounded-2xl p-6 md:p-8 mb-6">
@@ -433,6 +451,7 @@
                                 <button onclick="setTheme('theme-blue')" data-theme="theme-blue" class="theme-btn w-10 h-10 rounded-full bg-blue-200 border-4 border-blue-50 hover:shadow-md transition" title="Biru (Default)"></button>
                                 <button onclick="setTheme('theme-green')" data-theme="theme-green" class="theme-btn w-10 h-10 rounded-full bg-green-200 border-4 border-green-50 hover:shadow-md transition" title="Hijau"></button>
                                 <button onclick="setTheme('theme-yellow')" data-theme="theme-yellow" class="theme-btn w-10 h-10 rounded-full bg-yellow-200 border-4 border-yellow-50 hover:shadow-md transition" title="Kuning"></button>
+                                <button onclick="setTheme('theme-dark')" data-theme="theme-dark" class="theme-btn w-10 h-10 rounded-full bg-slate-800 border-4 border-slate-600 hover:shadow-md transition flex items-center justify-center text-white" title="Dark Mode"><i class="fa-solid fa-moon text-xs"></i></button>
                             </div>
                         </div>
                     </div>
@@ -814,20 +833,12 @@
             document.getElementById('btn-submit-text').innerText = "Simpan Jadwal"; 
         }
 
-        // [MODIFIED] START WRITING (Revisi Notulen)
         function startWriting(itemStr, setHash=true) {
             const item = JSON.parse(decodeURIComponent(itemStr));
-            
-            // SAVE DATA TO SESSION STORAGE FOR REFRESH
             sessionStorage.setItem('temp_edit_data', encodeURIComponent(JSON.stringify(item)));
-            
             editNotulen(itemStr, setHash);
-            
-            // Set Header UI
             document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-nib"></i></span> Mode Penulisan Notulen';
             document.getElementById('btn-submit-text').innerText = "Simpan Data";
-            
-            // Disable Inputs (Read-only view)
             document.getElementById('inp-unit').disabled = true;
             document.getElementById('inp-unit-lainnya').disabled = true;
             document.getElementById('inp-tanggal').disabled = true;
@@ -835,51 +846,25 @@
             document.getElementById('inp-agenda').disabled = true;
             document.getElementById('inp-peserta').disabled = true;
             document.getElementById('inp-file').disabled = true;
-
-            // ONLY SHOW SPREADSHEET AREA
             document.getElementById('spreadsheet-mode-area').classList.remove('hidden');
-
-            setTimeout(() => {
-                document.getElementById('section-recording').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 500);
-            
+            setTimeout(() => { document.getElementById('section-recording').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 500);
             if(setHash) window.history.pushState(null, null, `#v=edit`);
         }
 
         function editNotulen(itemStr, setHash=true) { 
             const item = JSON.parse(decodeURIComponent(itemStr)); 
-            
-            // Override navTo default behavior for edit mode
             document.querySelectorAll('.page-view').forEach(el => el.classList.add('hidden'));
             document.getElementById('view-create').classList.remove('hidden');
             if(setHash) window.history.pushState(null, null, `#v=edit`);
-
             document.getElementById('section-recording').classList.remove('hidden'); 
             document.getElementById('form-action').value = 'update'; 
             document.getElementById('form-id').value = item.id; 
-            
-            const unitSelect = document.getElementById('inp-unit');
-            const unitInput = document.getElementById('inp-unit-lainnya');
-            let isStandard = false;
-            for(let i=0; i<unitSelect.options.length; i++) {
-                if(unitSelect.options[i].value === item.unit) {
-                    isStandard = true; break;
-                }
-            }
-            if(isStandard) { unitSelect.value = item.unit; } else { unitSelect.value = 'Lainnya'; unitInput.value = item.unit; }
-            handleCreateUnitChange(unitSelect); 
-            
-            const d = new Date(item.tanggal); 
-            document.getElementById('inp-tanggal').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; 
-            document.getElementById('inp-waktu').value = item.waktu || ""; 
-            document.getElementById('inp-agenda').value = item.agenda; 
-            document.getElementById('inp-peserta').value = item.peserta; 
-
+            const unitSelect = document.getElementById('inp-unit'); const unitInput = document.getElementById('inp-unit-lainnya'); let isStandard = false; for(let i=0; i<unitSelect.options.length; i++) { if(unitSelect.options[i].value === item.unit) { isStandard = true; break; } } if(isStandard) { unitSelect.value = item.unit; } else { unitSelect.value = 'Lainnya'; unitInput.value = item.unit; } handleCreateUnitChange(unitSelect); 
+            const d = new Date(item.tanggal); document.getElementById('inp-tanggal').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; document.getElementById('inp-waktu').value = item.waktu || ""; document.getElementById('inp-agenda').value = item.agenda; document.getElementById('inp-peserta').value = item.peserta; 
             if(item.fileUrl && item.fileUrl.length > 5) { document.getElementById('form-existing-file').value = item.fileUrl; document.getElementById('existing-file-display').classList.remove('hidden'); document.getElementById('link-existing-file').href = item.fileUrl; } else { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; } 
             if(item.dokumentasiJson && item.dokumentasiJson.length > 5) { try { const docs = JSON.parse(item.dokumentasiJson); document.getElementById('form-kept-docs').value = JSON.stringify(docs); renderKeptDocs(docs); } catch(e) {} } else { document.getElementById('form-kept-docs').value = "[]"; renderKeptDocs([]); } 
         }
         
-        // (Other Functions addDocRow, addUrlRow, renderKeptDocs, removeKeptDoc, deleteExistingFile, compressImage... SAME)
         function addDocRow() { document.getElementById('empty-docs-msg').classList.add('hidden'); const container = document.getElementById('new-docs-container'); const rowId = 'doc-' + Date.now(); container.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="doc-row flex gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200"><div class="flex-1"><input type="text" placeholder="Deskripsi Foto/Dok..." class="doc-desc glass-input w-full rounded-lg px-3 py-2 text-sm"></div><div class="flex items-center gap-2"><input type="file" class="doc-file text-xs text-slate-500" accept="image/*,.pdf"><button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-xmark"></i></button></div></div>`); }
         function addUrlRow() { document.getElementById('empty-docs-msg').classList.add('hidden'); const container = document.getElementById('new-docs-container'); const rowId = 'url-' + Date.now(); container.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="url-row flex gap-2 bg-orange-50/50 p-3 rounded-lg border border-orange-100"><div class="flex items-center justify-center w-8 text-orange-400"><i class="fa-solid fa-link"></i></div><div class="flex-1 space-y-2 md:space-y-0 md:flex md:gap-2"><input type="text" placeholder="Deskripsi Link (e.g. Materi Drive)..." class="url-desc glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-300"><input type="url" placeholder="https://..." class="url-link glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-300"></div><div class="flex items-center"><button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-xmark"></i></button></div></div>`); }
         function renderKeptDocs(docs) { const c = document.getElementById('existing-docs-container'); c.innerHTML = ''; if(!docs.length) { c.classList.add('hidden'); return; } c.classList.remove('hidden'); docs.forEach((d,i) => { const isDrive = d.url && d.url.includes('drive.google.com'); const iconClass = isDrive ? 'fa-file-image text-indigo-500' : 'fa-link text-orange-500'; const bgClass = isDrive ? 'bg-white border-slate-200' : 'bg-orange-50 border-orange-100'; c.insertAdjacentHTML('beforeend', `<div class="flex justify-between p-3 ${bgClass} border rounded-lg items-center"><div class="flex gap-3 overflow-hidden items-center"><div class="w-8 flex justify-center"><i class="fa-solid ${iconClass} text-lg"></i></div><div class="truncate"><p class="text-sm font-bold text-slate-700">${d.desc||'Dokumentasi'}</p><a href="${d.url}" target="_blank" class="text-xs text-blue-500 hover:underline flex items-center gap-1">${isDrive ? 'Lihat File' : 'Buka Link'} <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a></div></div><button type="button" onclick="removeKeptDoc(${i})" class="text-slate-400 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition"><i class="fa-solid fa-trash-can"></i></button></div>`); }); }
@@ -894,11 +879,7 @@
             const MAX_IMG_SIZE = 10 * 1024 * 1024; 
             const MAX_DOC_SIZE = 20 * 1024 * 1024; 
 
-            // BYPASS VALIDASI ISI JIKA MODE SPREADSHEET (KARENA EDITOR HIDDEN)
             const formAction = document.getElementById('form-action').value;
-            // Jika mode edit, kita tidak memaksa Quill terisi karena fokus ke spreadsheet
-            // Namun jika user membuka Legacy Editor, Quill akan dikirim
-            
             let finalUnit = document.getElementById('inp-unit').value;
             if (finalUnit === 'Lainnya') { finalUnit = document.getElementById('inp-unit-lainnya').value; }
 
@@ -910,7 +891,6 @@
                 waktu: document.getElementById('inp-waktu').value, 
                 agenda: document.getElementById('inp-agenda').value, 
                 peserta: document.getElementById('inp-peserta').value, 
-                // Kirim kosong karena mode narasi dihapus
                 isi: "", 
                 tindakLanjut: "", 
                 pencatatNama: currentUser.name, 
@@ -969,7 +949,7 @@
             }).catch(() => { toggleLoader(false); Swal.fire('Error Server', 'Gagal menghubungi server.', 'error'); }); 
         }
 
-        // [MODIFIED] CREATE SPREADSHEET (TEMPLATE)
+        // [MODIFIED] CREATE SPREADSHEET WITH AUTO UPDATE UI
         function createSpreadsheetNotulen() {
             const formId = document.getElementById('form-id').value;
             const agenda = document.getElementById('inp-agenda').value;
@@ -980,39 +960,54 @@
 
             if(!agenda || !tanggal) { Swal.fire('Data Belum Lengkap', 'Mohon lengkapi Agenda dan Tanggal terlebih dahulu.', 'warning'); return; }
 
-            showConfirm('Buat Spreadsheet?', 'Sistem akan membuat file dari Template Standard Matrix.').then((result) => {
+            showConfirm('Buat Spreadsheet?', 'File akan dibuat dan otomatis tersimpan ke database.').then((result) => {
                 if (result.isConfirmed) {
                     toggleLoader(true);
-                    const payload = {
-                        action: 'createSpreadsheet',
-                        id: formId, 
-                        agenda: agenda,
-                        tanggal: tanggal,
-                        unit: unit,
-                        pimpinan: pimpinan,
-                        requesterEmail: currentUser.email 
-                    };
+                    const payload = { action: 'createSpreadsheet', id: formId, agenda: agenda, tanggal: tanggal, unit: unit, pimpinan: pimpinan, requesterEmail: currentUser.email };
 
                     fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
                     .then(res => res.json()).then(resp => {
                         toggleLoader(false);
                         if(resp.status === 'success') {
-                            const container = document.getElementById('new-docs-container');
-                            const rowId = 'url-' + Date.now();
+                            // 1. UPDATE UI LIST (Dokumentasi Kegiatan)
+                            // Supaya user melihat file baru di list tanpa refresh
+                            const savedDoc = resp.savedDoc;
+                            const container = document.getElementById('existing-docs-container');
                             document.getElementById('empty-docs-msg').classList.add('hidden');
+                            container.classList.remove('hidden'); // Ensure container visible
+
+                            // Generate UI Element for new doc (Reusing style from renderKeptDocs)
+                            // We construct a fake 'kept doc' entry
+                            const isDrive = true; // Spreadsheet is on Drive
+                            const iconClass = 'fa-file-excel text-green-600';
+                            const bgClass = 'bg-green-50 border-green-200';
                             
-                            container.insertAdjacentHTML('beforeend', `
-                                <div id="${rowId}" class="url-row flex gap-2 bg-green-50/50 p-3 rounded-lg border border-green-200">
-                                    <div class="flex items-center justify-center w-8 text-green-600"><i class="fa-solid fa-file-excel"></i></div>
-                                    <div class="flex-1 space-y-2 md:space-y-0 md:flex md:gap-2">
-                                        <input type="text" value="Notulen Matriks - ${agenda}" class="url-desc glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300">
-                                        <input type="url" value="${resp.url}" class="url-link glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-300">
+                            // Generate unique index for remove button (use timestamp)
+                            const tempIdx = Date.now(); 
+
+                            const html = `
+                                <div class="flex justify-between p-3 ${bgClass} border rounded-lg items-center animate-fade-in">
+                                    <div class="flex gap-3 overflow-hidden items-center">
+                                        <div class="w-8 flex justify-center"><i class="fa-solid ${iconClass} text-lg"></i></div>
+                                        <div class="truncate">
+                                            <p class="text-sm font-bold text-slate-700">${savedDoc.desc}</p>
+                                            <a href="${savedDoc.url}" target="_blank" class="text-xs text-blue-500 hover:underline flex items-center gap-1">Buka Spreadsheet <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center">
-                                        <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-xmark"></i></button>
-                                    </div>
-                                </div>
-                            `);
+                                    <!-- Remove button disabled for auto-saved items until refresh, to keep logic simple -->
+                                    <span class="text-[10px] text-green-600 font-bold px-2 py-1 bg-white/50 rounded">BARU</span>
+                                </div>`;
+                            
+                            container.insertAdjacentHTML('beforeend', html);
+
+                            // 2. UPDATE HIDDEN INPUT VALUE
+                            // Agar kalau user tekan "Simpan Data" lagi untuk hal lain, file ini tidak hilang
+                            try {
+                                const currentKeptDocs = JSON.parse(document.getElementById('form-kept-docs').value || "[]");
+                                currentKeptDocs.push(savedDoc);
+                                document.getElementById('form-kept-docs').value = JSON.stringify(currentKeptDocs);
+                            } catch(e) { console.error("Failed to update hidden input", e); }
+
                             Swal.fire({ icon: 'success', title: 'Berhasil!', text: resp.message, footer: '<a href="' + resp.url + '" target="_blank">Buka Spreadsheet</a>' });
                             window.open(resp.url, '_blank');
                         } else { Swal.fire('Gagal!', resp.message, 'error'); }
