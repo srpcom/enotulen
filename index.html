@@ -18,10 +18,6 @@
     <!-- SIGNATURE PAD -->
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 
-    <!-- QUILL EDITOR (Rich Text) -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-
     <!-- SWEETALERT2 (Modern Alerts) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -95,11 +91,6 @@
         .paper-content-wrapper { flex: 1; display: flex; flex-direction: column; }
         .header-double-line { border-bottom: 4px double #1e293b; padding-bottom: 1.5rem; margin-bottom: 2rem; }
 
-        /* QUILL CUSTOM STYLES */
-        .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid rgba(0,0,0,0.1) !important; background: rgba(255, 255, 255, 0.5); border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; }
-        .ql-container.ql-snow { border: none !important; background: rgba(255, 255, 255, 0.3); border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 0.875rem !important; }
-        .ql-editor { min-height: 150px; }
-        
         .rich-text-content ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 0.5em; }
         .rich-text-content ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 0.5em; }
         .rich-text-content p { margin-bottom: 0.5em; text-align: justify; }
@@ -114,7 +105,7 @@
         @media print {
             @page { size: A4 portrait; margin: 0; }
             body { background: white !important; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            .no-print, #sidebar, header, .ql-toolbar, #btn-broadcast { display: none !important; }
+            .no-print, #sidebar, header, #btn-broadcast { display: none !important; }
             #view-public-result { display: block !important; position: static !important; width: 100% !important; height: auto !important; overflow: visible !important; background: white !important; padding: 0 !important; margin: 0 !important; }
             .a4-paper { display: block !important; width: 100% !important; max-width: 210mm !important; min-height: auto !important; height: auto !important; margin: 0 auto !important; padding: 20mm !important; box-shadow: none !important; border: none !important; }
             .paper-content-wrapper { display: block !important; flex: none !important; }
@@ -177,7 +168,6 @@
 
     <!-- VIEW: ABSENSI -->
     <div id="app-absensi" class="hidden w-full h-full overflow-y-auto p-4 flex flex-col items-center">
-        <!-- (Konten Absensi Sama seperti sebelumnya) -->
          <div class="glass-card max-w-md w-full p-6 rounded-3xl shadow-2xl border-t border-white/60 animate-fade-in my-auto">
             <div class="text-center mb-6">
                 <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-20 h-20 object-contain mx-auto mb-3 drop-shadow-sm" alt="Logo RSUD">
@@ -235,7 +225,6 @@
 
     <!-- VIEW: PUBLIC RESULT -->
     <div id="view-public-result" class="hidden w-full h-full overflow-y-auto p-0 md:p-8 flex justify-center bg-slate-200/50">
-        <!-- (Konten Result Sama seperti sebelumnya) -->
          <div class="a4-paper animate-fade-in relative">
             <div class="paper-content-wrapper">
                 <div class="header-double-line flex items-center gap-6">
@@ -399,7 +388,6 @@
 
                 <!-- PROFILE -->
                 <div id="view-profile" class="page-view hidden animate-fade-in max-w-3xl mx-auto">
-                     <!-- (Konten Profil Sama) -->
                      <h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg"><i class="fa-solid fa-user-gear"></i></span> Profil & Pengaturan</h1>
                     <div class="glass-card rounded-2xl p-6 md:p-8 mb-6">
                         <div class="flex flex-col md:flex-row items-center gap-6 mb-8 pb-8 border-b border-slate-200/50">
@@ -498,28 +486,6 @@
                                     </button>
                                 </div>
 
-                                <!-- EDITOR QUILL (DISEMBUNYIKAN SECARA DEFAULT UNTUK REVISI) -->
-                                <div id="legacy-editor-area" class="hidden">
-                                    <div class="mb-5 bg-blue-50 p-4 rounded-xl border border-blue-200 flex gap-3 items-start"><i class="fa-solid fa-circle-info text-blue-600 mt-1"></i><div><h3 class="text-blue-800 font-bold text-sm">Mode Narasi (Opsional)</h3><p class="text-blue-600 text-xs">Gunakan ini hanya jika Anda ingin membuat dokumen Word narasi, bukan tabel matriks.</p></div></div>
-                                    <div class="mb-6">
-                                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Isi Pembahasan</label>
-                                        <div class="rounded-xl overflow-hidden border border-slate-200 bg-white"><div id="editor-isi"></div></div>
-                                    </div>
-                                    <div class="mb-4">
-                                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Rencana Tindak Lanjut</label>
-                                        <div class="rounded-xl overflow-hidden border border-slate-200 bg-white"><div id="editor-tindak"></div></div>
-                                    </div>
-                                    <div class="mb-8 flex justify-end gap-3">
-                                        <button type="button" onclick="createWordNotulen()" class="text-xs bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-bold hover:bg-blue-200 transition border border-blue-300 flex items-center shadow-sm">
-                                            <i class="fa-solid fa-file-word mr-2"></i> Generate Word
-                                        </button>
-                                    </div>
-                                </div>
-                                <!-- BUTTON TOGGLE LEGACY EDITOR -->
-                                <div class="text-center mb-6">
-                                    <button type="button" onclick="toggleLegacyEditor()" class="text-xs text-slate-400 hover:text-slate-600 underline">Tampilkan Editor Narasi (Legacy)</button>
-                                </div>
-
                                 <div class="pt-6 border-t border-slate-200 mt-6">
                                     <div class="flex items-center justify-between mb-4">
                                         <label class="block text-xs font-bold text-slate-700 uppercase"><i class="fa-solid fa-images mr-1"></i> Dokumentasi Kegiatan</label>
@@ -543,7 +509,6 @@
 
                 <!-- LIST: ARSIP (VIEW ONLY/EDIT) -->
                 <div id="view-list" class="page-view hidden animate-fade-in max-w-6xl mx-auto">
-                    <!-- (Konten List Sama) -->
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6"><h1 class="text-2xl font-bold text-slate-800">Daftar Notulen</h1><div class="flex flex-col md:flex-row gap-3 w-full md:w-auto"><div class="relative w-full md:w-64"><i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-400 text-xs"></i><input type="text" id="search-input" oninput="handleFilter()" placeholder="Cari agenda, unit..." class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition"></div><div class="relative w-full md:w-40"><i class="fa-solid fa-sort absolute left-3 top-3.5 text-slate-400 text-xs"></i><select id="sort-select" onchange="handleFilter()" class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition appearance-none cursor-pointer"><option value="newest">Terbaru</option><option value="oldest">Terlama</option><option value="az">Agenda (A-Z)</option><option value="za">Agenda (Z-A)</option></select></div><button onclick="loadData()" class="px-4 py-2.5 glass-card rounded-xl text-slate-600 text-sm font-medium hover:bg-white transition"><i class="fa-solid fa-rotate"></i></button></div></div>
                     <div class="glass-card rounded-2xl overflow-hidden shadow-sm flex flex-col min-h-[400px]">
                         <div class="overflow-x-auto flex-1"><table class="w-full text-left text-sm"><thead class="bg-slate-50/80 text-xs uppercase font-bold text-slate-500 border-b border-slate-200"><tr><th class="px-6 py-5">Waktu</th><th class="px-6 py-5">Agenda</th><th class="px-6 py-5">Unit</th><th class="px-6 py-5">Status</th><th class="px-6 py-5 text-center">Aksi</th></tr></thead><tbody id="table-body" class="divide-y divide-slate-100"><tr><td colspan="5" class="p-10 text-center text-slate-400">Sedang memuat data...</td></tr></tbody></table></div>
@@ -553,7 +518,6 @@
 
                 <!-- LIST: TULIS NOTULEN (ACTION LIST) -->
                 <div id="view-write" class="page-view hidden animate-fade-in max-w-6xl mx-auto">
-                    <!-- (Konten Write Sama) -->
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
                         <div>
                             <h1 class="text-2xl font-bold text-slate-800">Tulis Notulen</h1>
@@ -581,7 +545,6 @@
 
                 <!-- USERS -->
                 <div id="view-users" class="page-view hidden animate-fade-in max-w-5xl mx-auto">
-                     <!-- (Konten User Sama) -->
                     <div class="flex justify-between items-center mb-6"><h1 class="text-2xl font-bold text-slate-800">Manajemen Pengguna</h1><button onclick="loadUsers()" class="text-sm text-blue-600 font-semibold hover:underline">Refresh Data</button></div>
                     <div class="glass-card rounded-2xl overflow-hidden shadow-sm"><table class="w-full text-left text-sm"><thead class="bg-slate-50/80 text-xs uppercase font-bold text-slate-500 border-b border-slate-200"><tr><th class="px-6 py-5">Nama</th><th class="px-6 py-5">Email</th><th class="px-6 py-5">Role</th><th class="px-6 py-5 text-center">Aksi</th></tr></thead><tbody id="users-table-body" class="divide-y divide-slate-100"><tr><td colspan="4" class="p-10 text-center text-slate-400">Memuat user...</td></tr></tbody></table></div>
                 </div>
@@ -589,7 +552,7 @@
         </div>
     </div>
 
-    <!-- MODAL & LOADER (Sama seperti sebelumnya) -->
+    <!-- MODAL & LOADER -->
     <div id="modal-attendance" class="hidden fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-6 border-b border-slate-200 flex justify-between items-center">
@@ -645,31 +608,6 @@
         const meetingId = urlParams.get('id');
         let currentUser = null;
 
-        let quillIsi = null;
-        let quillTindak = null;
-
-        function initQuillEditors() {
-            if(quillIsi || quillTindak) return; 
-            
-            try {
-                if (typeof Quill === 'undefined') { return; }
-                const toolbarOptions = [
-                    ['bold', 'italic', 'underline'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'indent': '-1'}, { 'indent': '+1' }],
-                    ['link', 'clean']
-                ];
-
-                quillIsi = new Quill('#editor-isi', { theme: 'snow', placeholder: 'Catat poin-poin penting rapat...', modules: { toolbar: toolbarOptions } });
-                quillTindak = new Quill('#editor-tindak', { theme: 'snow', placeholder: 'Rencana tindak lanjut...', modules: { toolbar: toolbarOptions } });
-            } catch (err) {}
-        }
-
-        function toggleLegacyEditor() {
-            const area = document.getElementById('legacy-editor-area');
-            area.classList.toggle('hidden');
-        }
-
         // --- NEW ROUTING LOGIC FOR REFRESH SUPPORT ---
         function handleRouting() {
             const hash = window.location.hash.substring(1); // remove '#'
@@ -679,7 +617,6 @@
             const view = params.get('v');
             
             if(view && currentUser) {
-                // Special handling for editing which needs data loading
                 if (view === 'edit' || view === 'create_from_hash') {
                     const dataStr = sessionStorage.getItem('temp_edit_data');
                     if(dataStr) {
@@ -699,7 +636,6 @@
 
         // --- END ROUTING LOGIC ---
 
-        // (Other Functions: loadMeetingInfo, submitAbsensi, loadMeetingResult, broadcastResult... SAME AS BEFORE)
         function loadMeetingInfo(id) {
             document.getElementById('abs-meeting-id').value = id;
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getMeetingInfo', id: id }) })
@@ -729,7 +665,6 @@
                 else { Swal.fire({ icon: 'error', title: 'Gagal', text: resp.message }); } 
             }).catch(err => { toggleLoader(false); Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan sistem.' }); });
         }
-        // ... (Functions copyAbsensiLink, copyResultLink, showQrCode, viewAttendance, downloadAttendanceWithImages, deleteNotulen, closeAttendanceModal, closeQrModal same as before)
         function copyAbsensiLink(id) { const baseUrl = window.location.origin + window.location.pathname; const fullUrl = `${baseUrl}?v=absensi&id=${id}`; navigator.clipboard.writeText(fullUrl).then(() => { Toast.fire({ icon: 'success', title: 'Link Absensi Disalin!' }); }); }
         function copyResultLink(id) { const baseUrl = window.location.origin + window.location.pathname; const fullUrl = `${baseUrl}?v=result&id=${id}`; navigator.clipboard.writeText(fullUrl).then(() => { Toast.fire({ icon: 'success', title: 'Link Hasil Notulen Disalin!' }); }); }
         function showQrCode(id) { const baseUrl = window.location.origin + window.location.pathname; const fullUrl = `${baseUrl}?v=absensi&id=${id}`; const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(fullUrl)}`; document.getElementById('qr-image').src = qrUrl; document.getElementById('modal-qrcode').classList.remove('hidden'); }
@@ -787,8 +722,6 @@
             if(currentUser.role === 'ADMIN') document.getElementById('menu-admin').classList.remove('hidden');
             
             setTimeout(() => {
-                initQuillEditors(); 
-                
                 // CHECK HASH FIRST
                 const hash = window.location.hash.substring(1);
                 if(hash) {
@@ -831,7 +764,6 @@
 
         function logout() { localStorage.removeItem('rsud_user_pro_v2'); location.reload(); }
 
-        // (Other Functions loadData, handleFilter, renderPaginatedTable... SAME)
         function loadData() { 
             if(!currentUser) return; 
             toggleLoader(true); 
@@ -856,8 +788,6 @@
         
         function resetForm() { 
             document.getElementById('mainForm').reset(); 
-            if(quillIsi) quillIsi.setText('');
-            if(quillTindak) quillTindak.setText('');
             
             document.getElementById('form-action').value = 'create'; 
             document.getElementById('form-id').value = ''; 
@@ -878,7 +808,6 @@
             handleCreateUnitChange(document.getElementById('inp-unit')); 
             
             document.getElementById('section-recording').classList.add('hidden'); 
-            document.getElementById('legacy-editor-area').classList.add('hidden'); 
             document.getElementById('spreadsheet-mode-area').classList.remove('hidden');
             
             document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-plus"></i></span> Buat Jadwal Rapat'; 
@@ -907,8 +836,7 @@
             document.getElementById('inp-peserta').disabled = true;
             document.getElementById('inp-file').disabled = true;
 
-            // HIDE MODAL ISI & TINDAK LANJUT (DEFAULT)
-            document.getElementById('legacy-editor-area').classList.add('hidden');
+            // ONLY SHOW SPREADSHEET AREA
             document.getElementById('spreadsheet-mode-area').classList.remove('hidden');
 
             setTimeout(() => {
@@ -946,16 +874,6 @@
             document.getElementById('inp-waktu').value = item.waktu || ""; 
             document.getElementById('inp-agenda').value = item.agenda; 
             document.getElementById('inp-peserta').value = item.peserta; 
-            
-            // Fill editors just in case (hidden)
-            if(quillIsi) {
-                if(item.isi && item.isi.includes('<')) quillIsi.clipboard.dangerouslyPasteHTML(item.isi);
-                else quillIsi.setText(item.isi || ""); 
-            }
-            if(quillTindak) {
-                if(item.tindakLanjut && item.tindakLanjut.includes('<')) quillTindak.clipboard.dangerouslyPasteHTML(item.tindakLanjut);
-                else quillTindak.setText(item.tindakLanjut || "");
-            }
 
             if(item.fileUrl && item.fileUrl.length > 5) { document.getElementById('form-existing-file').value = item.fileUrl; document.getElementById('existing-file-display').classList.remove('hidden'); document.getElementById('link-existing-file').href = item.fileUrl; } else { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; } 
             if(item.dokumentasiJson && item.dokumentasiJson.length > 5) { try { const docs = JSON.parse(item.dokumentasiJson); document.getElementById('form-kept-docs').value = JSON.stringify(docs); renderKeptDocs(docs); } catch(e) {} } else { document.getElementById('form-kept-docs').value = "[]"; renderKeptDocs([]); } 
@@ -992,9 +910,9 @@
                 waktu: document.getElementById('inp-waktu').value, 
                 agenda: document.getElementById('inp-agenda').value, 
                 peserta: document.getElementById('inp-peserta').value, 
-                // Kirim isi Quill hanya sebagai backup, boleh kosong jika mode matriks
-                isi: quillIsi ? quillIsi.root.innerHTML : "", 
-                tindakLanjut: quillTindak ? quillTindak.root.innerHTML : "", 
+                // Kirim kosong karena mode narasi dihapus
+                isi: "", 
+                tindakLanjut: "", 
                 pencatatNama: currentUser.name, 
                 pencatatEmail: currentUser.email, 
                 existingFileUrl: document.getElementById('form-existing-file').value 
@@ -1097,42 +1015,6 @@
                             `);
                             Swal.fire({ icon: 'success', title: 'Berhasil!', text: resp.message, footer: '<a href="' + resp.url + '" target="_blank">Buka Spreadsheet</a>' });
                             window.open(resp.url, '_blank');
-                        } else { Swal.fire('Gagal!', resp.message, 'error'); }
-                    }).catch(() => { toggleLoader(false); Swal.fire('Error', 'Gagal koneksi server.', 'error'); });
-                }
-            });
-        }
-
-        // [MODIFIED] CREATE WORD (SAME LOGIC)
-        function createWordNotulen() {
-            const formId = document.getElementById('form-id').value;
-            const agenda = document.getElementById('inp-agenda').value;
-            const tanggal = document.getElementById('inp-tanggal').value;
-            const waktu = document.getElementById('inp-waktu').value;
-            let unit = document.getElementById('inp-unit').value;
-            if(unit === 'Lainnya') unit = document.getElementById('inp-unit-lainnya').value;
-            const pimpinan = document.getElementById('inp-peserta').value;
-
-            // USE QUILL CONTENT (IF LEGACY MODE IS USED)
-            const isi = quillIsi.root.innerHTML;
-            const tindakLanjut = quillTindak.root.innerHTML;
-
-            if(!agenda || !tanggal) { Swal.fire('Data Belum Lengkap', 'Mohon lengkapi Agenda dan Tanggal terlebih dahulu.', 'warning'); return; }
-
-            showConfirm('Buat Dokumen Word?', 'Buat file Dokumen Word (Narasi) untuk notulen ini?').then((result) => {
-                if (result.isConfirmed) {
-                    toggleLoader(true);
-                    const payload = { action: 'createWord', id: formId, agenda: agenda, tanggal: tanggal, waktu: waktu, unit: unit, pimpinan: pimpinan, isi: isi, tindakLanjut: tindakLanjut, requesterEmail: currentUser.email };
-                    fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-                    .then(res => res.json()).then(resp => {
-                        toggleLoader(false);
-                        if(resp.status === 'success') {
-                            const container = document.getElementById('new-docs-container');
-                            const rowId = 'url-' + Date.now();
-                            document.getElementById('empty-docs-msg').classList.add('hidden');
-                            container.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="url-row flex gap-2 bg-blue-50/50 p-3 rounded-lg border border-blue-200"><div class="flex items-center justify-center w-8 text-blue-600"><i class="fa-solid fa-file-word"></i></div><div class="flex-1 space-y-2 md:space-y-0 md:flex md:gap-2"><input type="text" value="Notulen Narasi Word - ${agenda}" class="url-desc glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300"><input type="url" value="${resp.url}" class="url-link glass-input w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300"></div><div class="flex items-center"><button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><i class="fa-solid fa-xmark"></i></button></div></div>`);
-                            window.open(resp.url, '_blank');
-                            Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Dokumen Word berhasil dibuat!', timer: 1500, showConfirmButton: false });
                         } else { Swal.fire('Gagal!', resp.message, 'error'); }
                     }).catch(() => { toggleLoader(false); Swal.fire('Error', 'Gagal koneksi server.', 'error'); });
                 }
