@@ -48,36 +48,34 @@
         .theme-green { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%); background-attachment: fixed; }
         .theme-yellow { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%); background-attachment: fixed; }
         
-        /* =========================================
-           TEMA DARK MODE - SUPERIOR READABILITY FIX
-           ========================================= */
+        /* TEMA DARK MODE */
         .theme-dark { background: #0f172a; color: #f8fafc; background-attachment: fixed; }
         
-        /* Global Text Colors */
+        /* Global Text Colors Dark Mode Overrides */
         .theme-dark .text-slate-900, .theme-dark .text-slate-800, .theme-dark .text-slate-700, .theme-dark .text-gray-900, .theme-dark .text-gray-800, .theme-dark .text-gray-700 { color: #f1f5f9 !important; }
         .theme-dark .text-slate-600, .theme-dark .text-gray-600 { color: #cbd5e1 !important; }
         .theme-dark .text-slate-500, .theme-dark .text-gray-500 { color: #94a3b8 !important; }
         .theme-dark h1, .theme-dark h2, .theme-dark h3, .theme-dark h4, .theme-dark h5, .theme-dark h6 { color: #fff !important; }
 
-        /* Containers */
+        /* Containers Dark Mode */
         .theme-dark .glass-card, .theme-dark .bg-white { background: #1e293b !important; border-color: #334155 !important; color: #f8fafc !important; }
         .theme-dark .bg-slate-50, .theme-dark .bg-gray-50, .theme-dark .bg-gray-100 { background-color: #0f172a !important; border-color: #334155 !important; }
 
-        /* Tables */
+        /* Tables Dark Mode */
         .theme-dark table { color: #f8fafc !important; }
         .theme-dark thead th { background-color: #0f172a !important; color: #cbd5e1 !important; border-bottom-color: #334155 !important; }
         .theme-dark tbody td { border-bottom-color: #334155 !important; color: #f1f5f9 !important; }
         .theme-dark tbody tr:hover { background-color: rgba(255, 255, 255, 0.05) !important; }
         .theme-dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #334155 !important; }
 
-        /* Inputs */
+        /* Inputs Dark Mode */
         .theme-dark .glass-input, .theme-dark input, .theme-dark select, .theme-dark textarea { background: #0f172a !important; border: 1px solid #334155 !important; color: #f8fafc !important; }
         .theme-dark .glass-input:focus { border-color: #60a5fa !important; ring: 2px solid rgba(96, 165, 250, 0.2); }
         .theme-dark .glass-input::placeholder { color: #64748b !important; }
         .theme-dark .glass-input:disabled { background: #1e293b !important; color: #64748b !important; border-color: #334155 !important; }
         .theme-dark option { background-color: #0f172a; color: #f1f5f9; }
 
-        /* Badges */
+        /* Badges Dark Mode */
         .theme-dark .bg-green-100, .theme-dark .bg-green-50 { background-color: rgba(22, 101, 52, 0.4) !important; border-color: rgba(34, 197, 94, 0.3) !important; }
         .theme-dark .text-green-800, .theme-dark .text-green-700, .theme-dark .text-green-600 { color: #86efac !important; }
         .theme-dark .bg-blue-100, .theme-dark .bg-blue-50 { background-color: rgba(30, 64, 175, 0.4) !important; border-color: rgba(59, 130, 246, 0.3) !important; }
@@ -87,14 +85,14 @@
         .theme-dark .bg-red-50, .theme-dark .bg-red-100 { background-color: rgba(153, 27, 27, 0.4) !important; border-color: rgba(239, 68, 68, 0.3) !important; }
         .theme-dark .text-red-500, .theme-dark .text-red-600, .theme-dark .text-red-700 { color: #fca5a5 !important; }
 
-        /* Nav & Swals */
+        /* Nav & Swals Dark Mode */
         .theme-dark .nav-item:hover { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
         .theme-dark .nav-item.active { background: linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(30, 58, 138, 0.2)) !important; color: #60a5fa !important; border: 1px solid rgba(59, 130, 246, 0.4) !important; box-shadow: none !important; }
         .theme-dark .swal2-popup { background: #1e293b !important; color: #f1f5f9 !important; border: 1px solid #334155; }
         .theme-dark .swal2-title { color: #f1f5f9 !important; }
         .theme-dark .swal2-content, .theme-dark .swal2-html-container { color: #cbd5e1 !important; }
-        .theme-dark #modal-attendance .glass-card, .theme-dark #modal-edit-user .glass-card { background: #1e293b !important; border: 1px solid #334155; }
-        .theme-dark #modal-qrcode .bg-white { background-color: #1e293b !important; color: #fff !important; }
+        .theme-dark #modal-edit-user .glass-card { background: #1e293b !important; border: 1px solid #334155; }
+        /* Modal Attendance White in Light Mode, Dark in Dark Mode Override handled via class */
 
         /* Standard */
         .glass-card { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); }
@@ -585,22 +583,39 @@
         </div>
     </div>
 
-    <!-- MODAL ATTENDANCE -->
-    <div id="modal-attendance" class="hidden fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-6 border-b border-slate-200 flex justify-between items-center">
-                <div><h3 class="text-xl font-bold text-slate-800">Daftar Hadir</h3><p id="att-modal-title" class="text-sm text-slate-500">Memuat...</p></div>
-                <button onclick="closeAttendanceModal()" class="text-slate-400 hover:text-red-500 text-xl transition"><i class="fa-solid fa-xmark"></i></button>
+    <!-- MODAL ATTENDANCE (REDESIGNED: WIDER, WHITE, COMPACT) -->
+    <div id="modal-attendance" class="hidden fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <!-- Changed max-w-3xl to max-w-7xl, removed glass-card, added bg-white shadow-2xl border -->
+        <div class="bg-white dark:bg-slate-800 w-full max-w-7xl rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col max-h-[90vh] animate-fade-in">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 rounded-t-xl">
+                <div><h3 class="text-lg font-bold text-slate-800 dark:text-white">Daftar Hadir</h3><p id="att-modal-title" class="text-xs text-slate-500 dark:text-slate-400">Memuat...</p></div>
+                <button onclick="closeAttendanceModal()" class="text-slate-400 hover:text-red-500 text-lg transition px-2"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="p-0 overflow-y-auto flex-1"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-xs uppercase font-bold text-slate-500 sticky top-0"><tr><th class="px-6 py-3">No</th><th class="px-6 py-3">Waktu</th><th class="px-6 py-3">Nama</th><th class="px-6 py-3">No HP</th><th class="px-6 py-3">Unit</th><th class="px-6 py-3 text-center">TTD</th></tr></thead><tbody id="att-table-body" class="divide-y divide-slate-100"></tbody></table></div>
-            <div class="p-4 border-t border-slate-200 bg-slate-50/50 flex justify-between items-center">
-                <button onclick="downloadAttendanceWithImages()" id="btn-download-att" class="hidden px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 shadow-sm flex items-center gap-2"><i class="fa-solid fa-file-excel"></i> Download Excel (.xlsx)</button>
-                <button onclick="closeAttendanceModal()" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition">Tutup</button>
+            <div class="p-0 overflow-y-auto flex-1">
+                <table class="w-full text-left text-xs md:text-sm">
+                    <thead class="bg-slate-100 dark:bg-slate-700 text-xs uppercase font-bold text-slate-600 dark:text-slate-300 sticky top-0 shadow-sm z-10">
+                        <tr>
+                            <th class="px-4 py-3 border-b border-slate-200 dark:border-slate-600">No</th>
+                            <th class="px-4 py-3 border-b border-slate-200 dark:border-slate-600">Waktu</th>
+                            <th class="px-4 py-3 border-b border-slate-200 dark:border-slate-600">Nama Peserta</th>
+                            <th class="px-4 py-3 border-b border-slate-200 dark:border-slate-600">No HP</th>
+                            <th class="px-4 py-3 border-b border-slate-200 dark:border-slate-600">Unit / Ruangan</th>
+                            <th class="px-4 py-3 text-center border-b border-slate-200 dark:border-slate-600">TTD</th>
+                        </tr>
+                    </thead>
+                    <tbody id="att-table-body" class="divide-y divide-slate-100 dark:divide-slate-700 bg-white dark:bg-slate-800">
+                        <!-- Content populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-b-xl flex justify-between items-center">
+                <button onclick="downloadAttendanceWithImages()" id="btn-download-att" class="hidden px-4 py-2 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 shadow-sm flex items-center gap-2"><i class="fa-solid fa-file-excel"></i> Download Excel (.xlsx)</button>
+                <button onclick="closeAttendanceModal()" class="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 transition">Tutup</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL EDIT USER (NEW) -->
+    <!-- MODAL EDIT USER (UPDATED WITH DROPDOWN) -->
     <div id="modal-edit-user" class="hidden fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-lg rounded-2xl shadow-2xl p-6">
             <div class="flex justify-between items-center mb-4 border-b border-slate-200 pb-2">
@@ -610,7 +625,26 @@
             <form onsubmit="submitEditUser(event)" class="space-y-4">
                 <input type="hidden" id="edit-user-email">
                 <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Lengkap</label><input type="text" id="edit-user-name" required class="glass-input w-full rounded-lg px-3 py-2 text-sm"></div>
-                <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Unit Kerja</label><input type="text" id="edit-user-unit" class="glass-input w-full rounded-lg px-3 py-2 text-sm"></div>
+                
+                <!-- DROPDOWN UNIT KERJA (UPDATED) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Unit Kerja</label>
+                    <select id="edit-user-unit-select" onchange="handleEditUserUnitChange(this)" class="glass-input w-full rounded-lg px-3 py-2 text-sm">
+                        <option value="">-- Pilih Unit --</option>
+                        <option value="Direksi">Direksi</option>
+                        <option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option>
+                        <option value="Bagian Keuangan">Bagian Keuangan</option>
+                        <option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option>
+                        <option value="Bidang Keperawatan">Bidang Keperawatan</option>
+                        <option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option>
+                        <option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                    <div id="edit-user-unit-lainnya-group" class="hidden mt-2 animate-fade-in">
+                        <input type="text" id="edit-user-unit-lainnya" placeholder="Masukkan nama unit kerja..." class="glass-input w-full rounded-lg px-3 py-2 text-sm">
+                    </div>
+                </div>
+
                 <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">No HP</label><input type="text" id="edit-user-phone" class="glass-input w-full rounded-lg px-3 py-2 text-sm"></div>
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="document.getElementById('modal-edit-user').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">Batal</button>
@@ -722,7 +756,47 @@
         function copyResultLink(id) { const baseUrl = window.location.origin + window.location.pathname; const fullUrl = `${baseUrl}?v=result&id=${id}`; navigator.clipboard.writeText(fullUrl).then(() => { Toast.fire({ icon: 'success', title: 'Link Hasil Notulen Disalin!' }); }); }
         function showQrCode(id) { const baseUrl = window.location.origin + window.location.pathname; const fullUrl = `${baseUrl}?v=absensi&id=${id}`; const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(fullUrl)}`; document.getElementById('qr-image').src = qrUrl; document.getElementById('modal-qrcode').classList.remove('hidden'); }
         function closeQrModal() { document.getElementById('modal-qrcode').classList.add('hidden'); }
-        function viewAttendance(id, title, date, time) { document.getElementById('modal-attendance').classList.remove('hidden'); document.getElementById('att-modal-title').textContent = title; document.getElementById('att-table-body').innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Mengambil data...</td></tr>'; document.getElementById('btn-download-att').classList.add('hidden'); currentMeetingTitle = title; currentMeetingDate = date; currentMeetingTime = time; fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getAttendance', meetingId: id }) }).then(res => res.json()).then(resp => { const tbody = document.getElementById('att-table-body'); tbody.innerHTML = ''; if (resp.status === 'success' && resp.data.length > 0) { currentAttendanceData = resp.data; document.getElementById('btn-download-att').classList.remove('hidden'); resp.data.forEach((row, idx) => { const ttdDisplay = row.ttdUrl ? `<a href="${row.ttdUrl}" target="_blank" class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-100 border border-indigo-200">Lihat TTD</a>` : '-'; tbody.innerHTML += `<tr class="hover:bg-slate-50 border-b border-slate-100"><td class="px-6 py-4 font-bold text-slate-500">${idx + 1}</td><td class="px-6 py-4">${row.waktu}</td><td class="px-6 py-4 font-semibold text-slate-700">${row.nama}</td><td class="px-6 py-4 text-slate-500">${row.hp}</td><td class="px-6 py-4 text-slate-500">${row.unit || '-'}</td><td class="px-6 py-4 text-center">${ttdDisplay}</td></tr>`; }); } else { currentAttendanceData = []; tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">Belum ada peserta yang mengisi daftar hadir.</td></tr>'; } }).catch(() => { document.getElementById('att-table-body').innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-400">Gagal memuat data.</td></tr>'; }); }
+        
+        // --- UPDATED VIEW ATTENDANCE FUNCTION (TIGHTER PADDING & STYLING) ---
+        function viewAttendance(id, title, date, time) { 
+            document.getElementById('modal-attendance').classList.remove('hidden'); 
+            document.getElementById('att-modal-title').textContent = title; 
+            document.getElementById('att-table-body').innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Mengambil data...</td></tr>'; 
+            document.getElementById('btn-download-att').classList.add('hidden'); 
+            currentMeetingTitle = title; 
+            currentMeetingDate = date; 
+            currentMeetingTime = time; 
+            
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getAttendance', meetingId: id }) })
+            .then(res => res.json())
+            .then(resp => { 
+                const tbody = document.getElementById('att-table-body'); 
+                tbody.innerHTML = ''; 
+                if (resp.status === 'success' && resp.data.length > 0) { 
+                    currentAttendanceData = resp.data; 
+                    document.getElementById('btn-download-att').classList.remove('hidden'); 
+                    resp.data.forEach((row, idx) => { 
+                        const ttdDisplay = row.ttdUrl ? `<a href="${row.ttdUrl}" target="_blank" class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-100 border border-indigo-200">Lihat TTD</a>` : '-'; 
+                        // Using smaller padding and alternating colors (even:bg-slate-50)
+                        tbody.innerHTML += `
+                        <tr class="hover:bg-blue-50/50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700 even:bg-slate-50 dark:even:bg-slate-800/80">
+                            <td class="px-4 py-2 text-slate-500 font-medium">${idx + 1}</td>
+                            <td class="px-4 py-2 whitespace-nowrap">${row.waktu}</td>
+                            <td class="px-4 py-2 font-bold text-slate-700 dark:text-slate-200">${row.nama}</td>
+                            <td class="px-4 py-2 text-slate-500 text-xs">${row.hp}</td>
+                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">${row.unit || '-'}</td>
+                            <td class="px-4 py-2 text-center">${ttdDisplay}</td>
+                        </tr>`; 
+                    }); 
+                } else { 
+                    currentAttendanceData = []; 
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">Belum ada peserta yang mengisi daftar hadir.</td></tr>'; 
+                } 
+            }).catch(() => { 
+                document.getElementById('att-table-body').innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-400">Gagal memuat data.</td></tr>'; 
+            }); 
+        }
+
         async function downloadAttendanceWithImages() { if (!currentAttendanceData || currentAttendanceData.length === 0) return; const btn = document.getElementById('btn-download-att'); const originalText = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyusun Excel...'; btn.disabled = true; const workbook = new ExcelJS.Workbook(); const worksheet = workbook.addWorksheet('Daftar Hadir'); const titleRow = worksheet.addRow(['DAFTAR HADIR']); titleRow.font = { size: 14, bold: true }; titleRow.alignment = { vertical: 'middle', horizontal: 'center' }; worksheet.mergeCells('A1:F1'); const agendaRow = worksheet.addRow([currentMeetingTitle]); agendaRow.font = { size: 12, bold: true }; agendaRow.alignment = { vertical: 'middle', horizontal: 'center' }; worksheet.mergeCells('A2:F2'); const dateRow = worksheet.addRow([`Tuban, ${currentMeetingDate}`]); dateRow.font = { size: 11, italic: true }; dateRow.alignment = { vertical: 'middle', horizontal: 'center' }; worksheet.mergeCells('A3:F3'); worksheet.addRow([]); const headerRow = worksheet.addRow(['No', 'Waktu Absen', 'Nama Peserta', 'Nomor HP', 'Unit/Ruangan', 'Tanda Tangan']); headerRow.height = 25; headerRow.eachCell((cell) => { cell.font = { bold: true }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } }; cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; cell.alignment = { vertical: 'middle', horizontal: 'center' }; }); worksheet.getColumn(1).width = 5; worksheet.getColumn(2).width = 18; worksheet.getColumn(3).width = 35; worksheet.getColumn(4).width = 15; worksheet.getColumn(5).width = 30; worksheet.getColumn(6).width = 15; worksheet.getColumn(4).numFmt = '@'; for (let i = 0; i < currentAttendanceData.length; i++) { const rowData = currentAttendanceData[i]; const row = worksheet.addRow([i + 1, rowData.waktu, rowData.nama, String(rowData.hp || ''), rowData.unit || '-', '']); row.height = 50; row.eachCell({ includeEmpty: true }, (cell) => { cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; cell.alignment = { vertical: 'middle', horizontal: 'left' }; }); row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' }; row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' }; if (rowData.ttdBase64) { const imageId = workbook.addImage({ base64: rowData.ttdBase64, extension: 'png', }); worksheet.addImage(imageId, { tl: { col: 5.2, row: row.number - 1 + 0.15 }, ext: { width: 90, height: 40 }, editAs: 'oneCell' }); } } const buffer = await workbook.xlsx.writeBuffer(); const safeTitle = (currentMeetingTitle || "Rapat").replace(/[^a-zA-Z0-9]/g, "_"); saveAs(new Blob([buffer]), `Absensi_${safeTitle}.xlsx`); btn.innerHTML = originalText; btn.disabled = false; }
         function deleteNotulen(id) { showConfirm('Hapus Notulen?', 'Yakin ingin menghapus notulen ini?').then((result) => { if (result.isConfirmed) { toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id, requesterEmail: currentUser.email }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { Swal.fire('Terhapus!', 'Berhasil menghapus notulen.', 'success'); loadData(); } else { Swal.fire('Gagal!', resp.message, 'error'); } }).catch(() => { toggleLoader(false); Swal.fire('Error!', 'Gagal koneksi server.', 'error'); }); } }); }
         function closeAttendanceModal() { document.getElementById('modal-attendance').classList.add('hidden'); }
@@ -1092,23 +1166,63 @@
 
         function changeRole(email, newRole) { showConfirm('Ubah Role?', `Ubah role user ini menjadi ${newRole}?`).then((result) => { if(result.isConfirmed) { toggleLoader(true); fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'toggleAdmin', targetEmail: email, newRole: newRole }) }).then(res => res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { Toast.fire({ icon: 'success', title: 'Role Berhasil Diubah' }); loadUsers(); } else { Swal.fire('Gagal', resp.message, 'error'); } }); } }); }
         
+        // --- UPDATED EDIT USER LOGIC WITH DROPDOWN ---
         function openEditUserModal(user) {
             document.getElementById('edit-user-email').value = user.email;
             document.getElementById('edit-user-name').value = user.name;
-            document.getElementById('edit-user-unit').value = user.unit;
             document.getElementById('edit-user-phone').value = user.phone;
+
+            // Handle Unit Dropdown
+            const select = document.getElementById('edit-user-unit-select');
+            const customInput = document.getElementById('edit-user-unit-lainnya');
+            
+            let isStandard = false;
+            for(let i=0; i<select.options.length; i++) { 
+                if(select.options[i].value === user.unit) { 
+                    isStandard = true; 
+                    break; 
+                } 
+            }
+            
+            if(isStandard) { 
+                select.value = user.unit; 
+            } else { 
+                select.value = 'Lainnya'; 
+                customInput.value = user.unit; 
+            }
+            handleEditUserUnitChange(select);
+
             document.getElementById('modal-edit-user').classList.remove('hidden');
+        }
+
+        function handleEditUserUnitChange(select) {
+            const div = document.getElementById('edit-user-unit-lainnya-group');
+            const input = document.getElementById('edit-user-unit-lainnya');
+            if (select.value === 'Lainnya') {
+                div.classList.remove('hidden');
+                input.setAttribute('required', 'true');
+            } else {
+                div.classList.add('hidden');
+                input.removeAttribute('required');
+                input.value = "";
+            }
         }
 
         function submitEditUser(e) {
             e.preventDefault();
             toggleLoader(true);
+            
+            let finalUnit = document.getElementById('edit-user-unit-select').value;
+            if (finalUnit === 'Lainnya') { 
+                finalUnit = document.getElementById('edit-user-unit-lainnya').value; 
+            }
+
             const payload = {
                 action: 'adminUpdateUser',
                 requesterEmail: currentUser.email,
                 targetEmail: document.getElementById('edit-user-email').value,
                 newName: document.getElementById('edit-user-name').value,
-                newUnit: document.getElementById('edit-user-unit').value,
+                newUnit: finalUnit, // Send string value to backend
                 newPhone: document.getElementById('edit-user-phone').value
             };
 
