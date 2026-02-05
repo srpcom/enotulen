@@ -43,37 +43,88 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-image 0.5s ease, background-color 0.5s ease, color 0.5s ease; }
         
-        /* TEMA PRESET */
+        /* TEMA PRESET (LIGHT) */
         .theme-blue { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%); background-attachment: fixed; }
         .theme-green { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%); background-attachment: fixed; }
         .theme-yellow { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%); background-attachment: fixed; }
         
-        /* TEMA DARK MODE */
+        /* TEMA DARK MODE - SUPERIOR READABILITY */
         .theme-dark { background: #0f172a; color: #f8fafc; background-attachment: fixed; }
-        .theme-dark .glass-card { background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
-        .theme-dark .glass-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #f1f5f9; }
-        .theme-dark .text-slate-900, .theme-dark .text-slate-800 { color: #f1f5f9 !important; }
-        .theme-dark .text-slate-700 { color: #e2e8f0 !important; }
+        
+        /* 1. Global Text Colors in Dark Mode (Force readable light colors) */
+        .theme-dark .text-slate-900, .theme-dark .text-slate-800, .theme-dark .text-slate-700 { color: #f1f5f9 !important; }
         .theme-dark .text-slate-600 { color: #cbd5e1 !important; }
         .theme-dark .text-slate-500 { color: #94a3b8 !important; }
+        .theme-dark .text-gray-600 { color: #cbd5e1 !important; }
+        .theme-dark h1, .theme-dark h2, .theme-dark h3, .theme-dark h4 { color: #fff !important; }
+
+        /* 2. Container Backgrounds in Dark Mode */
+        .theme-dark .glass-card { 
+            background: rgba(30, 41, 59, 0.85); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            backdrop-filter: blur(20px); 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); 
+        }
         .theme-dark .bg-white { background-color: #1e293b !important; }
         .theme-dark .bg-slate-50 { background-color: #0f172a !important; }
-        .theme-dark .bg-blue-50 { background-color: rgba(30, 58, 138, 0.2) !important; border-color: rgba(30, 58, 138, 0.4) !important; }
-        .theme-dark .bg-green-50 { background-color: rgba(20, 83, 45, 0.2) !important; border-color: rgba(20, 83, 45, 0.4) !important; }
-        .theme-dark .border-slate-200 { border-color: #334155 !important; }
-        .theme-dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #334155 !important; }
-        .theme-dark .nav-item:hover { background: rgba(255,255,255,0.05) !important; color: #fff !important; }
-        .theme-dark .nav-item.active { background: linear-gradient(to right, #1e293b, #0f172a); color: #60a5fa !important; border: 1px solid #334155; box-shadow: none; }
-        .theme-dark option { background-color: #0f172a; color: white; }
+        
+        /* 3. Input & Form Elements in Dark Mode */
+        .theme-dark .glass-input { 
+            background: rgba(15, 23, 42, 0.8) !important; 
+            border: 1px solid rgba(255, 255, 255, 0.15) !important; 
+            color: #f8fafc !important; 
+        }
+        .theme-dark .glass-input:focus { border-color: #60a5fa !important; ring: 2px solid rgba(96, 165, 250, 0.2); }
+        .theme-dark .glass-input::placeholder { color: #64748b !important; }
+        .theme-dark .glass-input:disabled { 
+            background: rgba(30, 41, 59, 0.5) !important; 
+            color: #64748b !important; 
+            border-color: rgba(255,255,255,0.05) !important; 
+        }
+        
+        /* Fix Select Options Background */
+        option { background-color: #ffffff; color: #1e293b; }
+        .theme-dark option { background-color: #1e293b; color: #f1f5f9; }
 
-        .glass-card { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); }
-        .glass-input { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(0,0,0,0.1); }
+        /* 4. Badges & Highlights (Ensure text is readable on colored backgrounds) */
+        .theme-dark .bg-green-100, .theme-dark .bg-green-50 { background-color: rgba(22, 101, 52, 0.3) !important; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .theme-dark .text-green-800, .theme-dark .text-green-700, .theme-dark .text-green-600 { color: #86efac !important; }
+        
+        .theme-dark .bg-blue-100, .theme-dark .bg-blue-50 { background-color: rgba(30, 64, 175, 0.3) !important; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .theme-dark .text-blue-800, .theme-dark .text-blue-700, .theme-dark .text-blue-600 { color: #93c5fd !important; }
+        
+        .theme-dark .bg-amber-100, .theme-dark .bg-orange-50 { background-color: rgba(146, 64, 14, 0.3) !important; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .theme-dark .text-amber-800, .theme-dark .text-amber-700, .theme-dark .text-orange-600 { color: #fcd34d !important; }
+        
+        .theme-dark .bg-slate-100 { background-color: rgba(51, 65, 85, 0.4) !important; color: #e2e8f0 !important; }
+
+        /* 5. Borders & Dividers */
+        .theme-dark .border-slate-200, .theme-dark .border-slate-100, .theme-dark .border-slate-50 { border-color: #334155 !important; }
+        .theme-dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #334155 !important; }
+        
+        /* 6. Navigation & Sidebar */
+        .theme-dark .nav-item:hover { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
+        .theme-dark .nav-item.active { 
+            background: linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(30, 58, 138, 0.2)) !important; 
+            color: #60a5fa !important; 
+            border: 1px solid rgba(59, 130, 246, 0.4) !important; 
+        }
+        
+        /* 7. SweetAlert2 Dark Mode Overrides */
+        .theme-dark .swal2-popup { background: #1e293b !important; color: #f1f5f9 !important; border: 1px solid #334155; }
+        .theme-dark .swal2-title { color: #f1f5f9 !important; }
+        .theme-dark .swal2-content, .theme-dark .swal2-html-container { color: #cbd5e1 !important; }
+
+        /* STANDARD UI CLASSES */
+        .glass-card { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); }
+        .glass-input { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(0,0,0,0.1); color: #1e293b; }
+        .glass-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         .glass-input:disabled { background: rgba(200, 200, 200, 0.3); color: #64748b; cursor: not-allowed; border: 1px solid rgba(0,0,0,0.05); }
         .hidden { display: none !important; }
         
         .nav-item.active { 
             border-right: none !important; 
-            font-weight: 800 !important; 
+            font-weight: 700 !important; 
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
             transform: scale(1.02); 
         }
@@ -92,7 +143,7 @@
         .theme-btn.active-theme { ring-width: 2px; ring-offset-width: 2px; ring-color: #64748b; transform: scale(1.1); }
         .theme-btn:hover { transform: scale(1.1); }
 
-        /* A4 PAPER STYLING - SCREEN MODE */
+        /* A4 PAPER STYLING */
         .a4-paper {
             width: 210mm;
             min-height: 297mm; 
@@ -105,16 +156,8 @@
             display: flex;
             flex-direction: column; 
         }
-
         .paper-content-wrapper { flex: 1; display: flex; flex-direction: column; }
         .header-double-line { border-bottom: 4px double #1e293b; padding-bottom: 1.5rem; margin-bottom: 2rem; }
-
-        .rich-text-content ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 0.5em; }
-        .rich-text-content ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 0.5em; }
-        .rich-text-content p { margin-bottom: 0.5em; text-align: justify; }
-        .rich-text-content strong { font-weight: 700; color: #0f172a; }
-        .rich-text-content em { font-style: italic; }
-        .rich-text-content h1, .rich-text-content h2, .rich-text-content h3 { font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; }
 
         @media (max-width: 215mm) {
             .a4-paper { width: 100%; min-height: auto; height: auto; padding: 1.5rem; padding-bottom: 4rem; box-shadow: none; }
