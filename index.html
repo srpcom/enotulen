@@ -76,55 +76,30 @@
             border-radius: 0.75rem; 
         }
         .theme-btn.active-theme { ring-width: 2px; ring-offset-width: 2px; ring-color: #64748b; transform: scale(1.1); }
+        .theme-btn:hover { transform: scale(1.1); }
 
         /* A4 PAPER STYLING - SCREEN MODE */
         .a4-paper {
             width: 210mm;
             min-height: 297mm; 
-            height: auto; /* Memastikan background memanjang mengikuti konten */
+            height: auto; 
             background: white;
             margin: 0 auto;
             padding: 20mm; 
             box-shadow: 0 0 25px rgba(0,0,0,0.1); 
             position: relative;
-            /* Menggunakan flex di layar agar footer bisa di bawah jika konten sedikit */
             display: flex;
             flex-direction: column; 
         }
 
-        /* WRAPPER KONTEN AGAR FLEX BEKERJA BAIK DI LAYAR */
-        .paper-content-wrapper {
-            flex: 1; /* Mengisi ruang kosong */
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* HEADER DOUBLE LINE (Kop Surat Style) */
-        .header-double-line {
-            border-bottom: 4px double #1e293b; 
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
+        .paper-content-wrapper { flex: 1; display: flex; flex-direction: column; }
+        .header-double-line { border-bottom: 4px double #1e293b; padding-bottom: 1.5rem; margin-bottom: 2rem; }
 
         /* QUILL CUSTOM STYLES */
-        .ql-toolbar.ql-snow {
-            border: none !important;
-            border-bottom: 1px solid rgba(0,0,0,0.1) !important;
-            background: rgba(255, 255, 255, 0.5);
-            border-top-left-radius: 0.75rem;
-            border-top-right-radius: 0.75rem;
-        }
-        .ql-container.ql-snow {
-            border: none !important;
-            background: rgba(255, 255, 255, 0.3);
-            border-bottom-left-radius: 0.75rem;
-            border-bottom-right-radius: 0.75rem;
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
-            font-size: 0.875rem !important;
-        }
+        .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid rgba(0,0,0,0.1) !important; background: rgba(255, 255, 255, 0.5); border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; }
+        .ql-container.ql-snow { border: none !important; background: rgba(255, 255, 255, 0.3); border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 0.875rem !important; }
         .ql-editor { min-height: 150px; }
         
-        /* Rich Text Content Styling */
         .rich-text-content ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 0.5em; }
         .rich-text-content ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 0.5em; }
         .rich-text-content p { margin-bottom: 0.5em; text-align: justify; }
@@ -133,79 +108,21 @@
         .rich-text-content h1, .rich-text-content h2, .rich-text-content h3 { font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; }
 
         @media (max-width: 215mm) {
-            .a4-paper { 
-                width: 100%; 
-                min-height: auto; 
-                height: auto; 
-                padding: 1.5rem; 
-                padding-bottom: 4rem; /* Tambahan padding bawah untuk mobile */
-                box-shadow: none; 
-            }
+            .a4-paper { width: 100%; min-height: auto; height: auto; padding: 1.5rem; padding-bottom: 4rem; box-shadow: none; }
         }
 
-        /* === PRINT CONFIGURATION (FIXED) === */
         @media print {
-            @page { 
-                size: A4 portrait;
-                margin: 0; /* Browser margin 0, kita atur padding di .a4-paper */
-            }
-            body { 
-                background: white !important; 
-                margin: 0; 
-                padding: 0; 
-                -webkit-print-color-adjust: exact !important; 
-                print-color-adjust: exact !important; 
-            }
-            
-            /* Sembunyikan elemen UI */
+            @page { size: A4 portrait; margin: 0; }
+            body { background: white !important; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             .no-print, #sidebar, header, .ql-toolbar, #btn-broadcast { display: none !important; }
-            
-            /* Reset Container Utama */
-            #view-public-result { 
-                display: block !important; 
-                position: static !important;
-                width: 100% !important; 
-                height: auto !important; 
-                overflow: visible !important; 
-                background: white !important; 
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            
-            /* Reset A4 Paper agar menjadi BLOCK biasa (PENTING untuk pagination) */
-            .a4-paper { 
-                display: block !important; /* JANGAN FLEX saat print */
-                width: 100% !important;
-                max-width: 210mm !important; /* Pastikan tidak melebar */
-                min-height: auto !important;
-                height: auto !important;
-                margin: 0 auto !important;
-                padding: 20mm !important; 
-                box-shadow: none !important; 
-                border: none !important; 
-            }
-
-            /* Reset Wrapper Konten */
-            .paper-content-wrapper {
-                display: block !important;
-                flex: none !important;
-            }
-
-            /* Signature agar tidak error di flex */
-            .signature-section {
-                margin-top: 30px !important;
-                page-break-inside: avoid !important;
-            }
-
-            /* Pastikan background warna tercetak */
+            #view-public-result { display: block !important; position: static !important; width: 100% !important; height: auto !important; overflow: visible !important; background: white !important; padding: 0 !important; margin: 0 !important; }
+            .a4-paper { display: block !important; width: 100% !important; max-width: 210mm !important; min-height: auto !important; height: auto !important; margin: 0 auto !important; padding: 20mm !important; box-shadow: none !important; border: none !important; }
+            .paper-content-wrapper { display: block !important; flex: none !important; }
+            .signature-section { margin-top: 30px !important; page-break-inside: avoid !important; }
             .bg-slate-50 { background-color: #f8fafc !important; }
             .bg-green-50\/50 { background-color: #f0fdf4 !important; }
-            
-            /* Cegah pemotongan elemen penting */
             tr, img, .break-inside-avoid { page-break-inside: avoid; }
             h1, h2, h3, h4 { page-break-after: avoid; }
-            
-            /* Header adjustments */
             .header-double-line { border-bottom: 2px solid #000 !important; }
         }
     </style>
@@ -216,7 +133,6 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbzj1mWjE3EC2KmtKbaHoz8yNEcnNFffDKXJ2xQg0mAKsSBB9QWGtIfwDw65z0OnnHWV/exec"; 
         const CLIENT_ID = "783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com";
 
-        // --- SWEETALERT2 MIXINS ---
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -235,8 +151,8 @@
                 text: text,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3b82f6', // Tailwind Blue 500
-                cancelButtonColor: '#ef4444', // Tailwind Red 500
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#ef4444',
                 confirmButtonText: confirmText,
                 cancelButtonText: 'Batal'
             });
@@ -246,6 +162,8 @@
             document.body.classList.remove('theme-blue', 'theme-green', 'theme-yellow');
             document.body.classList.add(themeName);
             localStorage.setItem('rsud_theme_pref', themeName);
+            
+            // Update UI pada tombol di Halaman Settings (bukan di sidebar lagi)
             document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active-theme', 'ring-2', 'ring-slate-400'));
             const activeBtn = document.querySelector(`[data-theme="${themeName}"]`);
             if(activeBtn) activeBtn.classList.add('active-theme', 'ring-2', 'ring-slate-400');
@@ -260,7 +178,6 @@
 
     <!-- VIEW: ABSENSI -->
     <div id="app-absensi" class="hidden w-full h-full overflow-y-auto p-4 flex flex-col items-center">
-        <!-- (Code Absensi Sama) -->
         <div class="glass-card max-w-md w-full p-6 rounded-3xl shadow-2xl border-t border-white/60 animate-fade-in my-auto">
             <div class="text-center mb-6">
                 <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-20 h-20 object-contain mx-auto mb-3 drop-shadow-sm" alt="Logo RSUD">
@@ -316,14 +233,10 @@
         <p class="mt-8 text-[10px] text-slate-500">© 2026 Bagian Administrasi dan Umum</p>
     </div>
 
-    <!-- VIEW: PUBLIC RESULT (HASIL RAPAT) - FORMAT A4 -->
+    <!-- VIEW: PUBLIC RESULT -->
     <div id="view-public-result" class="hidden w-full h-full overflow-y-auto p-0 md:p-8 flex justify-center bg-slate-200/50">
         <div class="a4-paper animate-fade-in relative">
-            
-            <!-- Wrapper Utama Konten -->
             <div class="paper-content-wrapper">
-                
-                <!-- Header Kop Surat Style -->
                 <div class="header-double-line flex items-center gap-6">
                     <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-24 h-24 object-contain">
                     <div class="w-full text-center md:text-left">
@@ -351,7 +264,6 @@
                         <h2 class="text-xl font-bold text-slate-800 uppercase underline underline-offset-4 decoration-2 decoration-slate-400">NOTULENSI RAPAT</h2>
                     </div>
 
-                    <!-- Informasi Rapat Table Style -->
                     <table class="w-full text-sm text-slate-800 mb-8 border border-slate-300 break-inside-avoid">
                         <tr class="border-b border-slate-200">
                             <td class="w-48 py-3 px-4 font-bold bg-slate-50 border-r border-slate-200 uppercase text-xs tracking-wider">Agenda Rapat</td>
@@ -394,8 +306,6 @@
                 </div>
             </div>
 
-            <!-- Tanda Tangan Section -->
-            <!-- mt-auto dihapus agar tidak mendorong keluar saat flex/min-height issue terjadi -->
             <div class="signature-section pt-16 flex justify-end break-inside-avoid page-break-inside-avoid">
                 <div class="text-center w-64">
                     <p class="text-sm text-slate-600 mb-20">Mengetahui,</p>
@@ -419,35 +329,33 @@
                 <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-10 h-10 object-contain mr-3 filter drop-shadow-sm" alt="Logo">
                 <div><h1 class="font-bold text-lg tracking-tight text-slate-800">E-Notulen</h1><p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">RSUD dr. R. Koesma</p></div>
             </div>
+            
             <div onclick="navTo('profile')" class="mx-4 mt-6 mb-2 p-3 rounded-2xl bg-white/40 border border-white/20 cursor-pointer hover:bg-white/60 transition group">
                 <div class="flex items-center gap-3">
                     <img id="sb-avatar" src="" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover bg-white">
                     <div class="overflow-hidden"><p id="sb-name" class="text-sm font-bold truncate group-hover:text-blue-700 transition">User</p><p id="sb-role" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700 w-max mt-1">LOADING</p></div>
                 </div>
             </div>
+
             <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-1">
                 <button onclick="navTo('dashboard')" id="nav-dashboard" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/50 transition flex items-center gap-3"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</button>
                 <button onclick="navTo('create')" id="nav-create" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/50 transition flex items-center gap-3"><i class="fa-solid fa-calendar-plus w-5"></i> Buat Jadwal</button>
                 <button onclick="navTo('write')" id="nav-write" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/50 transition flex items-center gap-3"><i class="fa-solid fa-pen-to-square w-5"></i> Tulis Notulen</button>
                 <button onclick="navTo('list')" id="nav-list" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/50 transition flex items-center gap-3"><i class="fa-solid fa-folder-open w-5"></i> Arsip Notulen</button>
+                <!-- [MODIFIED] Update Label jadi Profil & Pengaturan -->
                 <button onclick="navTo('profile')" id="nav-profile" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/50 transition flex items-center gap-3"><i class="fa-solid fa-user-gear w-5"></i> Pengaturan</button>
                 <div id="menu-admin" class="hidden pt-4 mt-2 border-t border-slate-200/50">
                     <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Admin Panel</p>
                     <button onclick="navTo('users')" id="nav-users" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/50 transition flex items-center gap-3"><i class="fa-solid fa-users-gear w-5"></i> Data User</button>
                 </div>
             </nav>
+
+            <!-- [MODIFIED] Sidebar Footer: Cleaned up (Theme removed, only Logout) -->
             <div class="p-4 border-t border-white/10 bg-white/20 backdrop-blur-sm">
-                <div class="flex flex-col gap-2 mb-4 px-2">
-                    <div class="flex justify-between items-center"><span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">TEMA APLIKASI</span></div>
-                    <div class="flex gap-3 mt-1">
-                        <button onclick="setTheme('theme-blue')" data-theme="theme-blue" class="theme-btn w-6 h-6 rounded-full bg-blue-200 border-2 border-blue-400 hover:scale-110 transition shadow-sm" title="Biru (Default)"></button>
-                        <button onclick="setTheme('theme-green')" data-theme="theme-green" class="theme-btn w-6 h-6 rounded-full bg-green-200 border-2 border-green-400 hover:scale-110 transition shadow-sm" title="Hijau"></button>
-                        <button onclick="setTheme('theme-yellow')" data-theme="theme-yellow" class="theme-btn w-6 h-6 rounded-full bg-yellow-200 border-2 border-yellow-400 hover:scale-110 transition shadow-sm" title="Kuning"></button>
-                    </div>
-                </div>
                 <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2.5 rounded-xl transition font-semibold text-sm shadow-sm"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
             </div>
         </aside>
+
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden transition-opacity"></div>
 
         <div class="flex-1 flex flex-col relative h-full overflow-hidden">
@@ -491,8 +399,8 @@
 
                 <!-- PROFILE -->
                 <div id="view-profile" class="page-view hidden animate-fade-in max-w-3xl mx-auto">
-                     <h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg"><i class="fa-solid fa-user-gear"></i></span> Pengaturan Profil</h1>
-                    <div class="glass-card rounded-2xl p-6 md:p-8">
+                     <h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg"><i class="fa-solid fa-user-gear"></i></span> Profil & Pengaturan</h1>
+                    <div class="glass-card rounded-2xl p-6 md:p-8 mb-6">
                         <div class="flex flex-col md:flex-row items-center gap-6 mb-8 pb-8 border-b border-slate-200/50">
                             <div class="relative"><img id="prof-img" src="" class="w-24 h-24 rounded-full border-4 border-white shadow-md"></div>
                             <div class="text-center md:text-left"><h2 id="prof-name-disp" class="text-2xl font-bold text-slate-900">User Name</h2><p id="prof-email-disp" class="text-slate-500 mb-2">email@example.com</p><span id="prof-role-disp" class="inline-block text-xs font-bold tracking-wider bg-slate-100 text-slate-600 px-3 py-1 rounded-full uppercase">USER</span></div>
@@ -521,8 +429,24 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="pt-4 flex justify-end"><button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 text-sm font-semibold flex items-center transform active:scale-95 transition-all"><i class="fa-solid fa-check-circle mr-2"></i> Simpan Perubahan</button></div>
+                            <div class="pt-4 flex justify-end"><button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 text-sm font-semibold flex items-center transform active:scale-95 transition-all"><i class="fa-solid fa-check-circle mr-2"></i> Simpan Data Profil</button></div>
                         </form>
+                    </div>
+
+                    <!-- [MODIFIED] PREFERENSI APLIKASI (TEMA) - PINDAH KESINI -->
+                    <div class="glass-card rounded-2xl p-6 md:p-8">
+                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">Preferensi Aplikasi</h3>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="text-slate-800 font-bold">Tema Warna</h4>
+                                <p class="text-xs text-slate-500">Pilih warna aksen aplikasi sesuai selera.</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <button onclick="setTheme('theme-blue')" data-theme="theme-blue" class="theme-btn w-10 h-10 rounded-full bg-blue-200 border-4 border-blue-50 hover:shadow-md transition" title="Biru (Default)"></button>
+                                <button onclick="setTheme('theme-green')" data-theme="theme-green" class="theme-btn w-10 h-10 rounded-full bg-green-200 border-4 border-green-50 hover:shadow-md transition" title="Hijau"></button>
+                                <button onclick="setTheme('theme-yellow')" data-theme="theme-yellow" class="theme-btn w-10 h-10 rounded-full bg-yellow-200 border-4 border-yellow-50 hover:shadow-md transition" title="Kuning"></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -560,7 +484,6 @@
                             <div id="section-recording" class="hidden pt-6 border-t border-slate-200 mt-6 animate-fade-in">
                                 <div class="mb-5 bg-green-50 p-4 rounded-xl border border-green-200 flex gap-3 items-start"><i class="fa-solid fa-circle-info text-green-600 mt-1"></i><div><h3 class="text-green-800 font-bold text-sm">Area Notulensi</h3><p class="text-green-600 text-xs">Silakan lengkapi hasil rapat dan rencana tindak lanjut di bawah ini. Gunakan toolbar untuk memformat teks.</p></div></div>
                                 
-                                <!-- QUILL EDITOR FOR ISI PEMBAHASAN -->
                                 <div class="mb-6">
                                     <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Isi Pembahasan <span class="text-red-500">*</span></label>
                                     <div class="rounded-xl overflow-hidden border border-slate-200 focus-within:ring-2 focus-within:ring-blue-500/50 transition">
@@ -568,7 +491,6 @@
                                     </div>
                                 </div>
                                 
-                                <!-- QUILL EDITOR FOR RENCANA TINDAK LANJUT -->
                                 <div class="mb-4">
                                     <label class="block text-xs font-bold text-green-700 uppercase mb-2">Rencana Tindak Lanjut</label>
                                     <div class="rounded-xl overflow-hidden border border-green-200 bg-green-50/30 focus-within:ring-2 focus-within:ring-green-500/50 transition">
@@ -576,14 +498,11 @@
                                     </div>
                                 </div>
                                 
-                                <!-- [MODIFIED] Tombol Create Spreadsheet & Word -->
                                 <div class="mb-8 flex justify-end gap-3">
-                                    <!-- Tombol Word (BARU) -->
                                     <button type="button" onclick="createWordNotulen()" class="text-xs bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-bold hover:bg-blue-200 transition border border-blue-300 flex items-center shadow-sm">
                                         <i class="fa-solid fa-file-word mr-2"></i> Buat Notulen Mode Word
                                     </button>
                                     
-                                    <!-- Tombol Spreadsheet (LAMA) -->
                                     <button type="button" onclick="createSpreadsheetNotulen()" class="text-xs bg-green-100 text-green-700 px-4 py-2 rounded-lg font-bold hover:bg-green-200 transition border border-green-300 flex items-center shadow-sm">
                                         <i class="fa-solid fa-file-excel mr-2"></i> Buat Notulen Mode Spreadsheet
                                     </button>
@@ -693,7 +612,6 @@
     </div>
 
     <script>
-        // ... (Signature Pad Logic is same) ...
         let signaturePad = null;
         const canvas = document.getElementById('signature-pad');
 
@@ -712,18 +630,16 @@
         }
         function clearSignature() { if (signaturePad) signaturePad.clear(); }
 
-        // --- 2. INIT APPLICATION ---
         const urlParams = new URLSearchParams(window.location.search);
         const mode = urlParams.get('v');
         const meetingId = urlParams.get('id');
         let currentUser = null;
 
-        // --- QUILL INITIALIZATION ---
         let quillIsi = null;
         let quillTindak = null;
 
         function initQuillEditors() {
-            if(quillIsi || quillTindak) return; // Prevent double init
+            if(quillIsi || quillTindak) return; 
             
             try {
                 if (typeof Quill === 'undefined') {
@@ -753,7 +669,6 @@
             }
         }
 
-        // ... (Absensi Logic Same) ...
         function loadMeetingInfo(id) {
             document.getElementById('abs-meeting-id').value = id;
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getMeetingInfo', id: id }) })
@@ -798,7 +713,6 @@
             });
         }
 
-        // ... (Result Logic Updated for HTML) ...
         function loadMeetingResult(id) {
             document.getElementById('res-meeting-id').value = id;
             const savedUser = localStorage.getItem('rsud_user_pro_v2');
@@ -815,7 +729,6 @@
                     document.getElementById('res-pimpinan').textContent = d.pimpinan || '-';
                     document.getElementById('res-ttd-nama').textContent = d.pimpinan || 'Pimpinan Rapat';
                     
-                    // [MODIFIED] Use innerHTML to render Rich Text
                     document.getElementById('res-isi').innerHTML = d.isi || 'Belum ada pembahasan.';
                     document.getElementById('res-tindak').innerHTML = d.tindakLanjut || '-';
                     
@@ -860,7 +773,6 @@
             });
         }
 
-        // --- 4. ADMIN LOGIC ---
         let allData = [];
         let filteredData = [];
         let currentPage = 1;
@@ -898,7 +810,6 @@
         function initApp() {
             if (!currentUser) return;
             
-            // Hide login screen IMMEDIATELY
             document.getElementById('view-login').classList.add('hidden');
             document.getElementById('sidebar').classList.remove('hidden'); 
             document.getElementById('sidebar').classList.add('flex');
@@ -911,7 +822,7 @@
             if(currentUser.role === 'ADMIN') document.getElementById('menu-admin').classList.remove('hidden');
             
             setTimeout(() => {
-                initQuillEditors(); // Delay init slightly to ensure DOM ready
+                initQuillEditors(); 
                 navTo('dashboard'); 
                 loadData();
             }, 100);
@@ -942,9 +853,7 @@
 
         function logout() { localStorage.removeItem('rsud_user_pro_v2'); location.reload(); }
 
-        // ... (Helpers: Copy, View Attendance, Download Excel, Delete, Load Data) ...
         function copyAbsensiLink(id) { 
-            // FIXED: Gunakan origin + pathname agar link bersih (tanpa # atau parameter lama)
             const baseUrl = window.location.origin + window.location.pathname; 
             const fullUrl = `${baseUrl}?v=absensi&id=${id}`; 
             navigator.clipboard.writeText(fullUrl).then(() => { 
@@ -952,7 +861,6 @@
             }); 
         }
         function copyResultLink(id) { 
-            // FIXED: Gunakan origin + pathname
             const baseUrl = window.location.origin + window.location.pathname; 
             const fullUrl = `${baseUrl}?v=result&id=${id}`; 
             navigator.clipboard.writeText(fullUrl).then(() => { 
@@ -960,7 +868,6 @@
             }); 
         }
         function showQrCode(id) { 
-            // FIXED: Gunakan origin + pathname
             const baseUrl = window.location.origin + window.location.pathname; 
             const fullUrl = `${baseUrl}?v=absensi&id=${id}`; 
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(fullUrl)}`; 
@@ -1038,10 +945,8 @@
                 const isOwner = (item.pencatatEmail === currentUser.email); const isAdmin = (currentUser.role === 'ADMIN'); const canEdit = (isAdmin || isOwner); 
                 const fileIcon = (item.fileUrl && item.fileUrl.length > 5) ? `<a href="${item.fileUrl}" target="_blank" class="text-red-500 ml-2"><i class="fa-solid fa-file-pdf"></i></a>` : ''; 
                 
-                // [MODIFIKASI] Buat Link URL ke Result Page
                 const resultUrl = `?v=result&id=${item.id}`;
 
-                // Check rich text content length safely (strip tags)
                 const tempDiv = document.createElement("div"); tempDiv.innerHTML = item.isi || ""; const textContent = tempDiv.textContent || tempDiv.innerText || "";
                 
                 let statusBadge = textContent.length > 5 ? `<span class="bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-200">Selesai</span>` : `<span class="bg-amber-100 text-amber-700 text-[10px] px-3 py-1 rounded-full font-bold border border-amber-200">Terjadwal</span>`; 
@@ -1052,7 +957,6 @@
                     btn += `</div>`; 
                 } 
                 
-                // [MODIFIKASI] Render baris tabel dengan Judul yang bisa diklik
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/50 transition">
                         <td class="px-6 py-4">
@@ -1113,7 +1017,6 @@
             document.getElementById('inp-file').disabled = true;
             setTimeout(() => {
                 document.getElementById('section-recording').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Focus on Quill Editor
                 if(quillIsi) quillIsi.focus();
             }, 500);
         }
@@ -1124,7 +1027,6 @@
         
         function resetForm() { 
             document.getElementById('mainForm').reset(); 
-            // Reset Quill
             if(quillIsi) quillIsi.setText('');
             if(quillTindak) quillTindak.setText('');
             
@@ -1146,7 +1048,6 @@
             document.getElementById('inp-unit').value = currentUser.unit || ""; 
             handleCreateUnitChange(document.getElementById('inp-unit')); 
             document.getElementById('section-recording').classList.add('hidden'); 
-            // document.getElementById('inp-isi').removeAttribute('required'); // No longer needed with Quill
             document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-plus"></i></span> Buat Jadwal Rapat'; 
             document.getElementById('btn-submit-text').innerText = "Simpan Jadwal"; 
         }
@@ -1155,7 +1056,6 @@
             const item = JSON.parse(decodeURIComponent(itemStr)); 
             navTo('create'); 
             document.getElementById('section-recording').classList.remove('hidden'); 
-            // document.getElementById('inp-isi').setAttribute('required', 'true'); // Quill validation is manual
             document.getElementById('form-title').innerHTML = '<span class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-pen-to-square"></i></span> Isi Hasil Rapat'; 
             document.getElementById('btn-submit-text').innerText = "Simpan Hasil Notulen"; 
             document.getElementById('form-action').value = 'update'; 
@@ -1182,10 +1082,9 @@
             document.getElementById('inp-agenda').value = item.agenda; 
             document.getElementById('inp-peserta').value = item.peserta; 
             
-            // [MODIFIED] Set Content to Quill
             if(quillIsi) {
                 if(item.isi && item.isi.includes('<')) quillIsi.clipboard.dangerouslyPasteHTML(item.isi);
-                else quillIsi.setText(item.isi || ""); // Fallback for old plain text
+                else quillIsi.setText(item.isi || ""); 
             }
             if(quillTindak) {
                 if(item.tindakLanjut && item.tindakLanjut.includes('<')) quillTindak.clipboard.dangerouslyPasteHTML(item.tindakLanjut);
@@ -1254,7 +1153,6 @@
             });
         }
         
-        // --- FUNGSI BARU: KOMPRESI GAMBAR ---
         function compressImage(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1266,21 +1164,16 @@
                         const canvas = document.createElement('canvas');
                         let width = img.width;
                         let height = img.height;
-
-                        // Resize dimensi jika terlalu besar (Max 2048px agar file tidak bengkak)
                         const MAX_DIM = 2048; 
                         if (width > height) {
                             if (width > MAX_DIM) { height *= MAX_DIM / width; width = MAX_DIM; }
                         } else {
                             if (height > MAX_DIM) { width *= MAX_DIM / height; height = MAX_DIM; }
                         }
-
                         canvas.width = width;
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-
-                        // Kompres ke JPEG dengan kualitas 70% (0.7)
                         resolve(canvas.toDataURL('image/jpeg', 0.7)); 
                     };
                     img.onerror = (err) => reject(err);
@@ -1293,13 +1186,11 @@
             e.preventDefault(); 
             toggleLoader(true); 
             
-            // --- KONFIGURASI BATAS UKURAN ---
-            const MAX_IMG_SIZE = 10 * 1024 * 1024; // 10 MB
-            const MAX_DOC_SIZE = 20 * 1024 * 1024; // 20 MB
+            const MAX_IMG_SIZE = 10 * 1024 * 1024; 
+            const MAX_DOC_SIZE = 20 * 1024 * 1024; 
 
             const formAction = document.getElementById('form-action').value;
             
-            // Validasi Manual Quill (Isi Notulen)
             if (formAction === 'update' && quillIsi.getText().trim().length === 0) {
                     toggleLoader(false);
                     Swal.fire({ icon: 'warning', title: 'Belum Lengkap', text: 'Mohon isi pembahasan rapat terlebih dahulu.' });
@@ -1327,7 +1218,6 @@
                 existingFileUrl: document.getElementById('form-existing-file').value 
             }; 
 
-            // --- PROSES FILE UTAMA (UNDANGAN) ---
             const fileInput = document.getElementById('inp-file'); 
             if(fileInput.files.length > 0) { 
                 const f = fileInput.files[0]; 
@@ -1335,21 +1225,17 @@
                 let finalMime = f.type;
 
                 if (f.type.startsWith('image/')) {
-                    // Jika Gambar: Kompres dulu
                     base64Result = await compressImage(f);
-                    finalMime = "image/jpeg"; // Hasil kompresi selalu JPEG
+                    finalMime = "image/jpeg"; 
                     
-                    // Cek ukuran setelah kompresi (Estimasi dari panjang string Base64)
                     const sizeInBytes = (base64Result.length * 3) / 4; 
                     if(sizeInBytes > MAX_IMG_SIZE) { 
                         toggleLoader(false); 
                         Swal.fire('File Gambar Terlalu Besar', 'Setelah dikompres ukuran masih di atas 10MB.', 'warning'); 
                         return; 
                     }
-                    // Hapus header data url untuk dikirim ke backend
                     payload.fileData = base64Result.split(',')[1];
                 } else {
-                    // Jika PDF/Lainnya: Cek ukuran asli
                     if(f.size > MAX_DOC_SIZE) { 
                         toggleLoader(false); 
                         Swal.fire('File Terlalu Besar', 'Maksimal ukuran file dokumen (PDF) adalah 20MB', 'warning'); 
@@ -1363,7 +1249,6 @@
                 payload.mimeType = finalMime; 
             } 
             
-            // --- PROSES DOKUMENTASI TAMBAHAN ---
             const newDocs = []; 
             for(const row of document.querySelectorAll('.doc-row')) { 
                 const fi = row.querySelector('.doc-file'); 
@@ -1375,7 +1260,6 @@
                     let docMime = f.type;
 
                     if (f.type.startsWith('image/')) {
-                        // Kompres Gambar Dokumentasi
                         docBase64 = await compressImage(f);
                         docMime = "image/jpeg";
 
@@ -1387,7 +1271,6 @@
                         }
                         newDocs.push({ fileData: docBase64.split(',')[1], fileName: f.name, mimeType: docMime, description: di.value }); 
                     } else {
-                        // Dokumen Non-Gambar (PDF)
                         if(f.size > MAX_DOC_SIZE) { 
                             toggleLoader(false); 
                             Swal.fire('Dokumen Terlalu Besar', `File "${f.name}" melebihi 20MB.`, 'warning'); 
@@ -1400,7 +1283,6 @@
             } 
             payload.newDokumentasi = newDocs; 
 
-            // --- SISA LOGIKA (URL LINKS & KIRIM DATA) ---
             let keptDocsArray = [];
             try { keptDocsArray = JSON.parse(document.getElementById('form-kept-docs').value); } catch(e) { keptDocsArray = []; }
 
@@ -1437,9 +1319,7 @@
             }); 
         }
 
-        // [BARU] Fungsi Create Spreadsheet Notulen dengan Requester Email
         function createSpreadsheetNotulen() {
-            const formAction = document.getElementById('form-action').value;
             const formId = document.getElementById('form-id').value;
             const agenda = document.getElementById('inp-agenda').value;
             const tanggal = document.getElementById('inp-tanggal').value;
@@ -1463,7 +1343,7 @@
                         tanggal: tanggal,
                         unit: unit,
                         pimpinan: pimpinan,
-                        requesterEmail: currentUser.email // [MODIFIKASI] Kirim email user login
+                        requesterEmail: currentUser.email 
                     };
 
                     fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
@@ -1471,7 +1351,6 @@
                     .then(resp => {
                         toggleLoader(false);
                         if(resp.status === 'success') {
-                            // Otomatis tambahkan ke list URL
                             const container = document.getElementById('new-docs-container');
                             const rowId = 'url-' + Date.now();
                             
@@ -1509,9 +1388,7 @@
             });
         }
 
-        // [BARU TAHAP 2] Fungsi Create Word Notulen
         function createWordNotulen() {
-            const formAction = document.getElementById('form-action').value;
             const formId = document.getElementById('form-id').value;
             const agenda = document.getElementById('inp-agenda').value;
             const tanggal = document.getElementById('inp-tanggal').value;
@@ -1520,7 +1397,6 @@
             if(unit === 'Lainnya') unit = document.getElementById('inp-unit-lainnya').value;
             const pimpinan = document.getElementById('inp-peserta').value;
 
-            // Ambil konten dari Quill Editor
             const isi = quillIsi.root.innerHTML;
             const tindakLanjut = quillTindak.root.innerHTML;
 
@@ -1551,7 +1427,6 @@
                     .then(resp => {
                         toggleLoader(false);
                         if(resp.status === 'success') {
-                            // Otomatis tambahkan ke list URL (Dokumentasi)
                             const container = document.getElementById('new-docs-container');
                             const rowId = 'url-' + Date.now();
                             
@@ -1570,7 +1445,6 @@
                                 </div>
                             `);
 
-                            // [MODIFIED] BUKA TAB BARU LANGSUNG & AUTO CLOSE ALERT
                             window.open(resp.url, '_blank');
 
                             Swal.fire({
@@ -1677,7 +1551,6 @@
             }
         }
 
-        // --- 5. EXECUTE ON LOAD (LOGIC MODIFIED FOR PERSISTENCE) ---
         if (mode === 'absensi' && meetingId) {
             const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.add('hidden');
             const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.remove('hidden');
@@ -1688,18 +1561,14 @@
             const resultApp = document.getElementById('view-public-result'); if(resultApp) resultApp.classList.remove('hidden');
             loadMeetingResult(meetingId);
         } else {
-            // Default Admin/Login view
             const absensiApp = document.getElementById('app-absensi'); if(absensiApp) absensiApp.classList.add('hidden');
             const adminApp = document.getElementById('app-admin'); if(adminApp) adminApp.classList.remove('hidden');
             const googleBtn = document.getElementById('g_id_onload'); if(googleBtn) googleBtn.setAttribute('data-client_id', CLIENT_ID);
 
-            // [MODIFIED] ROBUST LOCAL STORAGE CHECK
             const savedUser = localStorage.getItem('rsud_user_pro_v2');
             
             if(savedUser) {
                 try {
-                    // Hanya parse JSON di dalam try block ini
-                    // Jika JSON valid, kita anggap user ada
                     currentUser = JSON.parse(savedUser);
                 } catch(e) {
                     console.error("Local Storage Corrupt, clearing data:", e);
@@ -1707,14 +1576,11 @@
                     currentUser = null;
                 }
 
-                // Jalankan App di luar try-catch penghapusan data
-                // Jika App error, user TIDAK dilogout, melainkan error muncul di console
                 if (currentUser) {
                     try {
                         initApp();
                     } catch (err) {
                         console.error("Application Init Error (User stays logged in):", err);
-                        // Optional: Bisa tampilkan notifikasi error kecil tanpa logout
                     }
                 }
             }
@@ -1722,5 +1588,3 @@
     </script>
 </body>
 </html>
-
-
