@@ -727,16 +727,101 @@
         function handleProfileUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('prof-unit-lainnya').classList.remove('hidden'); else document.getElementById('prof-unit-lainnya').classList.add('hidden'); }
         function deleteExistingFile() { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; }
 
+        // --- NEW FUNCTIONS (FIX MISSING CODE) ---
+
+        function loadMeetingInfo(id) {
+            // Explicitly hide login overlay just in case
+            document.getElementById('view-login').style.display = 'none';
+
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'getMeetingInfo', id: id })
+            })
+            .then(res => res.json())
+            .then(resp => {
+                document.getElementById('absensi-loading').classList.add('hidden');
+                if(resp.status === 'success') {
+                    document.getElementById('absensi-content').classList.remove('hidden');
+                    document.getElementById('abs-agenda').innerText = resp.data.agenda;
+                    document.getElementById('abs-tanggal').innerText = resp.data.tanggal;
+                    document.getElementById('abs-waktu').innerText = resp.data.waktu;
+                    document.getElementById('abs-meeting-id').value = id;
+                } else {
+                    document.getElementById('absensi-content').innerHTML = `<div class="text-red-500 font-bold p-4">Error: ${resp.message}</div>`;
+                }
+            })
+            .catch(err => {
+                document.getElementById('absensi-loading').classList.add('hidden');
+                document.getElementById('absensi-content').innerHTML = `<div class="text-red-500 font-bold p-4">Gagal memuat data rapat.</div>`;
+            });
+        }
+
+        function submitAbsensi(e) {
+            e.preventDefault();
+            if(signaturePad.isEmpty()) {
+                Swal.fire('Tanda Tangan', 'Mohon bubuhkan tanda tangan.', 'warning');
+                return;
+            }
+
+            // Disable button
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            const unitVal = document.getElementById('abs-unit').value;
+            const finalUnit = unitVal === 'Lainnya' ? document.getElementById('abs-unit-lainnya').value : unitVal;
+
+            const payload = {
+                action: 'submitAttendance',
+                meetingId: document.getElementById('abs-meeting-id').value,
+                nama: document.getElementById('abs-nama').value,
+                phone: document.getElementById('abs-phone').value,
+                unit: finalUnit,
+                signatureData: signaturePad.toDataURL()
+            };
+
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(resp => {
+                if(resp.status === 'success') {
+                    document.getElementById('absensi-content').classList.add('hidden');
+                    document.getElementById('absensi-success').classList.remove('hidden');
+                } else {
+                    Swal.fire('Gagal', resp.message, 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                Swal.fire('Error', 'Gagal koneksi server.', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+
         // Start (Safe DOM Load)
         document.addEventListener('DOMContentLoaded', () => {
              const savedUser = localStorage.getItem('rsud_user_pro_v2');
+             
+             // PRIORITY 1: Check Absensi Mode
              if(mode === 'absensi' && meetingId) {
+                // FORCE HIDE LOGIN & SHOW ABSENSI
+                document.getElementById('view-login').style.display = 'none'; 
+                document.getElementById('view-login').classList.add('hidden');
+                
                 document.getElementById('app-absensi').classList.remove('hidden');
                 loadMeetingInfo(meetingId);
-             } else if(savedUser) { 
+             } 
+             // PRIORITY 2: Check Logged User
+             else if(savedUser) { 
                 try { currentUser = JSON.parse(savedUser); initApp(); } 
                 catch(e) { localStorage.removeItem('rsud_user_pro_v2'); }
              }
+             // DEFAULT: Show Login (Already Visible in HTML)
         });
     </script>
 </body>
