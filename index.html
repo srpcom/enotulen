@@ -623,19 +623,31 @@
                 }
             });
         }
+        
         function broadcastResult(id) {
-             showConfirm('Broadcast WA?', 'Kirim link dokumen resmi ke semua peserta?').then(r => {
-                if(r.isConfirmed) {
-                    toggleLoader(true);
-                    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'broadcastResult', meetingId: id }) })
-                    .then(r=>r.json()).then(resp => {
-                        toggleLoader(false);
-                        if(resp.status === 'success') Swal.fire('Terkirim', resp.message, 'success');
-                        else Swal.fire('Gagal', resp.message, 'error');
-                    });
-                }
-            });
+            const item = allData.find(x => x.id === id);
+            if (!item) return;
+
+            if (!item.linkFinal || item.linkFinal.length < 5) {
+                Swal.fire('Belum Ada Dokumen', 'Harap generate dokumen laporan resmi terlebih dahulu.', 'warning');
+                return;
+            }
+
+            const absensiLink = `${window.location.origin}${window.location.pathname}?v=absensi&id=${id}`;
+            
+            // Format pesan sesuai permintaan
+            const message = `*NOTULA*\n` +
+                            `Rapat          : ${item.agenda}\n` +
+                            `Hari/Tanggal   : ${item.displayTanggal}\n` +
+                            `Waktu Rapat    : ${item.waktu}\n` +
+                            `Hasil Rapat    : ${item.linkFinal}\n` +
+                            `Link Absensi   : ${absensiLink}`;
+
+            // Membuka WhatsApp dengan teks pre-filled
+            const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
         }
+
         function deleteNotulen(id) {
             showConfirm('Hapus?', 'Data akan dihapus permanen.').then(r => {
                 if(r.isConfirmed) {
