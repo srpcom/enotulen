@@ -864,8 +864,22 @@
                     handleFilter(); 
                     renderDashboard(); 
                     renderWriteTable(); 
-                } else Swal.fire('Error', resp.message, 'error'); 
-            }).catch(() => { toggleLoader(false); Swal.fire('Error', 'Gagal memuat data (Jaringan)', 'error'); }); 
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Memuat Data',
+                        text: resp.message || 'Terjadi kesalahan yang tidak diketahui.'
+                    });
+                } 
+            }).catch(err => { 
+                toggleLoader(false); 
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan Jaringan',
+                    text: 'Gagal menghubungi server. Periksa koneksi internet Anda.',
+                    footer: err.message
+                });
+            }); 
         }
         function handleFilter() { 
             // Add safety check for search input existence
@@ -1035,8 +1049,13 @@
             }).join('');
 
             // Inject Content
-            tbody.innerHTML = tableRows;
-            mobileContainer.innerHTML = cardRows;
+            try {
+                tbody.innerHTML = tableRows;
+                mobileContainer.innerHTML = cardRows;
+            } catch(e) {
+                console.error("Rendering error:", e);
+                tbody.innerHTML = `<tr><td colspan="5" class="text-red-500 p-4 text-center">Gagal merender data. Coba refresh.</td></tr>`;
+            }
             
             const totalPages = Math.ceil(filteredData.length / itemsPerPage); 
             const pageInfo = document.getElementById('page-info');
