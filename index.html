@@ -92,8 +92,7 @@
         .theme-dark .swal2-title { color: #f1f5f9 !important; }
         .theme-dark .swal2-content, .theme-dark .swal2-html-container { color: #cbd5e1 !important; }
         .theme-dark #modal-edit-user .glass-card { background: #1e293b !important; border: 1px solid #334155; }
-        /* Modal Attendance White in Light Mode, Dark in Dark Mode Override handled via class */
-
+        
         /* Standard */
         .glass-card { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); }
         .glass-input { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(0,0,0,0.1); color: #1e293b; }
@@ -830,12 +829,12 @@
             if (page === 'dashboard') { renderDashboard(); if(allData.length === 0) loadData(); }
             if (page === 'write') { renderWriteTable(); if(allData.length === 0) loadData(); }
             
-            // Fix for Empty List
+            // Fix for Empty List: Always call handleFilter() to populate filteredData and render table
             if (page === 'list') {
                 if (allData.length > 0) {
                     handleFilter(); // Re-render table if data exists
                 } else {
-                    loadData(); // Fetch if empty
+                    loadData(); // Fetch if empty, which will call handleFilter on success
                 }
             }
             
@@ -868,7 +867,29 @@
                 } else Swal.fire('Error', resp.message, 'error'); 
             }).catch(() => { toggleLoader(false); Swal.fire('Error', 'Gagal memuat data (Jaringan)', 'error'); }); 
         }
-        function handleFilter() { const searchVal = document.getElementById('search-input').value.toLowerCase(); const sortVal = document.getElementById('sort-select').value; let temp = allData.filter(item => (item.agenda && item.agenda.toLowerCase().includes(searchVal)) || (item.unit && item.unit.toLowerCase().includes(searchVal))); if (sortVal === 'newest') temp.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)); else if (sortVal === 'oldest') temp.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)); else if (sortVal === 'az') temp.sort((a, b) => a.agenda.localeCompare(b.agenda)); else if (sortVal === 'za') temp.sort((a, b) => b.agenda.localeCompare(a.agenda)); filteredData = temp; currentPage = 1; renderPaginatedTable(); }
+        function handleFilter() { 
+            // Add safety check for search input existence
+            const searchInput = document.getElementById('search-input');
+            const searchVal = searchInput ? searchInput.value.toLowerCase() : "";
+            
+            const sortSelect = document.getElementById('sort-select');
+            const sortVal = sortSelect ? sortSelect.value : "newest"; 
+            
+            let temp = allData.filter(item => {
+                const agenda = item.agenda ? item.agenda.toLowerCase() : "";
+                const unit = item.unit ? item.unit.toLowerCase() : "";
+                return agenda.includes(searchVal) || unit.includes(searchVal);
+            }); 
+            
+            if (sortVal === 'newest') temp.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)); 
+            else if (sortVal === 'oldest') temp.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)); 
+            else if (sortVal === 'az') temp.sort((a, b) => (a.agenda || "").localeCompare(b.agenda || "")); 
+            else if (sortVal === 'za') temp.sort((a, b) => (b.agenda || "").localeCompare(a.agenda || "")); 
+            
+            filteredData = temp; 
+            currentPage = 1; 
+            renderPaginatedTable(); 
+        }
         
         // --- MODIFIED RENDER TABLE (PC) & CARDS (MOBILE) ---
         function renderPaginatedTable() { 
@@ -876,16 +897,20 @@
             const mobileContainer = document.getElementById('mobile-list-container');
             const footer = document.getElementById('pagination-footer'); 
             
+            if (!tbody || !mobileContainer) return; // Safety check
+
             tbody.innerHTML = ''; 
             mobileContainer.innerHTML = '';
             
             if (filteredData.length === 0) { 
                 tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400">Data tidak ditemukan.</td></tr>`; 
                 mobileContainer.innerHTML = `<div class="p-10 text-center text-slate-400">Data tidak ditemukan.</div>`;
-                footer.classList.add('hidden'); 
+                // IMPORTANT: Do NOT hide footer if you want to keep layout consistent, 
+                // but usually we hide pagination controls if empty.
+                if(footer) footer.classList.add('hidden'); 
                 return; 
             } 
-            footer.classList.remove('hidden'); 
+            if(footer) footer.classList.remove('hidden'); 
             
             const start = (currentPage - 1) * itemsPerPage; 
             const end = start + itemsPerPage; 
@@ -982,9 +1007,13 @@
             }); 
             
             const totalPages = Math.ceil(filteredData.length / itemsPerPage); 
-            document.getElementById('page-info').innerText = `Halaman ${currentPage} dari ${totalPages}`; 
-            document.getElementById('btn-prev').disabled = (currentPage === 1); 
-            document.getElementById('btn-next').disabled = (currentPage === totalPages); 
+            const pageInfo = document.getElementById('page-info');
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+
+            if(pageInfo) pageInfo.innerText = `Halaman ${currentPage} dari ${totalPages}`; 
+            if(btnPrev) btnPrev.disabled = (currentPage === 1); 
+            if(btnNext) btnNext.disabled = (currentPage === totalPages); 
         }
 
         // --- NEW FUNCTION: GENERATE DOC ---
