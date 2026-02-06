@@ -903,6 +903,11 @@
             tbody.innerHTML = ''; 
             mobileContainer.innerHTML = '';
             
+            // Fallback to allData if filteredData is empty but search is empty (initial load glitch fix)
+            if (filteredData.length === 0 && allData.length > 0 && (!document.getElementById('search-input').value)) {
+                filteredData = [...allData];
+            }
+
             if (filteredData.length === 0) { 
                 tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400">Data tidak ditemukan.</td></tr>`; 
                 mobileContainer.innerHTML = `<div class="p-10 text-center text-slate-400">Data tidak ditemukan.</div>`;
