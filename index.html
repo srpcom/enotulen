@@ -825,8 +825,19 @@
             if (page === 'create') resetForm();
             if (page === 'profile') loadProfileView();
             if (page === 'users') loadUsers();
-            if (page === 'dashboard') renderDashboard();
-            if (page === 'write') renderWriteTable(); 
+            
+            // --- UPDATED LOGIC TO FORCE DATA REFRESH ---
+            if (page === 'dashboard') { renderDashboard(); if(allData.length === 0) loadData(); }
+            if (page === 'write') { renderWriteTable(); if(allData.length === 0) loadData(); }
+            
+            // Fix for Empty List
+            if (page === 'list') {
+                if (allData.length > 0) {
+                    handleFilter(); // Re-render table if data exists
+                } else {
+                    loadData(); // Fetch if empty
+                }
+            }
             
             if(updateHash) {
                 window.history.pushState(null, null, `#v=${page}`);
