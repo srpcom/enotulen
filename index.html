@@ -816,13 +816,13 @@
         function viewAttendance(id, title, date, time, btn) {
              setBtnLoading(btn, true);
              document.getElementById('modal-attendance').classList.remove('hidden');
-             const tbody = document.getElementById('att-table-body'); tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center">Memuat...</td></tr>';
+             const tbody = document.getElementById('att-table-body'); tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center">Memuat...</td></tr>';
              fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getAttendance', meetingId: id }) })
              .then(r=>r.json()).then(resp => {
                  setBtnLoading(btn, false);
                  tbody.innerHTML = '';
                  currentAttendanceData = resp.data || [];
-                 if(currentAttendanceData.length === 0) tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Belum ada data.</td></tr>';
+                 if(currentAttendanceData.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Belum ada data.</td></tr>';
                  else {
                      document.getElementById('btn-download-att').classList.remove('hidden');
                      currentAttendanceData.forEach((r, i) => {
@@ -1109,98 +1109,6 @@
         function handleAbsensiUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('abs-unit-lainnya').classList.remove('hidden'); else document.getElementById('abs-unit-lainnya').classList.add('hidden'); }
         function handleCreateUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('inp-unit-lainnya').classList.remove('hidden'); else document.getElementById('inp-unit-lainnya').classList.add('hidden'); }
         function deleteExistingFile() { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; }
-
-        // ==========================================
-        // FUNGSI PROFIL
-        // ==========================================
-        function loadProfile() {
-            if(!currentUser) return;
-            
-            // Populate Form
-            document.getElementById('prof-email').value = currentUser.email;
-            document.getElementById('prof-name').value = currentUser.name;
-            document.getElementById('prof-phone').value = currentUser.phone || "";
-            
-            // Populate Display
-            document.getElementById('prof-name-disp').innerText = currentUser.name;
-            document.getElementById('prof-email-disp').innerText = currentUser.email;
-            document.getElementById('prof-role-disp').innerText = currentUser.role;
-            document.getElementById('prof-img').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=0D8ABC&color=fff`;
-
-            // Unit Logic
-            const unitSelect = document.getElementById('prof-unit');
-            const unitLainnya = document.getElementById('prof-unit-lainnya');
-            const unitGroup = document.getElementById('prof-unit-lainnya-group');
-            
-            const unitVal = currentUser.unit || "";
-            let found = false;
-            
-            // Reset
-            unitGroup.classList.add('hidden');
-            unitLainnya.value = "";
-
-            for(let i=0; i<unitSelect.options.length; i++) {
-                if(unitSelect.options[i].value === unitVal) {
-                    unitSelect.selectedIndex = i;
-                    found = true;
-                    break;
-                }
-            }
-
-            if(!found && unitVal !== "") {
-                unitSelect.value = "Lainnya";
-                unitGroup.classList.remove('hidden');
-                unitLainnya.value = unitVal;
-            } else if (unitVal === "") {
-                unitSelect.value = "";
-            }
-        }
-
-        function handleProfileUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('prof-unit-lainnya-group').classList.remove('hidden'); else document.getElementById('prof-unit-lainnya-group').classList.add('hidden'); }
-
-        function saveProfile(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            setBtnLoading(btn, true);
-
-            const name = document.getElementById('prof-name').value;
-            const phone = document.getElementById('prof-phone').value;
-            let unit = document.getElementById('prof-unit').value;
-            if(unit === 'Lainnya') unit = document.getElementById('prof-unit-lainnya').value;
-
-            const payload = {
-                action: 'updateProfile',
-                email: currentUser.email,
-                name: name,
-                phone: phone,
-                unit: unit
-            };
-
-            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-            .then(r => r.json())
-            .then(resp => {
-                setBtnLoading(btn, false);
-                if(resp.status === 'success') {
-                    // Update Local State
-                    currentUser.name = name;
-                    currentUser.phone = phone;
-                    currentUser.unit = unit;
-                    localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser));
-                    
-                    // Update Sidebar
-                    document.getElementById('sb-name').innerText = currentUser.name;
-                    
-                    Swal.fire('Sukses', 'Profil berhasil diperbarui.', 'success');
-                    loadProfile(); 
-                } else {
-                    Swal.fire('Gagal', resp.message, 'error');
-                }
-            })
-            .catch(err => {
-                setBtnLoading(btn, false);
-                Swal.fire('Error', 'Gagal menghubungi server.', 'error');
-            });
-        }
 
         // ==========================================
         // FUNGSI PENGATURAN (SETTINGS) & MAINTENANCE
