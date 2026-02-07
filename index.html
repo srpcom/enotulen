@@ -362,7 +362,7 @@
 
                 <!-- LIST: ARSIP (FIXED VISIBILITY) -->
                 <div id="view-list" class="page-view hidden animate-fade-in max-w-7xl mx-auto">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6"><h1 class="text-2xl font-bold text-slate-800">Daftar Notulen</h1><div class="flex flex-col md:flex-row gap-3 w-full md:w-auto"><div class="relative w-full md:w-64"><i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-400 text-xs"></i><input type="text" id="search-input" oninput="handleFilter()" placeholder="Cari agenda, unit..." class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition"></div><button onclick="loadData()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 text-sm font-medium hover:bg-slate-50 transition shadow-sm"><i class="fa-solid fa-rotate"></i></button></div></div>
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6"><h1 class="text-2xl font-bold text-slate-800">Daftar Notulen</h1><div class="flex flex-col md:flex-row gap-3 w-full md:w-auto"><div class="relative w-full md:w-64"><i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-400 text-xs"></i><input type="text" id="search-input" oninput="handleFilter()" placeholder="Cari agenda, unit..." class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition"></div><button id="btn-refresh-data" onclick="loadData()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 text-sm font-medium hover:bg-slate-50 transition shadow-sm"><i class="fa-solid fa-rotate"></i></button></div></div>
                     
                     <!-- CONTAINER: Solid White BG & No Custom Hidden -->
                     <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col w-full min-h-[400px]">
@@ -412,9 +412,6 @@
     <!-- MODAL QR -->
     <div id="modal-qrcode" class="hidden fixed inset-0 z-[80] bg-white/95 backdrop-blur-md flex flex-col items-center justify-center p-4 animate-fade-in"><button onclick="closeQrModal()" class="absolute top-6 right-6 bg-slate-100 p-3 rounded-full text-slate-500 hover:bg-red-100 hover:text-red-600 transition shadow-sm z-50"><i class="fa-solid fa-xmark text-2xl"></i></button><h3 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2 text-center">QR Code</h3><div class="bg-white p-6 rounded-3xl border-4 border-slate-200 shadow-2xl relative"><img id="qr-image" src="" alt="QR Code" class="w-[80vw] h-[80vw] max-w-[500px] max-h-[500px] object-contain"></div></div>
     
-    <!-- LOADER -->
-    <div id="loader" class="hidden fixed inset-0 z-[100] bg-slate-100/50 backdrop-blur-sm flex flex-col items-center justify-center"><div class="w-16 h-16 rounded-full border-4 border-blue-200 animate-pulse relative"><div class="absolute top-0 left-0 w-16 h-16 rounded-full border-4 border-t-blue-600 animate-spin"></div></div></div>
-
     <script>
         // GLOBAL VARIABLES
         const urlParams = new URLSearchParams(window.location.search);
@@ -444,9 +441,10 @@
             loginBackend(payload);
         }
         function loginBackend(user) {
-            toggleLoader(true);
+            // Deprecated global loader
+            // toggleLoader(true);
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', email: user.email, name: user.name }) })
-            .then(res=>res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { currentUser = resp.user; localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); initApp(); } else Swal.fire('Gagal', resp.message, 'error'); });
+            .then(res=>res.json()).then(resp => { if(resp.status === 'success') { currentUser = resp.user; localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); initApp(); } else Swal.fire('Gagal', resp.message, 'error'); });
         }
 
         // APP FLOW
@@ -504,21 +502,56 @@
         }
         
         function logout() { localStorage.removeItem('rsud_user_pro_v2'); location.reload(); }
-        function toggleLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
+        // NEW: Deprecated function to prevent errors from old calls
+        function toggleLoader(show) { 
+            // No-op: Loader is removed
+        }
+
+        // NEW: BUTTON LOADING HELPER
+        function setBtnLoading(btn, isLoading, originalHtml = '') {
+            if (!btn) return;
+            if (isLoading) {
+                btn.dataset.originalHtml = btn.innerHTML;
+                btn.disabled = true;
+                const isIconOnly = btn.innerText.trim() === '';
+                if(isIconOnly) {
+                     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+                } else {
+                     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memproses...';
+                }
+            } else {
+                btn.innerHTML = originalHtml || btn.dataset.originalHtml || btn.innerHTML;
+                btn.disabled = false;
+            }
+        }
 
         function loadData() {
             if(!currentUser) return;
-            toggleLoader(true);
+            const btnRefresh = document.getElementById('btn-refresh-data');
+            if(btnRefresh) {
+                btnRefresh.disabled = true;
+                btnRefresh.querySelector('i').classList.add('fa-spin');
+            }
+            
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'read', email: currentUser.email }) })
             .then(res => res.json()).then(resp => {
-                toggleLoader(false);
+                if(btnRefresh) {
+                    btnRefresh.disabled = false;
+                    btnRefresh.querySelector('i').classList.remove('fa-spin');
+                }
                 if(resp.status === 'success') {
                     allData = resp.data;
                     handleFilter(); renderDashboard(); renderWriteTable();
                 } else {
                     document.getElementById('table-body').innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500 font-bold">Gagal: ${resp.message}</td></tr>`;
                 }
-            }).catch(e => { toggleLoader(false); document.getElementById('table-body').innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500">Error Koneksi Server</td></tr>`; });
+            }).catch(e => { 
+                if(btnRefresh) {
+                    btnRefresh.disabled = false;
+                    btnRefresh.querySelector('i').classList.remove('fa-spin');
+                }
+                document.getElementById('table-body').innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500">Error Koneksi Server</td></tr>`; 
+            });
         }
 
         function handleFilter() {
@@ -578,11 +611,11 @@
                     actions = `<div class="flex items-center justify-center gap-2 text-lg">
                         <button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-blue-500" title="Link Absen"><i class="fa-regular fa-copy"></i></button>
                         <button onclick="showQrCode('${item.id}')" class="text-slate-400 hover:text-slate-800" title="QR"><i class="fa-solid fa-qrcode"></i></button>
-                        <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}')" class="text-slate-400 hover:text-green-600" title="Hadir"><i class="fa-solid fa-users"></i></button>
-                        <button onclick="generateDoc('${item.id}')" class="text-slate-400 hover:text-blue-800" title="Generate Doc"><i class="fa-solid fa-file-word"></i></button>
-                        <button onclick="broadcastResult('${item.id}')" class="text-slate-400 hover:text-green-600" title="Broadcast"><i class="fa-brands fa-whatsapp"></i></button>
+                        <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}', this)" class="text-slate-400 hover:text-green-600" title="Hadir"><i class="fa-solid fa-users"></i></button>
+                        <button onclick="generateDoc('${item.id}', this)" class="text-slate-400 hover:text-blue-800" title="Generate Doc"><i class="fa-solid fa-file-word"></i></button>
+                        <button onclick="broadcastResult('${item.id}', this)" class="text-slate-400 hover:text-green-600" title="Broadcast"><i class="fa-brands fa-whatsapp"></i></button>
                         <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 text-xs font-bold border border-blue-100 bg-blue-50 px-2 py-1 rounded ml-1">Edit</button>
-                        ${isAdmin ? `<button onclick="deleteNotulen('${item.id}')" class="text-red-500 hover:text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        ${isAdmin ? `<button onclick="deleteNotulen('${item.id}', this)" class="text-red-500 hover:text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>` : ''}
                     </div>`;
                 }
 
@@ -610,8 +643,8 @@
                     mobileActions = `<div class="flex justify-between items-center border-t pt-3 mt-3">
                          <div class="flex gap-4 text-xl text-slate-400">
                             <button onclick="copyAbsensiLink('${item.id}')"><i class="fa-regular fa-copy"></i></button>
-                            <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}')"><i class="fa-solid fa-users"></i></button>
-                            <button onclick="generateDoc('${item.id}')"><i class="fa-solid fa-file-word"></i></button>
+                            <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}', this)"><i class="fa-solid fa-users"></i></button>
+                            <button onclick="generateDoc('${item.id}', this)"><i class="fa-solid fa-file-word"></i></button>
                          </div>
                          <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-xs font-bold text-blue-600 border px-3 py-1 rounded">Edit</button>
                     </div>`;
@@ -657,11 +690,13 @@
         function copyAbsensiLink(id) { const url = `${window.location.origin}${window.location.pathname}?v=absensi&id=${id}`; navigator.clipboard.writeText(url).then(() => Toast.fire({icon:'success', title:'Link Absensi Disalin'})); }
         function showQrCode(id) { document.getElementById('modal-qrcode').classList.remove('hidden'); document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(window.location.origin + window.location.pathname + '?v=absensi&id=' + id)}`; }
         function closeQrModal() { document.getElementById('modal-qrcode').classList.add('hidden'); }
-        function viewAttendance(id, title, date, time) {
+        function viewAttendance(id, title, date, time, btn) {
+             setBtnLoading(btn, true);
              document.getElementById('modal-attendance').classList.remove('hidden');
              const tbody = document.getElementById('att-table-body'); tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center">Memuat...</td></tr>';
              fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getAttendance', meetingId: id }) })
              .then(r=>r.json()).then(resp => {
+                 setBtnLoading(btn, false);
                  tbody.innerHTML = '';
                  currentAttendanceData = resp.data || [];
                  if(currentAttendanceData.length === 0) tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Belum ada data.</td></tr>';
@@ -674,21 +709,22 @@
              });
         }
         function closeAttendanceModal() { document.getElementById('modal-attendance').classList.add('hidden'); }
-        function generateDoc(id) {
+        
+        function generateDoc(id, btn) {
             showConfirm('Generate Dokumen?', 'Membuat Google Doc Laporan Resmi dari template.').then(r => {
                 if(r.isConfirmed) {
-                    toggleLoader(true);
+                    setBtnLoading(btn, true);
                     fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'generateResmiDoc', id: id, requesterEmail: currentUser.email }) })
                     .then(r=>r.json()).then(resp => {
-                        toggleLoader(false);
+                        setBtnLoading(btn, false);
                         if(resp.status === 'success') { Swal.fire('Sukses', 'Dokumen dibuat.', 'success'); loadData(); }
                         else Swal.fire('Gagal', resp.message, 'error');
-                    });
+                    }).catch(() => setBtnLoading(btn, false));
                 }
             });
         }
         
-        function broadcastResult(id) {
+        function broadcastResult(id, btn) {
             const item = allData.find(x => x.id === id);
             if (!item) return;
 
@@ -709,16 +745,16 @@
             window.open(url, '_blank');
         }
 
-        function deleteNotulen(id) {
+        function deleteNotulen(id, btn) {
             showConfirm('Hapus?', 'Data akan dihapus permanen.').then(r => {
                 if(r.isConfirmed) {
-                    toggleLoader(true);
+                    setBtnLoading(btn, true);
                     fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id, requesterEmail: currentUser.email }) })
                     .then(r=>r.json()).then(resp => {
-                        toggleLoader(false);
+                        setBtnLoading(btn, false);
                         if(resp.status === 'success') { Toast.fire({icon:'success', title:'Terhapus'}); loadData(); }
                         else Swal.fire('Gagal', resp.message, 'error');
-                    });
+                    }).catch(() => setBtnLoading(btn, false));
                 }
             });
         }
@@ -843,10 +879,17 @@
 
             showConfirm('Buat Spreadsheet?', 'File akan dibuat otomatis.').then(r => {
                 if(r.isConfirmed) {
-                    toggleLoader(true);
+                    // Manual loader for generic actions (not bound to a specific button in this context, or bind to this button)
+                    // Let's bind to the button that called this.
+                    // Since createSpreadsheetNotulen is called via onclick, we need to pass 'this' or find it.
+                    // For now, let's just let it run without specific button loader or add a small toast.
+                    // Actually, let's use the button in the form:
+                    const btn = document.querySelector('button[onclick="createSpreadsheetNotulen()"]');
+                    setBtnLoading(btn, true);
+                    
                     fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'createSpreadsheet', id: formId, agenda, tanggal, unit, pimpinan, requesterEmail: currentUser.email }) })
                     .then(r=>r.json()).then(resp => {
-                        toggleLoader(false);
+                        setBtnLoading(btn, false);
                         if(resp.status === 'success') { 
                             Swal.fire('Berhasil', 'Spreadsheet dibuat', 'success'); 
                             window.open(resp.url, '_blank'); 
@@ -858,7 +901,7 @@
                             }
                         }
                         else Swal.fire('Gagal', resp.message, 'error');
-                    });
+                    }).catch(() => setBtnLoading(btn, false));
                 }
             });
         }
@@ -886,7 +929,8 @@
         // --- UPDATED SUBMIT FUNCTION ---
         async function submitData(e) { 
             e.preventDefault(); 
-            toggleLoader(true); 
+            const submitBtn = document.getElementById('main-submit-btn');
+            setBtnLoading(submitBtn, true);
 
             // 1. Handle Main File Upload
             const mainFileInput = document.getElementById('inp-file');
@@ -937,17 +981,24 @@
             };
 
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(r=>r.json()).then(resp => { 
-                toggleLoader(false); 
+                setBtnLoading(submitBtn, false);
                 if(resp.status==='success') { Swal.fire('Sukses','Data tersimpan','success').then(()=>navTo('list')); loadData(); } 
                 else Swal.fire('Gagal',resp.message,'error'); 
-            }); 
+            }).catch(() => setBtnLoading(submitBtn, false));
         }
 
         // Edit User
         function openEditUserModal(u) { document.getElementById('modal-edit-user').classList.remove('hidden'); document.getElementById('edit-user-email').value = u.email; document.getElementById('edit-user-name').value = u.name; }
-        function submitEditUser(e) { e.preventDefault(); toggleLoader(true);
+        function submitEditUser(e) { 
+            e.preventDefault(); 
+            const btn = e.target.querySelector('button[type="submit"]');
+            setBtnLoading(btn, true);
+            
             const payload = { action: 'adminUpdateUser', requesterEmail: currentUser.email, targetEmail: document.getElementById('edit-user-email').value, newName: document.getElementById('edit-user-name').value, newUnit: document.getElementById('edit-user-unit-select').value, newPhone: document.getElementById('edit-user-phone').value };
-            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(r=>r.json()).then(resp => { toggleLoader(false); if(resp.status==='success') { Swal.fire('Sukses','User diupdate','success'); document.getElementById('modal-edit-user').classList.add('hidden'); loadUsers(); } });
+            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(r=>r.json()).then(resp => { 
+                setBtnLoading(btn, false);
+                if(resp.status==='success') { Swal.fire('Sukses','User diupdate','success'); document.getElementById('modal-edit-user').classList.add('hidden'); loadUsers(); } 
+            }).catch(() => setBtnLoading(btn, false));
         }
         function handleEditUserUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('edit-user-unit-lainnya').classList.remove('hidden'); else document.getElementById('edit-user-unit-lainnya').classList.add('hidden'); }
         function handleAbsensiUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('abs-unit-lainnya').classList.remove('hidden'); else document.getElementById('abs-unit-lainnya').classList.add('hidden'); }
