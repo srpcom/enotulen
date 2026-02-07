@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Notulen | RSUD dr. R. Koesma</title>
+    <title>E Notulen | RSUD dr. R. Koesma</title>
     
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png">
 
@@ -146,7 +146,7 @@
                 
                 <div>
                     <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-28 h-28 object-contain mx-auto mb-6 drop-shadow-lg filter" alt="Logo">
-                    <h2 class="text-4xl font-extrabold text-slate-800 mb-2 tracking-tight">E NOTULEN</h2>
+                    <h2 class="text-4xl font-extrabold text-slate-800 mb-2 tracking-tight">Selamat Datang</h2>
                     <p class="text-slate-600 text-sm mb-10 leading-relaxed font-medium">Sistem Informasi Manajemen Notulen Rapat<br><span class="font-bold text-blue-600 text-base">RSUD dr. R. Koesma Tuban</span></p>
                     
                     <div class="flex justify-center transform transition hover:scale-105 active:scale-95 duration-200">
@@ -221,7 +221,7 @@
         <aside id="sidebar" class="hidden md:flex flex-col w-72 h-full glass-card border-r border-white/20 shadow-2xl z-30 transition-transform duration-300 md:translate-x-0 -translate-x-full fixed md:relative bg-white/80 backdrop-blur-md">
             <div class="h-20 flex items-center px-8 border-b border-slate-100">
                 <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-10 h-10 object-contain mr-3 drop-shadow-sm" alt="Logo">
-                <div><h1 class="font-bold text-lg tracking-tight text-slate-800">E-Notulen</h1><p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">RSUD dr. R. Koesma</p></div>
+                <div><h1 class="font-bold text-lg tracking-tight text-slate-800">E Notulen</h1><p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">RSUD dr. R. Koesma</p></div>
             </div>
             
             <div onclick="navTo('profile')" class="mx-4 mt-6 mb-2 p-3 rounded-2xl bg-white/50 border border-white/50 cursor-pointer hover:bg-white/80 transition group shadow-sm">
@@ -253,7 +253,7 @@
         <!-- MAIN CONTENT AREA -->
         <div class="flex-1 flex flex-col relative h-full overflow-hidden bg-slate-50/50">
             <header class="md:hidden h-16 glass-card flex items-center justify-between px-6 z-20 shrink-0 border-b-0 bg-white/90">
-                <span class="font-bold text-lg text-slate-800 flex items-center gap-2"><img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-8 h-8 object-contain"> E-Notulen</span>
+                <span class="font-bold text-lg text-slate-800 flex items-center gap-2"><img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-8 h-8 object-contain"> E Notulen</span>
                 <button onclick="toggleSidebar()" class="text-slate-600 p-2 rounded-lg active:bg-slate-100"><i class="fa-solid fa-bars text-xl"></i></button>
             </header>
 
@@ -261,7 +261,7 @@
                 
                 <!-- DASHBOARD -->
                 <div id="view-dashboard" class="page-view animate-fade-in max-w-6xl mx-auto space-y-6">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2"><div><h1 class="text-2xl md:text-3xl font-bold text-slate-800">Dashboard Overview</h1><p class="text-slate-500 text-sm">Wellcome back, mari produktif hari ini.</p></div></div>
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2"><div><h1 class="text-2xl md:text-3xl font-bold text-slate-800">Dashboard Overview</h1><p class="text-slate-500 text-sm">Selamat datang kembali, mari produktif hari ini.</p></div></div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div onclick="navTo('create')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden bg-white"><div class="flex items-center gap-5 relative z-10"><div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-green-500/30"><i class="fa-solid fa-plus text-2xl"></i></div><div><h3 class="font-bold text-xl text-slate-800">Buat Jadwal</h3><p class="text-sm text-slate-500 mt-1">Undang peserta rapat.</p></div></div></div>
                         <div onclick="navTo('list')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden bg-white"><div class="flex items-center gap-5 relative z-10"><div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30"><i class="fa-solid fa-folder-open text-2xl"></i></div><div><h3 class="font-bold text-xl text-slate-800">Arsip Notulen</h3><p class="text-sm text-slate-500 mt-1"><span id="dash-total-count" class="font-bold text-blue-500">...</span> dokumen.</p></div></div></div>
@@ -1038,18 +1038,127 @@
         function handleProfileUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('prof-unit-lainnya').classList.remove('hidden'); else document.getElementById('prof-unit-lainnya').classList.add('hidden'); }
         function deleteExistingFile() { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; }
 
+        // --- NEW FUNCTIONS (FIX MISSING CODE) ---
+
+        function loadMeetingInfo(id) {
+            // Explicitly hide login overlay just in case
+            document.getElementById('view-login').style.display = 'none';
+
+            // Add timeout race
+            const timeout = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Request timed out')), 10000)
+            );
+
+            const fetchRequest = fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'getMeetingInfo', id: id })
+            });
+
+            Promise.race([fetchRequest, timeout])
+            .then(res => {
+                if (!res.ok) throw new Error('Network response was not ok');
+                return res.json();
+            })
+            .then(resp => {
+                if(resp.status === 'success') {
+                    document.getElementById('absensi-content').classList.remove('hidden');
+                    document.getElementById('abs-agenda').innerText = resp.data.agenda;
+                    document.getElementById('abs-tanggal').innerText = resp.data.tanggal;
+                    document.getElementById('abs-waktu').innerText = resp.data.waktu;
+                    document.getElementById('abs-meeting-id').value = id;
+
+                    // --- NEW: Logic Tombol Hasil Rapat ---
+                    const btnResult = document.getElementById('btn-hasil-rapat-public');
+                    if (resp.data.linkFinal && resp.data.linkFinal.length > 5) {
+                        btnResult.href = resp.data.linkFinal;
+                        btnResult.classList.remove('hidden');
+                    } else {
+                        btnResult.classList.add('hidden');
+                    }
+                } else {
+                    document.getElementById('absensi-content').classList.remove('hidden');
+                    document.getElementById('absensi-content').innerHTML = `<div class="text-red-500 font-bold p-4 bg-red-50 rounded-xl border border-red-100">Error: ${resp.message}</div>`;
+                }
+            })
+            .catch(err => {
+                console.error("Fetch Error:", err);
+                document.getElementById('absensi-content').classList.remove('hidden');
+                document.getElementById('absensi-content').innerHTML = `<div class="text-red-500 font-bold p-4 bg-red-50 rounded-xl border border-red-100">Gagal memuat data rapat. <br><span class="text-xs font-normal text-slate-500">(${err.message})</span><br><button onclick="location.reload()" class="mt-2 text-xs bg-white border border-red-200 px-3 py-1 rounded shadow-sm">Coba Lagi</button></div>`;
+            })
+            .finally(() => {
+                // ALWAYS HIDE LOADER
+                document.getElementById('absensi-loading').classList.add('hidden');
+            });
+        }
+
+        function submitAbsensi(e) {
+            e.preventDefault();
+            if(signaturePad.isEmpty()) {
+                Swal.fire('Tanda Tangan', 'Mohon bubuhkan tanda tangan.', 'warning');
+                return;
+            }
+
+            // Disable button
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            const unitVal = document.getElementById('abs-unit').value;
+            const finalUnit = unitVal === 'Lainnya' ? document.getElementById('abs-unit-lainnya').value : unitVal;
+
+            const payload = {
+                action: 'submitAttendance',
+                meetingId: document.getElementById('abs-meeting-id').value,
+                nama: document.getElementById('abs-nama').value,
+                phone: document.getElementById('abs-phone').value,
+                unit: finalUnit,
+                signatureData: signaturePad.toDataURL()
+            };
+
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(resp => {
+                if(resp.status === 'success') {
+                    document.getElementById('absensi-content').classList.add('hidden');
+                    document.getElementById('absensi-success').classList.remove('hidden');
+                } else {
+                    Swal.fire('Gagal', resp.message, 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                Swal.fire('Error', 'Gagal koneksi server.', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+
         // Start (Safe DOM Load)
         document.addEventListener('DOMContentLoaded', () => {
              const savedUser = localStorage.getItem('rsud_user_pro_v2');
+             
+             // PRIORITY 1: Check Absensi Mode
              if(mode === 'absensi' && meetingId) {
+                // FORCE HIDE LOGIN & SHOW ABSENSI
                 document.getElementById('view-login').style.display = 'none'; 
                 document.getElementById('view-login').classList.add('hidden');
+                
                 document.getElementById('app-absensi').classList.remove('hidden');
                 loadMeetingInfo(meetingId);
-             } else if(savedUser) { 
+             } 
+             // PRIORITY 2: Check Logged User
+             else if(savedUser) { 
                 try { currentUser = JSON.parse(savedUser); initApp(); } 
                 catch(e) { localStorage.removeItem('rsud_user_pro_v2'); }
              }
+             // DEFAULT: Show Login (Already Visible in HTML)
+             
+             // --- TSPARTICLES INIT ---
              if(window.tsParticles) {
                  tsParticles.load("tsparticles", {
                     fpsLimit: 60,
@@ -1063,4 +1172,3 @@
     </script>
 </body>
 </html>
-
