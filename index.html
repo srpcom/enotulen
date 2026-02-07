@@ -313,7 +313,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                 <div class="md:col-span-1">
                                     <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Unit Pelaksana</label>
-                                    <select name="unit" id="inp-unit" onchange="handleCreateUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"><option value="">-- Pilih --</option><option value="Direksi">Direksi</option><option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option><option value="Bagian Keuangan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Keuangan</option><option value="Bidang Keperawatan">Bidang Keperawatan</option><option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option><option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option><option value="Lainnya">Lainnya</option></select>
+                                    <select name="unit" id="inp-unit" onchange="handleCreateUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"><option value="">-- Pilih --</option><option value="Direksi">Direksi</option><option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option><option value="Bagian Keuangan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option><option value="Bidang Keperawatan">Bidang Keperawatan</option><option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option><option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option><option value="Lainnya">Lainnya</option></select>
                                     <div id="inp-unit-lainnya-group" class="hidden mt-2 animate-fade-in"><input type="text" id="inp-unit-lainnya" placeholder="Tulis nama unit..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"></div>
                                 </div>
                                 <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 uppercase mb-2">Tanggal</label><input type="date" name="tanggal" id="inp-tanggal" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"></div>
@@ -1048,86 +1048,71 @@
         function handleEditUserUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('edit-user-unit-lainnya').classList.remove('hidden'); else document.getElementById('edit-user-unit-lainnya').classList.add('hidden'); }
         function handleAbsensiUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('abs-unit-lainnya').classList.remove('hidden'); else document.getElementById('abs-unit-lainnya').classList.add('hidden'); }
         function handleCreateUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('inp-unit-lainnya').classList.remove('hidden'); else document.getElementById('inp-unit-lainnya').classList.add('hidden'); }
-        function handleProfileUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('prof-unit-lainnya').classList.remove('hidden'); else document.getElementById('prof-unit-lainnya').classList.add('hidden'); }
+        function handleProfileUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('prof-unit-lainnya-group').classList.remove('hidden'); else document.getElementById('prof-unit-lainnya-group').classList.add('hidden'); }
         function deleteExistingFile() { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; }
 
         // ==========================================
-        // FUNGSI ABSENSI YANG SEBELUMNYA HILANG
+        // FUNGSI PROFIL (YANG HILANG)
         // ==========================================
-        function loadMeetingInfo(id) {
-            const loadingEl = document.getElementById('absensi-loading');
-            const contentEl = document.getElementById('absensi-content');
+        function loadProfile() {
+            if(!currentUser) return;
             
-            // Reset UI
-            loadingEl.classList.remove('hidden');
-            contentEl.classList.add('hidden');
+            // Populate Form
+            document.getElementById('prof-email').value = currentUser.email;
+            document.getElementById('prof-name').value = currentUser.name;
+            document.getElementById('prof-phone').value = currentUser.phone || "";
+            
+            // Populate Display
+            document.getElementById('prof-name-disp').innerText = currentUser.name;
+            document.getElementById('prof-email-disp').innerText = currentUser.email;
+            document.getElementById('prof-role-disp').innerText = currentUser.role;
+            document.getElementById('prof-img').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=0D8ABC&color=fff`;
 
-            fetch(API_URL, { 
-                method: 'POST', 
-                body: JSON.stringify({ action: 'getMeetingInfo', id: id }) 
-            })
-            .then(res => res.json())
-            .then(resp => {
-                if(resp.status === 'success') {
-                    const data = resp.data;
-                    document.getElementById('abs-agenda').innerText = data.agenda;
-                    document.getElementById('abs-tanggal').innerText = data.tanggal;
-                    document.getElementById('abs-waktu').innerText = data.waktu;
-                    document.getElementById('abs-meeting-id').value = id;
+            // Unit Logic
+            const unitSelect = document.getElementById('prof-unit');
+            const unitLainnya = document.getElementById('prof-unit-lainnya');
+            const unitGroup = document.getElementById('prof-unit-lainnya-group');
+            
+            const unitVal = currentUser.unit || "";
+            let found = false;
+            
+            // Reset
+            unitGroup.classList.add('hidden');
+            unitLainnya.value = "";
 
-                    // Handle Link Hasil Rapat (Public)
-                    const btnHasil = document.getElementById('btn-hasil-rapat-public');
-                    if(data.linkFinal && data.linkFinal.length > 5) {
-                        btnHasil.href = data.linkFinal;
-                        btnHasil.classList.remove('hidden');
-                    } else {
-                        btnHasil.classList.add('hidden');
-                    }
-
-                    loadingEl.classList.add('hidden');
-                    contentEl.classList.remove('hidden');
-                    
-                    // CALL RESIZE AFTER CONTENT IS VISIBLE
-                    setTimeout(resizeCanvas, 100); 
-
-                    contentEl.classList.add('animate-fade-in');
-                } else {
-                    loadingEl.innerHTML = `<div class="text-red-500 font-bold p-4 bg-red-50 rounded-xl border border-red-200"><i class="fa-solid fa-triangle-exclamation mr-2"></i> ${resp.message}</div>`;
+            for(let i=0; i<unitSelect.options.length; i++) {
+                if(unitSelect.options[i].value === unitVal) {
+                    unitSelect.selectedIndex = i;
+                    found = true;
+                    break;
                 }
-            })
-            .catch(err => {
-                loadingEl.innerHTML = `<div class="text-red-500 font-bold">Gagal memuat data: ${err.message}</div>`;
-            });
-        }
-
-        async function submitAbsensi(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            
-            // Validasi Tanda Tangan
-            if (signaturePad.isEmpty()) {
-                Swal.fire('Tanda Tangan Kosong', 'Mohon tanda tangan pada area yang tersedia.', 'warning');
-                return;
             }
 
-            // Ambil Data
-            const id = document.getElementById('abs-meeting-id').value;
-            const nama = document.getElementById('abs-nama').value;
-            const phone = document.getElementById('abs-phone').value;
-            let unit = document.getElementById('abs-unit').value;
-            if(unit === 'Lainnya') unit = document.getElementById('abs-unit-lainnya').value;
+            if(!found && unitVal !== "") {
+                unitSelect.value = "Lainnya";
+                unitGroup.classList.remove('hidden');
+                unitLainnya.value = unitVal;
+            } else if (unitVal === "") {
+                unitSelect.value = "";
+            }
+        }
 
-            setBtnLoading(btn, true, '<i class="fa-solid fa-check-circle mr-2"></i> Konfirmasi Kehadiran');
+        function saveProfile(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            setBtnLoading(btn, true);
 
-            const signatureData = signaturePad.toDataURL("image/png");
+            const name = document.getElementById('prof-name').value;
+            const phone = document.getElementById('prof-phone').value;
+            let unit = document.getElementById('prof-unit').value;
+            if(unit === 'Lainnya') unit = document.getElementById('prof-unit-lainnya').value;
 
             const payload = {
-                action: 'submitAttendance',
-                meetingId: id,
-                nama: nama,
+                action: 'updateProfile',
+                email: currentUser.email,
+                name: name,
                 phone: phone,
-                unit: unit,
-                signatureData: signatureData
+                unit: unit
             };
 
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
@@ -1135,39 +1120,25 @@
             .then(resp => {
                 setBtnLoading(btn, false);
                 if(resp.status === 'success') {
-                    document.getElementById('absensi-content').classList.add('hidden');
-                    document.getElementById('absensi-success').classList.remove('hidden');
-                    triggerConfetti(); // Optional visual effect
+                    // Update Local State
+                    currentUser.name = name;
+                    currentUser.phone = phone;
+                    currentUser.unit = unit;
+                    localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser));
+                    
+                    // Update Sidebar
+                    document.getElementById('sb-name').innerText = currentUser.name;
+                    
+                    Swal.fire('Sukses', 'Profil berhasil diperbarui.', 'success');
+                    loadProfile(); // Refresh tampilan
                 } else {
                     Swal.fire('Gagal', resp.message, 'error');
                 }
             })
             .catch(err => {
                 setBtnLoading(btn, false);
-                Swal.fire('Error', 'Terjadi kesalahan koneksi.', 'error');
+                Swal.fire('Error', 'Gagal menghubungi server.', 'error');
             });
-        }
-
-        function triggerConfetti() {
-            if(window.tsParticles) {
-                tsParticles.load("tsparticles", {
-                    fullScreen: { zIndex: 100 },
-                    particles: {
-                        number: { value: 0 },
-                        color: { value: ["#00FFFC", "#FC00FF", "#fffc00"] },
-                        shape: { type: ["circle", "square"] },
-                        opacity: { value: 1, animation: { enable: true, minimumValue: 0, speed: 2, sync: false } },
-                        size: { value: 4, random: { enable: true, minimumValue: 2 } },
-                        move: { enable: true, gravity: { enable: true, acceleration: 10 }, speed: { min: 10, max: 20 }, decay: 0.1, direction: "none", random: false, straight: false, outModes: { default: "destroy", top: "none" } }
-                    },
-                    emitters: {
-                        direction: "top", life: { count: 0, duration: 0.1, delay: 0.1 },
-                        rate: { delay: 0.1, quantity: 100 },
-                        size: { width: 0, height: 0 },
-                        position: { x: 50, y: 50 }
-                    }
-                });
-            }
         }
 
         // ==========================================
@@ -1299,6 +1270,126 @@
                 }
             });
         }
+
+        // ==========================================
+        // FUNGSI ABSENSI YANG SEBELUMNYA HILANG
+        // ==========================================
+        function loadMeetingInfo(id) {
+            const loadingEl = document.getElementById('absensi-loading');
+            const contentEl = document.getElementById('absensi-content');
+            
+            // Reset UI
+            loadingEl.classList.remove('hidden');
+            contentEl.classList.add('hidden');
+
+            fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'getMeetingInfo', id: id }) 
+            })
+            .then(res => res.json())
+            .then(resp => {
+                if(resp.status === 'success') {
+                    const data = resp.data;
+                    document.getElementById('abs-agenda').innerText = data.agenda;
+                    document.getElementById('abs-tanggal').innerText = data.tanggal;
+                    document.getElementById('abs-waktu').innerText = data.waktu;
+                    document.getElementById('abs-meeting-id').value = id;
+
+                    // Handle Link Hasil Rapat (Public)
+                    const btnHasil = document.getElementById('btn-hasil-rapat-public');
+                    if(data.linkFinal && data.linkFinal.length > 5) {
+                        btnHasil.href = data.linkFinal;
+                        btnHasil.classList.remove('hidden');
+                    } else {
+                        btnHasil.classList.add('hidden');
+                    }
+
+                    loadingEl.classList.add('hidden');
+                    contentEl.classList.remove('hidden');
+                    
+                    // CALL RESIZE AFTER CONTENT IS VISIBLE
+                    setTimeout(resizeCanvas, 100); 
+
+                    contentEl.classList.add('animate-fade-in');
+                } else {
+                    loadingEl.innerHTML = `<div class="text-red-500 font-bold p-4 bg-red-50 rounded-xl border border-red-200"><i class="fa-solid fa-triangle-exclamation mr-2"></i> ${resp.message}</div>`;
+                }
+            })
+            .catch(err => {
+                loadingEl.innerHTML = `<div class="text-red-500 font-bold">Gagal memuat data: ${err.message}</div>`;
+            });
+        }
+
+        async function submitAbsensi(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            
+            // Validasi Tanda Tangan
+            if (signaturePad.isEmpty()) {
+                Swal.fire('Tanda Tangan Kosong', 'Mohon tanda tangan pada area yang tersedia.', 'warning');
+                return;
+            }
+
+            // Ambil Data
+            const id = document.getElementById('abs-meeting-id').value;
+            const nama = document.getElementById('abs-nama').value;
+            const phone = document.getElementById('abs-phone').value;
+            let unit = document.getElementById('abs-unit').value;
+            if(unit === 'Lainnya') unit = document.getElementById('abs-unit-lainnya').value;
+
+            setBtnLoading(btn, true, '<i class="fa-solid fa-check-circle mr-2"></i> Konfirmasi Kehadiran');
+
+            const signatureData = signaturePad.toDataURL("image/png");
+
+            const payload = {
+                action: 'submitAttendance',
+                meetingId: id,
+                nama: nama,
+                phone: phone,
+                unit: unit,
+                signatureData: signatureData
+            };
+
+            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+            .then(r => r.json())
+            .then(resp => {
+                setBtnLoading(btn, false);
+                if(resp.status === 'success') {
+                    document.getElementById('absensi-content').classList.add('hidden');
+                    document.getElementById('absensi-success').classList.remove('hidden');
+                    triggerConfetti(); // Optional visual effect
+                } else {
+                    Swal.fire('Gagal', resp.message, 'error');
+                }
+            })
+            .catch(err => {
+                setBtnLoading(btn, false);
+                Swal.fire('Error', 'Terjadi kesalahan koneksi.', 'error');
+            });
+        }
+
+        function triggerConfetti() {
+            if(window.tsParticles) {
+                tsParticles.load("tsparticles", {
+                    fullScreen: { zIndex: 100 },
+                    particles: {
+                        number: { value: 0 },
+                        color: { value: ["#00FFFC", "#FC00FF", "#fffc00"] },
+                        shape: { type: ["circle", "square"] },
+                        opacity: { value: 1, animation: { enable: true, minimumValue: 0, speed: 2, sync: false } },
+                        size: { value: 4, random: { enable: true, minimumValue: 2 } },
+                        move: { enable: true, gravity: { enable: true, acceleration: 10 }, speed: { min: 10, max: 20 }, decay: 0.1, direction: "none", random: false, straight: false, outModes: { default: "destroy", top: "none" } }
+                    },
+                    emitters: {
+                        direction: "top", life: { count: 0, duration: 0.1, delay: 0.1 },
+                        rate: { delay: 0.1, quantity: 100 },
+                        size: { width: 0, height: 0 },
+                        position: { x: 50, y: 50 }
+                    }
+                });
+            }
+        }
+
 
         // Start (Safe DOM Load)
         document.addEventListener('DOMContentLoaded', () => {
