@@ -416,13 +416,29 @@
 
         let signaturePad = null;
         const canvas = document.getElementById('signature-pad');
+        
+        // FUNGSI RESIZE CANVAS (DIPISAH SUPAYA BISA DIPANGGIL MANUAL)
+        function resizeCanvas() {
+            const canvas = document.getElementById('signature-pad');
+            if (canvas) {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                // Penting: Set ukuran atribut width/height sesuai ukuran tampilan CSS
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                canvas.getContext("2d").scale(ratio, ratio);
+                // Opsional: Clear data setelah resize agar tidak stretch
+                // if(signaturePad) signaturePad.clear(); 
+                // Note: Kita tidak clear di sini jika user sedang resize window, 
+                // tapi untuk inisialisasi awal (tampilan muncul), clear itu oke.
+            }
+        }
+
+        // Init Signature Pad
         if (canvas) {
             signaturePad = new SignaturePad(canvas, { minWidth: 0.5, maxWidth: 2.5, throttle: 16 });
             window.addEventListener("resize", () => {
-                 const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                 canvas.width = canvas.offsetWidth * ratio; canvas.height = canvas.offsetHeight * ratio;
-                 canvas.getContext("2d").scale(ratio, ratio);
-                 signaturePad.clear();
+                 resizeCanvas();
+                 if(signaturePad) signaturePad.clear();
             });
         }
         function clearSignature() { if(signaturePad) signaturePad.clear(); }
@@ -1075,6 +1091,10 @@
 
                     loadingEl.classList.add('hidden');
                     contentEl.classList.remove('hidden');
+                    
+                    // CALL RESIZE AFTER CONTENT IS VISIBLE
+                    setTimeout(resizeCanvas, 100); 
+
                     contentEl.classList.add('animate-fade-in');
                 } else {
                     loadingEl.innerHTML = `<div class="text-red-500 font-bold p-4 bg-red-50 rounded-xl border border-red-200"><i class="fa-solid fa-triangle-exclamation mr-2"></i> ${resp.message}</div>`;
