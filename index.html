@@ -52,8 +52,27 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-image 0.5s ease, background-color 0.5s ease, color 0.5s ease; }
         
-        /* TEMA PRESET (Full Color) */
-        .theme-blue { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%); background-attachment: fixed; }
+        /* TEMA PRESET UPDATED */
+        /* GANTI THEME BLUE JADI DARK NAVY (Biru Tua) */
+        .theme-blue { 
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #172554 100%); 
+            background-attachment: fixed;
+            color: #f1f5f9; /* Text default light agar terbaca di background gelap */
+        }
+        
+        /* Agar kartu tetap terang dan teks di dalamnya gelap saat theme-blue aktif */
+        .theme-blue .glass-card, 
+        .theme-blue .bg-white { 
+            background: rgba(255, 255, 255, 0.95) !important; 
+            color: #1e293b !important; 
+        }
+        
+        /* Penyesuaian teks sidebar dan judul saat theme-blue (Dark BG) aktif */
+        .theme-blue #sidebar {
+            background: rgba(255, 255, 255, 0.9);
+            color: #0f172a;
+        }
+        
         .theme-green { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%); background-attachment: fixed; }
         .theme-yellow { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%); background-attachment: fixed; }
         .theme-dark { background: #0f172a; color: #f8fafc; background-attachment: fixed; }
@@ -107,6 +126,15 @@
             100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(59, 130, 246, 0)); opacity: 1; }
         }
         .animate-logo-pulse { animation: pulse-logo 2s infinite ease-in-out; }
+
+        /* SWITCH TOGGLE */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #68D391;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #68D391;
+        }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden text-slate-800 relative">
@@ -162,6 +190,14 @@
                 </div>
             </div>
         </div>
+    </div>
+    
+    <!-- VIEW MAINTENANCE -->
+    <div id="view-maintenance" class="hidden absolute inset-0 z-[60] flex flex-col items-center justify-center bg-slate-100 text-slate-800 p-8 text-center">
+        <i class="fa-solid fa-triangle-exclamation text-6xl text-amber-500 mb-6"></i>
+        <h1 class="text-3xl font-bold mb-2">Sistem Sedang Maintenance</h1>
+        <p class="text-slate-500 max-w-md mx-auto">Aplikasi sedang dalam perbaikan untuk meningkatkan performa. Silakan coba beberapa saat lagi.</p>
+        <button onclick="logout()" class="mt-8 text-blue-600 hover:underline font-bold text-sm">Logout / Kembali</button>
     </div>
 
     <!-- 2. VIEW ABSENSI (PUBLIC - Z-INDEX 40) -->
@@ -225,6 +261,7 @@
                 <div><h1 class="font-bold text-lg tracking-tight text-slate-800">E Notulen</h1><p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">RSUD dr. R. Koesma</p></div>
             </div>
             
+            <!-- BUTTON PROFIL DI SIDEBAR -->
             <div onclick="navTo('profile')" class="mx-4 mt-6 mb-2 p-3 rounded-2xl bg-white/50 border border-white/50 cursor-pointer hover:bg-white/80 transition group shadow-sm">
                 <div class="flex items-center gap-3">
                     <img id="sb-avatar" src="" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover bg-slate-200">
@@ -237,7 +274,7 @@
                 <button onclick="navTo('create')" id="nav-create" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/60 transition flex items-center gap-3"><i class="fa-solid fa-calendar-plus w-5"></i> Buat Jadwal</button>
                 <button onclick="navTo('write')" id="nav-write" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/60 transition flex items-center gap-3"><i class="fa-solid fa-pen-to-square w-5"></i> Tulis Notulen</button>
                 <button onclick="navTo('list')" id="nav-list" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/60 transition flex items-center gap-3"><i class="fa-solid fa-folder-open w-5"></i> Arsip Notulen</button>
-                <button onclick="navTo('profile')" id="nav-profile" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/60 transition flex items-center gap-3"><i class="fa-solid fa-user-gear w-5"></i> Pengaturan</button>
+                <button onclick="navTo('profile')" id="nav-profile" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/60 transition flex items-center gap-3"><i class="fa-solid fa-gears w-5"></i> Pengaturan</button>
                 <div id="menu-admin" class="hidden pt-4 mt-2 border-t border-slate-200/50">
                     <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Admin Panel</p>
                     <button onclick="navTo('users')" id="nav-users" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/60 transition flex items-center gap-3"><i class="fa-solid fa-users-gear w-5"></i> Data User</button>
@@ -270,37 +307,36 @@
                     </div>
                 </div>
 
-                <!-- PROFILE -->
+                <!-- SETTINGS (REPLACED VIEW-PROFILE) -->
                 <div id="view-profile" class="page-view hidden animate-fade-in max-w-3xl mx-auto">
-                     <h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg"><i class="fa-solid fa-user-gear"></i></span> Profil & Pengaturan</h1>
-                    <div class="glass-card rounded-2xl p-6 md:p-8 mb-6 bg-white">
-                        <div class="flex flex-col md:flex-row items-center gap-6 mb-8 pb-8 border-b border-slate-100">
-                            <div class="relative"><img id="prof-img" src="" class="w-24 h-24 rounded-full border-4 border-white shadow-md bg-slate-200"></div>
-                            <div class="text-center md:text-left"><h2 id="prof-name-disp" class="text-2xl font-bold text-slate-900">User Name</h2><p id="prof-email-disp" class="text-slate-500 mb-2">email@example.com</p><span id="prof-role-disp" class="inline-block text-xs font-bold tracking-wider bg-slate-100 text-slate-600 px-3 py-1 rounded-full uppercase">USER</span></div>
-                        </div>
-                        <form id="profileForm" onsubmit="saveProfile(event)" class="space-y-5">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div class="col-span-1 md:col-span-2"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email Akun</label><input type="text" id="prof-email" disabled class="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-500 px-4 py-3 text-sm cursor-not-allowed"></div>
-                                <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nama Lengkap</label><input type="text" id="prof-name" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"></div>
-                                <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nomor HP / WA</label><input type="tel" id="prof-phone" placeholder="08..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"></div>
-                                <div class="col-span-1 md:col-span-2">
-                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Unit Kerja</label>
-                                    <select id="prof-unit" onchange="handleProfileUnitChange(this)" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"><option value="">-- Pilih Unit --</option><option value="Direksi">Direksi</option><option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option><option value="Bagian Keuangan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option><option value="Bidang Keperawatan">Bidang Keperawatan</option><option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option><option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option><option value="Lainnya">Lainnya</option></select>
-                                    <div id="prof-unit-lainnya-group" class="hidden mt-3 animate-fade-in"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Nama Unit Lainnya</label><input type="text" id="prof-unit-lainnya" placeholder="Masukkan nama unit..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"></div>
-                                </div>
-                            </div>
-                            <div class="pt-4 flex justify-end"><button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 text-sm font-semibold flex items-center transform active:scale-95 transition-all"><i class="fa-solid fa-check-circle mr-2"></i> Simpan Data Profil</button></div>
-                        </form>
-                    </div>
+                     <h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center text-lg"><i class="fa-solid fa-gears"></i></span> Pengaturan Aplikasi</h1>
+                    
                     <!-- Theme Switcher -->
-                    <div class="glass-card rounded-2xl p-6 md:p-8 bg-white flex justify-between items-center">
-                        <div><h4 class="font-bold text-slate-800">Tema Warna</h4><p class="text-xs text-slate-500">Sesuaikan tampilan aplikasi.</p></div>
-                        <div class="flex gap-3">
-                            <button onclick="setTheme('theme-blue')" data-theme="theme-blue" class="theme-btn w-10 h-10 rounded-full bg-blue-100 border-2 border-blue-200"></button>
-                            <button onclick="setTheme('theme-green')" data-theme="theme-green" class="theme-btn w-10 h-10 rounded-full bg-green-100 border-2 border-green-200"></button>
-                            <button onclick="setTheme('theme-yellow')" data-theme="theme-yellow" class="theme-btn w-10 h-10 rounded-full bg-yellow-100 border-2 border-yellow-200"></button>
-                            <button onclick="setTheme('theme-dark')" data-theme="theme-dark" class="theme-btn w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-600 text-white flex items-center justify-center"><i class="fa-solid fa-moon text-xs"></i></button>
+                    <div class="glass-card rounded-2xl p-6 md:p-8 bg-white mb-6">
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div><h4 class="font-bold text-slate-800 text-lg">Tampilan & Aksesibilitas</h4><p class="text-sm text-slate-500">Sesuaikan tema warna aplikasi sesuai kenyamanan Anda.</p></div>
+                            <div class="flex gap-3">
+                                <button onclick="setTheme('theme-blue')" data-theme="theme-blue" class="theme-btn w-12 h-12 rounded-full bg-blue-900 border-2 border-blue-950 shadow-md transform hover:scale-110 transition" title="Biru Tua (Navy)"></button>
+                                <button onclick="setTheme('theme-green')" data-theme="theme-green" class="theme-btn w-12 h-12 rounded-full bg-green-100 border-2 border-green-300 shadow-md transform hover:scale-110 transition" title="Hijau"></button>
+                                <button onclick="setTheme('theme-yellow')" data-theme="theme-yellow" class="theme-btn w-12 h-12 rounded-full bg-yellow-100 border-2 border-yellow-300 shadow-md transform hover:scale-110 transition" title="Kuning"></button>
+                                <button onclick="setTheme('theme-dark')" data-theme="theme-dark" class="theme-btn w-12 h-12 rounded-full bg-slate-800 border-2 border-slate-600 text-white flex items-center justify-center shadow-md transform hover:scale-110 transition" title="Mode Gelap"><i class="fa-solid fa-moon text-xs"></i></button>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- Maintenance Mode (Super Admin Only) -->
+                    <div id="maintenance-control-group" class="hidden glass-card rounded-2xl p-6 md:p-8 bg-white border-l-4 border-l-red-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-lg flex items-center gap-2"><i class="fa-solid fa-screwdriver-wrench text-red-500"></i> Mode Maintenance</h4>
+                                <p class="text-sm text-slate-500 mt-1">Jika aktif, hanya Admin yang bisa mengakses aplikasi. User lain akan diblokir.</p>
+                            </div>
+                            <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" name="toggle" id="maintenance-toggle" onclick="toggleMaintenance(this)" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="maintenance-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div id="maintenance-status-text" class="text-xs font-bold text-slate-400 mt-3 uppercase tracking-wide">Status: OFF</div>
                     </div>
                 </div>
 
@@ -416,12 +452,11 @@
         let signaturePad = null;
         const canvas = document.getElementById('signature-pad');
         
-        // FUNGSI RESIZE CANVAS (DIPISAH SUPAYA BISA DIPANGGIL MANUAL)
+        // FUNGSI RESIZE CANVAS
         function resizeCanvas() {
             const canvas = document.getElementById('signature-pad');
             if (canvas) {
                 const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                // Penting: Set ukuran atribut width/height sesuai ukuran tampilan CSS
                 canvas.width = canvas.offsetWidth * ratio;
                 canvas.height = canvas.offsetHeight * ratio;
                 canvas.getContext("2d").scale(ratio, ratio);
@@ -440,7 +475,7 @@
 
         let allData = []; let filteredData = []; let currentPage = 1; const itemsPerPage = 15; let currentUser = null;
         let currentAttendanceData = []; let currentMeetingTitle = ""; let currentMeetingDate = "";
-        let currentKeptDocs = []; // STORE EXISTING DOCS DURING EDIT
+        let currentKeptDocs = [];
 
         // AUTH
         function handleCredentialResponse(response) {
@@ -450,7 +485,24 @@
         function loginBackend(user) {
             toggleLoader(true);
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', email: user.email, name: user.name }) })
-            .then(res=>res.json()).then(resp => { toggleLoader(false); if(resp.status === 'success') { currentUser = resp.user; localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); initApp(); } else Swal.fire('Gagal', resp.message, 'error'); });
+            .then(res=>res.json()).then(resp => { 
+                toggleLoader(false); 
+                if(resp.status === 'success') { 
+                    currentUser = resp.user; 
+                    localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser)); 
+                    
+                    // Maintenance Check Logic on Login
+                    if(resp.maintenance && currentUser.role !== 'ADMIN') {
+                        document.getElementById('view-login').style.display = 'none';
+                        document.getElementById('view-maintenance').classList.remove('hidden');
+                    } else {
+                        initApp(); 
+                    }
+                } else if(resp.status === 'maintenance') {
+                     document.getElementById('view-login').style.display = 'none';
+                     document.getElementById('view-maintenance').classList.remove('hidden');
+                } else Swal.fire('Gagal', resp.message, 'error'); 
+            });
         }
 
         // APP FLOW
@@ -471,6 +523,12 @@
             document.getElementById('sb-avatar').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=0D8ABC&color=fff`;
             if(currentUser.role === 'ADMIN') document.getElementById('menu-admin').classList.remove('hidden');
 
+            // NEW: Fetch Maintenance Status if Admin
+            if(currentUser.email === SUPER_ADMIN_EMAIL) {
+                document.getElementById('maintenance-control-group').classList.remove('hidden');
+                checkMaintenanceStatus();
+            }
+
             navTo(window.location.hash.substring(1).replace('v=','') || 'dashboard');
         }
 
@@ -485,7 +543,6 @@
 
             if(window.innerWidth < 768) toggleSidebar(false);
 
-            // FORCE DATA RELOAD ON LIST/DASHBOARD
             if(page === 'list' || page === 'dashboard' || page === 'write') {
                 if(allData.length === 0) loadData();
                 else if(page === 'list') { handleFilter(); renderPaginatedTable(); }
@@ -493,7 +550,7 @@
                 else renderDashboard();
             } else if (page === 'create') resetForm();
             else if (page === 'users') loadUsers();
-            else if (page === 'profile') loadProfile();
+            else if (page === 'profile') loadSettings(); // RENAMED FROM loadProfile
             
             window.history.pushState(null, null, `#v=${page}`);
         }
@@ -506,19 +563,15 @@
             const shouldOpen = force !== undefined ? force : isClosed;
 
             if (shouldOpen) {
-                // Open Sidebar
                 sb.classList.remove('hidden');
                 sb.classList.add('flex');
                 ov.classList.remove('hidden');
-                // Small delay to allow display:flex to render before transform
                 setTimeout(() => {
                     sb.classList.remove('-translate-x-full');
                 }, 10);
             } else {
-                // Close Sidebar
                 sb.classList.add('-translate-x-full');
                 ov.classList.add('hidden');
-                // Wait for transition to finish before hiding
                 setTimeout(() => {
                     if (sb.classList.contains('-translate-x-full')) {
                         sb.classList.add('hidden');
@@ -529,14 +582,13 @@
         }
         
         function logout() { localStorage.removeItem('rsud_user_pro_v2'); location.reload(); }
-        // NEW: LOADER DENGAN LOGO PULSE
+        
         function toggleLoader(show) { 
             const loader = document.getElementById('loader');
             if(show) loader.classList.remove('hidden');
             else loader.classList.add('hidden');
         }
 
-        // NEW: BUTTON LOADING HELPER
         function setBtnLoading(btn, isLoading, originalHtml = '') {
             if (!btn) return;
             if (isLoading) {
@@ -571,6 +623,10 @@
                 if(resp.status === 'success') {
                     allData = resp.data;
                     handleFilter(); renderDashboard(); renderWriteTable();
+                } else if(resp.status === 'maintenance') {
+                    document.getElementById('view-login').style.display = 'none';
+                    document.getElementById('app-admin').classList.add('hidden');
+                    document.getElementById('view-maintenance').classList.remove('hidden');
                 } else {
                     document.getElementById('table-body').innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500 font-bold">Gagal: ${resp.message}</td></tr>`;
                 }
@@ -596,7 +652,6 @@
             renderPaginatedTable();
         }
 
-        // RENDER LIST (FIXED VISIBILITY)
         function renderPaginatedTable() {
             const tbody = document.getElementById('table-body');
             const mobileContainer = document.getElementById('mobile-list-container');
@@ -604,7 +659,6 @@
             
             if (!tbody) return;
 
-            // FALLBACK TO ALL DATA IF EMPTY (Initial State Fix)
             if (filteredData.length === 0 && allData.length > 0 && !document.getElementById('search-input').value) {
                 filteredData = [...allData];
             }
@@ -621,7 +675,6 @@
             const end = start + itemsPerPage;
             const pageData = filteredData.slice(start, end);
 
-            // Construct HTML Strings
             const tableRows = pageData.map(item => {
                 const isOwner = (item.pencatatEmail === currentUser.email);
                 const isAdmin = (currentUser.role === 'ADMIN');
@@ -815,20 +868,16 @@
             const emptyMsg = document.getElementById('empty-docs-msg');
             const input = document.getElementById('form-kept-docs');
 
-            // Update hidden input untuk submission
             input.value = JSON.stringify(currentKeptDocs);
-            
             container.innerHTML = '';
             
-            // Logic: Hide container if empty, but also check if new-docs is empty for emptyMsg
             if (currentKeptDocs.length === 0) {
                 container.classList.add('hidden');
-                // We don't force show emptyMsg here because new-docs might have items, handled by their adder
                 return;
             }
 
             container.classList.remove('hidden');
-            emptyMsg.classList.add('hidden'); // Hide empty message if we have existing docs
+            emptyMsg.classList.add('hidden'); 
 
             currentKeptDocs.forEach((doc, index) => {
                 let iconClass = "fa-file";
@@ -904,7 +953,6 @@
             document.getElementById('inp-tanggal').value = d.toISOString().split('T')[0];
             document.getElementById('inp-waktu').value = item.waktu; document.getElementById('inp-agenda').value = item.agenda; document.getElementById('inp-peserta').value = item.peserta; 
             
-            // --- NEW: POPULATE EXISTING DOCS ---
             try {
                 currentKeptDocs = JSON.parse(item.dokumentasiJson || "[]");
             } catch(e) {
@@ -938,8 +986,6 @@
                         if(resp.status === 'success') { 
                             Swal.fire('Berhasil', 'Spreadsheet dibuat', 'success'); 
                             window.open(resp.url, '_blank'); 
-                            
-                            // Auto update UI with new doc if provided
                             if(resp.savedDoc) {
                                 currentKeptDocs.push(resp.savedDoc);
                                 renderKeptDocs();
@@ -963,7 +1009,6 @@
             c.insertAdjacentHTML('beforeend', `<div class="flex gap-2 items-center"><input type="text" class="new-doc-title glass-input w-1/3 rounded px-2 py-2 text-sm" placeholder="Judul"><input type="file" class="new-doc-file glass-input w-2/3 rounded px-2 text-sm py-1.5"><button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 ml-1"><i class="fa-solid fa-times"></i></button></div>`); 
         }
 
-        // --- HELPER: FILE TO BASE64 ---
         const fileToBase64 = file => new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -971,13 +1016,11 @@
             reader.onerror = error => reject(error);
         });
 
-        // --- UPDATED SUBMIT FUNCTION ---
         async function submitData(e) { 
             e.preventDefault(); 
             const submitBtn = document.getElementById('main-submit-btn');
             setBtnLoading(submitBtn, true);
 
-            // 1. Handle Main File Upload
             const mainFileInput = document.getElementById('inp-file');
             let fileData = ""; 
             let fileName = ""; 
@@ -989,7 +1032,6 @@
                 mimeType = file.type;
             }
 
-            // 2. Handle New Documentation Uploads
             const newDocs = [];
             const newDocRows = document.getElementById('new-docs-container').children;
             for(let i=0; i<newDocRows.length; i++) {
@@ -1017,10 +1059,8 @@
                 peserta: document.getElementById('inp-peserta').value, 
                 pencatatNama: currentUser.name, 
                 pencatatEmail: currentUser.email,
-                // Files
                 fileData: fileData, fileName: fileName, mimeType: mimeType,
                 existingFileUrl: document.getElementById('form-existing-file').value,
-                // Docs
                 keptDokumentasi: document.getElementById('form-kept-docs').value,
                 newDokumentasi: newDocs
             };
@@ -1048,102 +1088,62 @@
         function handleEditUserUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('edit-user-unit-lainnya').classList.remove('hidden'); else document.getElementById('edit-user-unit-lainnya').classList.add('hidden'); }
         function handleAbsensiUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('abs-unit-lainnya').classList.remove('hidden'); else document.getElementById('abs-unit-lainnya').classList.add('hidden'); }
         function handleCreateUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('inp-unit-lainnya').classList.remove('hidden'); else document.getElementById('inp-unit-lainnya').classList.add('hidden'); }
-        function handleProfileUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('prof-unit-lainnya-group').classList.remove('hidden'); else document.getElementById('prof-unit-lainnya-group').classList.add('hidden'); }
         function deleteExistingFile() { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; }
 
         // ==========================================
-        // FUNGSI PROFIL (YANG HILANG)
+        // FUNGSI PENGATURAN (SETTINGS) & MAINTENANCE
         // ==========================================
-        function loadProfile() {
-            if(!currentUser) return;
-            
-            // Populate Form
-            document.getElementById('prof-email').value = currentUser.email;
-            document.getElementById('prof-name').value = currentUser.name;
-            document.getElementById('prof-phone').value = currentUser.phone || "";
-            
-            // Populate Display
-            document.getElementById('prof-name-disp').innerText = currentUser.name;
-            document.getElementById('prof-email-disp').innerText = currentUser.email;
-            document.getElementById('prof-role-disp').innerText = currentUser.role;
-            document.getElementById('prof-img').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=0D8ABC&color=fff`;
-
-            // Unit Logic
-            const unitSelect = document.getElementById('prof-unit');
-            const unitLainnya = document.getElementById('prof-unit-lainnya');
-            const unitGroup = document.getElementById('prof-unit-lainnya-group');
-            
-            const unitVal = currentUser.unit || "";
-            let found = false;
-            
-            // Reset
-            unitGroup.classList.add('hidden');
-            unitLainnya.value = "";
-
-            for(let i=0; i<unitSelect.options.length; i++) {
-                if(unitSelect.options[i].value === unitVal) {
-                    unitSelect.selectedIndex = i;
-                    found = true;
-                    break;
-                }
-            }
-
-            if(!found && unitVal !== "") {
-                unitSelect.value = "Lainnya";
-                unitGroup.classList.remove('hidden');
-                unitLainnya.value = unitVal;
-            } else if (unitVal === "") {
-                unitSelect.value = "";
+        function loadSettings() {
+            // Function formerly known as loadProfile, now streamlined
+            // Only used to check maintenance status visually
+            if(currentUser && currentUser.email === SUPER_ADMIN_EMAIL) {
+                checkMaintenanceStatus();
             }
         }
 
-        function saveProfile(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            setBtnLoading(btn, true);
-
-            const name = document.getElementById('prof-name').value;
-            const phone = document.getElementById('prof-phone').value;
-            let unit = document.getElementById('prof-unit').value;
-            if(unit === 'Lainnya') unit = document.getElementById('prof-unit-lainnya').value;
-
-            const payload = {
-                action: 'updateProfile',
-                email: currentUser.email,
-                name: name,
-                phone: phone,
-                unit: unit
-            };
-
-            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+        function checkMaintenanceStatus() {
+            if(!currentUser || currentUser.email !== SUPER_ADMIN_EMAIL) return;
+            
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getSystemStatus' }) })
             .then(r => r.json())
             .then(resp => {
-                setBtnLoading(btn, false);
-                if(resp.status === 'success') {
-                    // Update Local State
-                    currentUser.name = name;
-                    currentUser.phone = phone;
-                    currentUser.unit = unit;
-                    localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser));
-                    
-                    // Update Sidebar
-                    document.getElementById('sb-name').innerText = currentUser.name;
-                    
-                    Swal.fire('Sukses', 'Profil berhasil diperbarui.', 'success');
-                    loadProfile(); // Refresh tampilan
-                } else {
-                    Swal.fire('Gagal', resp.message, 'error');
-                }
-            })
-            .catch(err => {
-                setBtnLoading(btn, false);
-                Swal.fire('Error', 'Gagal menghubungi server.', 'error');
+                const toggle = document.getElementById('maintenance-toggle');
+                const statusText = document.getElementById('maintenance-status-text');
+                
+                toggle.checked = resp.maintenance;
+                statusText.innerText = resp.maintenance ? "Status: ON (User Diblokir)" : "Status: OFF (Normal)";
+                statusText.className = resp.maintenance ? "text-xs font-bold text-red-500 mt-3 uppercase tracking-wide" : "text-xs font-bold text-slate-400 mt-3 uppercase tracking-wide";
             });
         }
 
-        // ==========================================
-        // FUNGSI MANAJEMEN USER (YANG HILANG)
-        // ==========================================
+        function toggleMaintenance(checkbox) {
+            if(!currentUser || currentUser.email !== SUPER_ADMIN_EMAIL) return;
+            
+            const isChecked = checkbox.checked;
+            const statusText = document.getElementById('maintenance-status-text');
+            statusText.innerText = "Mengupdate...";
+
+            fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'toggleMaintenance', email: currentUser.email, status: isChecked }) 
+            })
+            .then(r => r.json())
+            .then(resp => {
+                if(resp.status === 'success') {
+                    statusText.innerText = resp.newState ? "Status: ON (User Diblokir)" : "Status: OFF (Normal)";
+                    statusText.className = resp.newState ? "text-xs font-bold text-red-500 mt-3 uppercase tracking-wide" : "text-xs font-bold text-slate-400 mt-3 uppercase tracking-wide";
+                    Toast.fire({ icon: 'success', title: resp.message });
+                } else {
+                    checkbox.checked = !isChecked; // Revert
+                    Swal.fire('Gagal', resp.message, 'error');
+                }
+            })
+            .catch(() => {
+                checkbox.checked = !isChecked;
+                statusText.innerText = "Error koneksi";
+            });
+        }
+
         function loadUsers() {
             if (!currentUser || currentUser.role !== 'ADMIN') {
                 const tbody = document.getElementById('users-table-body');
@@ -1171,7 +1171,6 @@
                             const isSuperAdmin = (u.email === SUPER_ADMIN_EMAIL);
                             const roleColor = u.role === 'ADMIN' ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-slate-100 text-slate-600 border-slate-200';
                             
-                            // Block/Active Badge
                             let statusBadge = `<span class="px-2 py-1 rounded text-[10px] font-bold bg-green-100 text-green-700 border border-green-200">ACTIVE</span>`;
                             let blockBtnText = `<i class="fa-solid fa-ban mr-1"></i> Block`;
                             let blockBtnClass = "text-red-500 hover:text-red-700 bg-red-50 border-red-100";
@@ -1182,7 +1181,6 @@
                                 blockBtnClass = "text-green-500 hover:text-green-700 bg-green-50 border-green-100";
                             }
 
-                            // Actions
                             let actionButtons = '-';
                             if (!isMe && !isSuperAdmin) {
                                 actionButtons = `
@@ -1227,7 +1225,6 @@
 
         function toggleAdmin(email, currentRole) {
             const newRole = currentRole === 'ADMIN' ? 'USER' : 'ADMIN';
-            const actionText = newRole === 'ADMIN' ? 'Jadikan Admin' : 'Hapus Admin';
             
             showConfirm('Konfirmasi', `Yakin ingin mengubah role user ini menjadi <b>${newRole}</b>?`).then(r => {
                 if (r.isConfirmed) {
@@ -1272,13 +1269,12 @@
         }
 
         // ==========================================
-        // FUNGSI ABSENSI YANG SEBELUMNYA HILANG
+        // FUNGSI ABSENSI (PUBLIC)
         // ==========================================
         function loadMeetingInfo(id) {
             const loadingEl = document.getElementById('absensi-loading');
             const contentEl = document.getElementById('absensi-content');
             
-            // Reset UI
             loadingEl.classList.remove('hidden');
             contentEl.classList.add('hidden');
 
@@ -1295,7 +1291,6 @@
                     document.getElementById('abs-waktu').innerText = data.waktu;
                     document.getElementById('abs-meeting-id').value = id;
 
-                    // Handle Link Hasil Rapat (Public)
                     const btnHasil = document.getElementById('btn-hasil-rapat-public');
                     if(data.linkFinal && data.linkFinal.length > 5) {
                         btnHasil.href = data.linkFinal;
@@ -1306,10 +1301,7 @@
 
                     loadingEl.classList.add('hidden');
                     contentEl.classList.remove('hidden');
-                    
-                    // CALL RESIZE AFTER CONTENT IS VISIBLE
                     setTimeout(resizeCanvas, 100); 
-
                     contentEl.classList.add('animate-fade-in');
                 } else {
                     loadingEl.innerHTML = `<div class="text-red-500 font-bold p-4 bg-red-50 rounded-xl border border-red-200"><i class="fa-solid fa-triangle-exclamation mr-2"></i> ${resp.message}</div>`;
@@ -1324,13 +1316,11 @@
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
             
-            // Validasi Tanda Tangan
             if (signaturePad.isEmpty()) {
                 Swal.fire('Tanda Tangan Kosong', 'Mohon tanda tangan pada area yang tersedia.', 'warning');
                 return;
             }
 
-            // Ambil Data
             const id = document.getElementById('abs-meeting-id').value;
             const nama = document.getElementById('abs-nama').value;
             const phone = document.getElementById('abs-phone').value;
@@ -1357,7 +1347,7 @@
                 if(resp.status === 'success') {
                     document.getElementById('absensi-content').classList.add('hidden');
                     document.getElementById('absensi-success').classList.remove('hidden');
-                    triggerConfetti(); // Optional visual effect
+                    triggerConfetti(); 
                 } else {
                     Swal.fire('Gagal', resp.message, 'error');
                 }
@@ -1390,28 +1380,20 @@
             }
         }
 
-
-        // Start (Safe DOM Load)
         document.addEventListener('DOMContentLoaded', () => {
              const savedUser = localStorage.getItem('rsud_user_pro_v2');
              
-             // PRIORITY 1: Check Absensi Mode
              if(mode === 'absensi' && meetingId) {
-                // FORCE HIDE LOGIN & SHOW ABSENSI
                 document.getElementById('view-login').style.display = 'none'; 
                 document.getElementById('view-login').classList.add('hidden');
-                
                 document.getElementById('app-absensi').classList.remove('hidden');
                 loadMeetingInfo(meetingId);
              } 
-             // PRIORITY 2: Check Logged User
              else if(savedUser) { 
                 try { currentUser = JSON.parse(savedUser); initApp(); } 
                 catch(e) { localStorage.removeItem('rsud_user_pro_v2'); }
              }
-             // DEFAULT: Show Login (Already Visible in HTML)
              
-             // --- TSPARTICLES INIT ---
              if(window.tsParticles) {
                  tsParticles.load("tsparticles", {
                     fpsLimit: 60,
