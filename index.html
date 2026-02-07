@@ -312,7 +312,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                 <div class="md:col-span-1">
                                     <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Unit Pelaksana</label>
-                                    <select name="unit" id="inp-unit" onchange="handleCreateUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"><option value="">-- Pilih --</option><option value="Direksi">Direksi</option><option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option><option value="Bagian Keuangan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option><option value="Bidang Keperawatan">Bidang Keperawatan</option><option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option><option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option><option value="Lainnya">Lainnya</option></select>
+                                    <select name="unit" id="inp-unit" onchange="handleCreateUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"><option value="">-- Pilih --</option><option value="Direksi">Direksi</option><option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option><option value="Bagian Keuangan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option><option value="Bidang Keperawatan">Bidang Keperawatan</option><option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option><option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option><option value="Lainnya">Lainnya</option></select>
                                     <div id="inp-unit-lainnya-group" class="hidden mt-2 animate-fade-in"><input type="text" id="inp-unit-lainnya" placeholder="Tulis nama unit..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"></div>
                                 </div>
                                 <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 uppercase mb-2">Tanggal</label><input type="date" name="tanggal" id="inp-tanggal" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"></div>
@@ -488,10 +488,30 @@
         function toggleSidebar(force) {
             const sb = document.getElementById('sidebar');
             const ov = document.getElementById('sidebar-overlay');
-            if(force === false || !sb.classList.contains('-translate-x-full')) {
-                sb.classList.add('-translate-x-full'); ov.classList.add('hidden'); sb.classList.remove('flex');
+            const isClosed = sb.classList.contains('-translate-x-full');
+            
+            const shouldOpen = force !== undefined ? force : isClosed;
+
+            if (shouldOpen) {
+                // Open Sidebar
+                sb.classList.remove('hidden');
+                sb.classList.add('flex');
+                ov.classList.remove('hidden');
+                // Small delay to allow display:flex to render before transform
+                setTimeout(() => {
+                    sb.classList.remove('-translate-x-full');
+                }, 10);
             } else {
-                sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden'); sb.classList.add('flex');
+                // Close Sidebar
+                sb.classList.add('-translate-x-full');
+                ov.classList.add('hidden');
+                // Wait for transition to finish before hiding
+                setTimeout(() => {
+                    if (sb.classList.contains('-translate-x-full')) {
+                        sb.classList.add('hidden');
+                        sb.classList.remove('flex');
+                    }
+                }, 300);
             }
         }
         
@@ -1017,149 +1037,6 @@
         function handleCreateUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('inp-unit-lainnya').classList.remove('hidden'); else document.getElementById('inp-unit-lainnya').classList.add('hidden'); }
         function handleProfileUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('prof-unit-lainnya').classList.remove('hidden'); else document.getElementById('prof-unit-lainnya').classList.add('hidden'); }
         function deleteExistingFile() { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; }
-
-        // --- RESTORED FUNCTIONS ---
-        
-        function saveProfile(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            setBtnLoading(btn, true);
-            
-            const unitVal = document.getElementById('prof-unit').value;
-            const finalUnit = unitVal === 'Lainnya' ? document.getElementById('prof-unit-lainnya').value : unitVal;
-
-            const payload = {
-                action: 'updateProfile',
-                email: currentUser.email,
-                name: document.getElementById('prof-name').value,
-                phone: document.getElementById('prof-phone').value,
-                unit: finalUnit
-            };
-
-            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-            .then(r => r.json())
-            .then(resp => {
-                setBtnLoading(btn, false);
-                if(resp.status === 'success') {
-                    currentUser.name = payload.name;
-                    currentUser.unit = payload.unit;
-                    currentUser.phone = payload.phone;
-                    localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser));
-                    document.getElementById('sb-name').innerText = currentUser.name;
-                    document.getElementById('prof-name-disp').innerText = currentUser.name;
-                    Swal.fire('Berhasil', 'Profil diperbarui', 'success');
-                } else {
-                    Swal.fire('Gagal', resp.message, 'error');
-                }
-            }).catch(() => setBtnLoading(btn, false));
-        }
-
-        async function downloadAttendanceWithImages() {
-            if(!currentAttendanceData || currentAttendanceData.length === 0) return;
-            
-            const workbook = new ExcelJS.Workbook();
-            const sheet = workbook.addWorksheet('Daftar Hadir');
-            
-            sheet.columns = [
-                { header: 'No', key: 'no', width: 5 },
-                { header: 'Waktu', key: 'waktu', width: 20 },
-                { header: 'Nama', key: 'nama', width: 30 },
-                { header: 'No HP', key: 'hp', width: 15 },
-                { header: 'Unit', key: 'unit', width: 25 },
-                { header: 'TTD', key: 'ttd', width: 20 }
-            ];
-
-            // Add rows and images logic (simplified for restoration)
-            currentAttendanceData.forEach((row, index) => {
-                const addedRow = sheet.addRow({
-                    no: index + 1,
-                    waktu: row.waktu,
-                    nama: row.nama,
-                    hp: row.hp,
-                    unit: row.unit
-                });
-                
-                // Add image if base64 exists (needs backend support to send base64 in getAttendance)
-                // For now, text fallback is fine if images aren't available client-side
-                if(row.ttdBase64) {
-                    const imageId = workbook.addImage({
-                        base64: row.ttdBase64,
-                        extension: 'png',
-                    });
-                    sheet.addImage(imageId, {
-                        tl: { col: 5, row: addedRow.number - 1 },
-                        ext: { width: 100, height: 50 }
-                    });
-                    addedRow.height = 50;
-                }
-            });
-
-            const buffer = await workbook.xlsx.writeBuffer();
-            const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-            saveAs(blob, `Absensi-${currentMeetingTitle || 'Rapat'}.xlsx`);
-        }
-
-        function loadProfile() {
-            if(!currentUser) return;
-            document.getElementById('prof-name-disp').innerText = currentUser.name;
-            document.getElementById('prof-email-disp').innerText = currentUser.email;
-            document.getElementById('prof-role-disp').innerText = currentUser.role;
-            document.getElementById('prof-img').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=0D8ABC&color=fff`;
-            
-            document.getElementById('prof-email').value = currentUser.email;
-            document.getElementById('prof-name').value = currentUser.name;
-            document.getElementById('prof-phone').value = currentUser.phone || '';
-            
-            const unitSelect = document.getElementById('prof-unit');
-            const unitLainnya = document.getElementById('prof-unit-lainnya');
-            
-            // Check if unit exists in select options
-            let found = false;
-            for(let i=0; i<unitSelect.options.length; i++) {
-                if(unitSelect.options[i].value === currentUser.unit) {
-                    unitSelect.selectedIndex = i;
-                    found = true;
-                    break;
-                }
-            }
-            
-            if(!found && currentUser.unit) {
-                unitSelect.value = 'Lainnya';
-                unitLainnya.value = currentUser.unit;
-                document.getElementById('prof-unit-lainnya-group').classList.remove('hidden');
-            } else {
-                document.getElementById('prof-unit-lainnya-group').classList.add('hidden');
-            }
-        }
-
-        function loadUsers() {
-            // Placeholder for admin user loading logic if missing
-            const tbody = document.getElementById('users-table-body');
-            tbody.innerHTML = '<tr><td colspan="6" class="p-10 text-center"><i class="fa-solid fa-circle-notch fa-spin text-blue-500"></i> Memuat data...</td></tr>';
-            
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getUsers', requesterEmail: currentUser.email }) })
-            .then(r=>r.json()).then(resp => {
-                if(resp.status === 'success') {
-                    tbody.innerHTML = '';
-                    resp.data.forEach(u => {
-                        const isBlocked = u.status === 'BLOCKED';
-                        tbody.innerHTML += `<tr class="border-b hover:bg-slate-50">
-                            <td class="px-6 py-4 font-bold text-slate-700">${u.name}</td>
-                            <td class="px-6 py-4 text-xs text-slate-500">${u.email}</td>
-                            <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${u.role==='ADMIN'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'}">${u.role}</span></td>
-                            <td class="px-6 py-4 text-xs text-slate-500">${u.unit}</td>
-                            <td class="px-6 py-4 text-xs text-slate-500">${u.phone}</td>
-                            <td class="px-6 py-4 text-center">
-                                <button onclick='openEditUserModal(${JSON.stringify(u)})' class="text-blue-500 hover:text-blue-700 mr-2"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <!-- Add block/unblock logic if needed -->
-                            </td>
-                        </tr>`;
-                    });
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">${resp.message}</td></tr>`;
-                }
-            });
-        }
 
         // Start (Safe DOM Load)
         document.addEventListener('DOMContentLoaded', () => {
