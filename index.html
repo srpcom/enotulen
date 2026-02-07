@@ -312,7 +312,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                 <div class="md:col-span-1">
                                     <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Unit Pelaksana</label>
-                                    <select name="unit" id="inp-unit" onchange="handleCreateUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"><option value="">-- Pilih --</option><option value="Direksi">Direksi</option><option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option><option value="Bagian Keuangan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option><option value="Bidang Keperawatan">Bidang Keperawatan</option><option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option><option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option><option value="Lainnya">Lainnya</option></select>
+                                    <select name="unit" id="inp-unit" onchange="handleCreateUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"><option value="">-- Pilih --</option><option value="Direksi">Direksi</option><option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option><option value="Bagian Keuangan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option><option value="Bidang Keperawatan">Bidang Keperawatan</option><option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option><option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option><option value="Lainnya">Lainnya</option></select>
                                     <div id="inp-unit-lainnya-group" class="hidden mt-2 animate-fade-in"><input type="text" id="inp-unit-lainnya" placeholder="Tulis nama unit..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"></div>
                                 </div>
                                 <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 uppercase mb-2">Tanggal</label><input type="date" name="tanggal" id="inp-tanggal" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"></div>
@@ -639,14 +639,18 @@
                 let mobileActions = '';
                 if(canEdit) {
                     const hasFinal = item.linkFinal && item.linkFinal.length > 5;
-                    mobileActions = `<div class="flex justify-between items-center border-t pt-3 mt-3">
-                         <div class="flex gap-4 text-xl text-slate-400">
-                            <button onclick="copyAbsensiLink('${item.id}')"><i class="fa-regular fa-copy"></i></button>
-                            <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}', this)"><i class="fa-solid fa-users"></i></button>
-                            <button onclick="generateDoc('${item.id}', this)"><i class="fa-solid fa-file-word"></i></button>
-                            <button onclick="showQrResult('${item.linkFinal}')" ${!hasFinal ? 'disabled class="text-slate-200"' : ''}><i class="fa-solid fa-qrcode text-purple-600"></i></button>
+                    mobileActions = `<div class="flex flex-col gap-2 border-t pt-3 mt-3">
+                         <div class="flex justify-between items-center">
+                             <div class="flex gap-3 text-lg text-slate-400">
+                                <button onclick="copyAbsensiLink('${item.id}')"><i class="fa-regular fa-copy"></i></button>
+                                <button onclick="showQrCode('${item.id}')"><i class="fa-solid fa-qrcode"></i></button>
+                                <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}', this)"><i class="fa-solid fa-users"></i></button>
+                                <button onclick="generateDoc('${item.id}', this)"><i class="fa-solid fa-file-word"></i></button>
+                                <button onclick="showQrResult('${item.linkFinal}')" ${!hasFinal ? 'disabled class="text-slate-200"' : 'class="text-purple-600"'}><i class="fa-solid fa-qrcode"></i></button>
+                                <button onclick="broadcastResult('${item.id}', this)" class="text-green-600"><i class="fa-brands fa-whatsapp"></i></button>
+                             </div>
+                             <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-xs font-bold text-blue-600 border px-3 py-1 rounded">Edit</button>
                          </div>
-                         <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-xs font-bold text-blue-600 border px-3 py-1 rounded">Edit</button>
                     </div>`;
                 }
 
