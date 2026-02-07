@@ -165,7 +165,6 @@
     </div>
 
     <!-- 2. VIEW ABSENSI (PUBLIC - Z-INDEX 40) -->
-    <!-- PERBAIKAN: Menghapus 'justify-center' agar konten bisa di-scroll sampai atas saat overflow -->
     <div id="app-absensi" class="hidden absolute inset-0 z-40 w-full h-full overflow-y-auto p-4 flex flex-col items-center bg-slate-50/50 backdrop-blur-sm">
          <!-- Card menggunakan 'my-auto' untuk centering vertikal jika muat, atau top align jika overflow -->
          <div class="glass-card max-w-md w-full p-6 rounded-3xl shadow-xl border-t border-white/60 animate-fade-in my-auto bg-white/80">
@@ -314,7 +313,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                 <div class="md:col-span-1">
                                     <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Unit Pelaksana</label>
-                                    <select name="unit" id="inp-unit" onchange="handleCreateUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"><option value="">-- Pilih --</option><option value="Direksi">Direksi</option><option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option><option value="Bagian Keuangan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option><option value="Bidang Keperawatan">Bidang Keperawatan</option><option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option><option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option><option value="Lainnya">Lainnya</option></select>
+                                    <select name="unit" id="inp-unit" onchange="handleCreateUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"><option value="">-- Pilih --</option><option value="Direksi">Direksi</option><option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option><option value="Bagian Keuangan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Keuangan</option><option value="Bidang Keperawatan">Bidang Keperawatan</option><option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option><option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option><option value="Lainnya">Lainnya</option></select>
                                     <div id="inp-unit-lainnya-group" class="hidden mt-2 animate-fade-in"><input type="text" id="inp-unit-lainnya" placeholder="Tulis nama unit..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"></div>
                                 </div>
                                 <div class="md:col-span-1"><label class="block text-xs font-bold text-slate-700 uppercase mb-2">Tanggal</label><input type="date" name="tanggal" id="inp-tanggal" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"></div>
@@ -426,10 +425,6 @@
                 canvas.width = canvas.offsetWidth * ratio;
                 canvas.height = canvas.offsetHeight * ratio;
                 canvas.getContext("2d").scale(ratio, ratio);
-                // Opsional: Clear data setelah resize agar tidak stretch
-                // if(signaturePad) signaturePad.clear(); 
-                // Note: Kita tidak clear di sini jika user sedang resize window, 
-                // tapi untuk inisialisasi awal (tampilan muncul), clear itu oke.
             }
         }
 
@@ -1175,6 +1170,135 @@
             }
         }
 
+        // ==========================================
+        // FUNGSI MANAJEMEN USER (YANG HILANG)
+        // ==========================================
+        function loadUsers() {
+            if (!currentUser || currentUser.role !== 'ADMIN') {
+                const tbody = document.getElementById('users-table-body');
+                if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="p-10 text-center text-red-500 font-bold">Akses Ditolak. Anda bukan Admin.</td></tr>';
+                return;
+            }
+
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '<tr><td colspan="6" class="p-10 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat data user...</td></tr>';
+
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'getUsers', requesterEmail: currentUser.email })
+            })
+            .then(res => res.json())
+            .then(resp => {
+                tbody.innerHTML = '';
+                if (resp.status === 'success') {
+                    const users = resp.data;
+                    if (users.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="p-10 text-center text-slate-400">Belum ada user lain.</td></tr>';
+                    } else {
+                        users.forEach(u => {
+                            const isMe = u.email === currentUser.email;
+                            const isSuperAdmin = (u.email === SUPER_ADMIN_EMAIL);
+                            const roleColor = u.role === 'ADMIN' ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-slate-100 text-slate-600 border-slate-200';
+                            
+                            // Block/Active Badge
+                            let statusBadge = `<span class="px-2 py-1 rounded text-[10px] font-bold bg-green-100 text-green-700 border border-green-200">ACTIVE</span>`;
+                            let blockBtnText = `<i class="fa-solid fa-ban mr-1"></i> Block`;
+                            let blockBtnClass = "text-red-500 hover:text-red-700 bg-red-50 border-red-100";
+                            
+                            if (u.status === 'BLOCKED') {
+                                statusBadge = `<span class="px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">BLOCKED</span>`;
+                                blockBtnText = `<i class="fa-solid fa-unlock mr-1"></i> Unblock`;
+                                blockBtnClass = "text-green-500 hover:text-green-700 bg-green-50 border-green-100";
+                            }
+
+                            // Actions
+                            let actionButtons = '-';
+                            if (!isMe && !isSuperAdmin) {
+                                actionButtons = `
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button onclick='openEditUserModal(${JSON.stringify(u)})' class="text-xs font-bold px-3 py-1.5 rounded border bg-white hover:bg-slate-50 text-slate-600 transition" title="Edit Profil"><i class="fa-solid fa-pen"></i></button>
+                                        <button onclick="toggleAdmin('${u.email}', '${u.role}')" class="text-xs font-bold px-3 py-1.5 rounded border bg-white hover:bg-slate-50 text-blue-600 transition" title="Ubah Role">${u.role === 'ADMIN' ? 'Set User' : 'Set Admin'}</button>
+                                        <button onclick="toggleBlockUser('${u.email}', ${u.status !== 'BLOCKED'})" class="text-xs font-bold px-3 py-1.5 rounded border ${blockBtnClass} transition" title="Blokir/Buka">${blockBtnText}</button>
+                                    </div>
+                                `;
+                            } else if (isMe) {
+                                actionButtons = `<span class="text-xs text-slate-400 italic">Akun Anda</span>`;
+                            } else if (isSuperAdmin) {
+                                actionButtons = `<span class="text-xs text-purple-500 font-bold"><i class="fa-solid fa-crown"></i> Super Admin</span>`;
+                            }
+
+                            tbody.innerHTML += `
+                                <tr class="border-b hover:bg-slate-50 transition">
+                                    <td class="px-6 py-4">
+                                        <div class="font-bold text-slate-700">${u.name}</div>
+                                        <div class="text-[10px] text-slate-400 md:hidden">${u.email}</div>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs text-slate-500 hidden md:table-cell">${u.email}</td>
+                                    <td class="px-6 py-4"><span class="px-2 py-1 rounded text-[10px] font-bold border ${roleColor}">${u.role}</span></td>
+                                    <td class="px-6 py-4 text-xs text-slate-500">${u.unit}</td>
+                                    <td class="px-6 py-4 text-xs text-slate-500">${u.phone} <div class="mt-1 md:hidden">${statusBadge}</div></td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="hidden md:block mb-2">${statusBadge}</div>
+                                        ${actionButtons}
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-red-500 font-bold">Gagal memuat: ${resp.message}</td></tr>`;
+                }
+            })
+            .catch(err => {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-red-500">Error Koneksi Server</td></tr>`;
+            });
+        }
+
+        function toggleAdmin(email, currentRole) {
+            const newRole = currentRole === 'ADMIN' ? 'USER' : 'ADMIN';
+            const actionText = newRole === 'ADMIN' ? 'Jadikan Admin' : 'Hapus Admin';
+            
+            showConfirm('Konfirmasi', `Yakin ingin mengubah role user ini menjadi <b>${newRole}</b>?`).then(r => {
+                if (r.isConfirmed) {
+                    fetch(API_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'toggleAdmin', requesterEmail: currentUser.email, targetEmail: email, newRole: newRole })
+                    })
+                    .then(res => res.json())
+                    .then(resp => {
+                        if (resp.status === 'success') {
+                            Toast.fire({ icon: 'success', title: 'Role Berhasil Diubah' });
+                            loadUsers();
+                        } else {
+                            Swal.fire('Gagal', resp.message, 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        function toggleBlockUser(email, shouldBlock) {
+            const actionText = shouldBlock ? 'Blokir User' : 'Buka Blokir';
+            const confirmText = shouldBlock ? 'User tidak akan bisa login.' : 'User akan bisa login kembali.';
+            
+            showConfirm(actionText, confirmText).then(r => {
+                if (r.isConfirmed) {
+                    fetch(API_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'toggleBlockUser', requesterEmail: currentUser.email, targetEmail: email, blockStatus: shouldBlock })
+                    })
+                    .then(res => res.json())
+                    .then(resp => {
+                        if (resp.status === 'success') {
+                            Toast.fire({ icon: 'success', title: 'Status User Diubah' });
+                            loadUsers();
+                        } else {
+                            Swal.fire('Gagal', resp.message, 'error');
+                        }
+                    });
+                }
+            });
+        }
 
         // Start (Safe DOM Load)
         document.addEventListener('DOMContentLoaded', () => {
