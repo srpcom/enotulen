@@ -274,7 +274,8 @@
                 <button onclick="navTo('create')" id="nav-create" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/60 transition flex items-center gap-3"><i class="fa-solid fa-calendar-plus w-5"></i> Buat Jadwal</button>
                 <button onclick="navTo('write')" id="nav-write" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/60 transition flex items-center gap-3"><i class="fa-solid fa-pen-to-square w-5"></i> Tulis Notulen</button>
                 <button onclick="navTo('list')" id="nav-list" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/60 transition flex items-center gap-3"><i class="fa-solid fa-folder-open w-5"></i> Arsip Notulen</button>
-                <button onclick="navTo('profile')" id="nav-profile" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/60 transition flex items-center gap-3"><i class="fa-solid fa-gears w-5"></i> Pengaturan</button>
+                <!-- MENU PENGATURAN (TERPISAH DARI PROFIL) -->
+                <button onclick="navTo('settings')" id="nav-settings" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/60 transition flex items-center gap-3"><i class="fa-solid fa-gears w-5"></i> Pengaturan</button>
                 <div id="menu-admin" class="hidden pt-4 mt-2 border-t border-slate-200/50">
                     <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Admin Panel</p>
                     <button onclick="navTo('users')" id="nav-users" class="nav-item w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/60 transition flex items-center gap-3"><i class="fa-solid fa-users-gear w-5"></i> Data User</button>
@@ -307,8 +308,32 @@
                     </div>
                 </div>
 
-                <!-- SETTINGS (REPLACED VIEW-PROFILE) -->
+                <!-- VIEW PROFILE (KHUSUS BIODATA) -->
                 <div id="view-profile" class="page-view hidden animate-fade-in max-w-3xl mx-auto">
+                     <h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg"><i class="fa-solid fa-user-gear"></i></span> Profil Saya</h1>
+                    <div class="glass-card rounded-2xl p-6 md:p-8 mb-6 bg-white">
+                        <div class="flex flex-col md:flex-row items-center gap-6 mb-8 pb-8 border-b border-slate-100">
+                            <div class="relative"><img id="prof-img" src="" class="w-24 h-24 rounded-full border-4 border-white shadow-md bg-slate-200"></div>
+                            <div class="text-center md:text-left"><h2 id="prof-name-disp" class="text-2xl font-bold text-slate-900">User Name</h2><p id="prof-email-disp" class="text-slate-500 mb-2">email@example.com</p><span id="prof-role-disp" class="inline-block text-xs font-bold tracking-wider bg-slate-100 text-slate-600 px-3 py-1 rounded-full uppercase">USER</span></div>
+                        </div>
+                        <form id="profileForm" onsubmit="saveProfile(event)" class="space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="col-span-1 md:col-span-2"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email Akun</label><input type="text" id="prof-email" disabled class="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-500 px-4 py-3 text-sm cursor-not-allowed"></div>
+                                <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nama Lengkap</label><input type="text" id="prof-name" required class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"></div>
+                                <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nomor HP / WA</label><input type="tel" id="prof-phone" placeholder="08..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"></div>
+                                <div class="col-span-1 md:col-span-2">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Unit Kerja</label>
+                                    <select id="prof-unit" onchange="handleProfileUnitChange(this)" class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"><option value="">-- Pilih Unit --</option><option value="Direksi">Direksi</option><option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option><option value="Bagian Keuangan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option><option value="Bidang Keperawatan">Bidang Keperawatan</option><option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option><option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option><option value="Lainnya">Lainnya</option></select>
+                                    <div id="prof-unit-lainnya-group" class="hidden mt-3 animate-fade-in"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Nama Unit Lainnya</label><input type="text" id="prof-unit-lainnya" placeholder="Masukkan nama unit..." class="glass-input w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all"></div>
+                                </div>
+                            </div>
+                            <div class="pt-4 flex justify-end"><button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 text-sm font-semibold flex items-center transform active:scale-95 transition-all"><i class="fa-solid fa-check-circle mr-2"></i> Simpan Data Profil</button></div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- VIEW SETTINGS (KHUSUS TEMA & MAINTENANCE) -->
+                <div id="view-settings" class="page-view hidden animate-fade-in max-w-3xl mx-auto">
                      <h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center text-lg"><i class="fa-solid fa-gears"></i></span> Pengaturan Aplikasi</h1>
                     
                     <!-- Theme Switcher -->
@@ -523,12 +548,6 @@
             document.getElementById('sb-avatar').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=0D8ABC&color=fff`;
             if(currentUser.role === 'ADMIN') document.getElementById('menu-admin').classList.remove('hidden');
 
-            // NEW: Fetch Maintenance Status if Admin
-            if(currentUser.email === SUPER_ADMIN_EMAIL) {
-                document.getElementById('maintenance-control-group').classList.remove('hidden');
-                checkMaintenanceStatus();
-            }
-
             navTo(window.location.hash.substring(1).replace('v=','') || 'dashboard');
         }
 
@@ -550,7 +569,8 @@
                 else renderDashboard();
             } else if (page === 'create') resetForm();
             else if (page === 'users') loadUsers();
-            else if (page === 'profile') loadSettings(); // RENAMED FROM loadProfile
+            else if (page === 'profile') loadProfile();
+            else if (page === 'settings') loadSettings();
             
             window.history.pushState(null, null, `#v=${page}`);
         }
@@ -1091,13 +1111,107 @@
         function deleteExistingFile() { document.getElementById('existing-file-display').classList.add('hidden'); document.getElementById('form-existing-file').value = ""; }
 
         // ==========================================
+        // FUNGSI PROFIL
+        // ==========================================
+        function loadProfile() {
+            if(!currentUser) return;
+            
+            // Populate Form
+            document.getElementById('prof-email').value = currentUser.email;
+            document.getElementById('prof-name').value = currentUser.name;
+            document.getElementById('prof-phone').value = currentUser.phone || "";
+            
+            // Populate Display
+            document.getElementById('prof-name-disp').innerText = currentUser.name;
+            document.getElementById('prof-email-disp').innerText = currentUser.email;
+            document.getElementById('prof-role-disp').innerText = currentUser.role;
+            document.getElementById('prof-img').src = `https://ui-avatars.com/api/?name=${currentUser.name}&background=0D8ABC&color=fff`;
+
+            // Unit Logic
+            const unitSelect = document.getElementById('prof-unit');
+            const unitLainnya = document.getElementById('prof-unit-lainnya');
+            const unitGroup = document.getElementById('prof-unit-lainnya-group');
+            
+            const unitVal = currentUser.unit || "";
+            let found = false;
+            
+            // Reset
+            unitGroup.classList.add('hidden');
+            unitLainnya.value = "";
+
+            for(let i=0; i<unitSelect.options.length; i++) {
+                if(unitSelect.options[i].value === unitVal) {
+                    unitSelect.selectedIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+
+            if(!found && unitVal !== "") {
+                unitSelect.value = "Lainnya";
+                unitGroup.classList.remove('hidden');
+                unitLainnya.value = unitVal;
+            } else if (unitVal === "") {
+                unitSelect.value = "";
+            }
+        }
+
+        function handleProfileUnitChange(sel) { if(sel.value==='Lainnya') document.getElementById('prof-unit-lainnya-group').classList.remove('hidden'); else document.getElementById('prof-unit-lainnya-group').classList.add('hidden'); }
+
+        function saveProfile(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            setBtnLoading(btn, true);
+
+            const name = document.getElementById('prof-name').value;
+            const phone = document.getElementById('prof-phone').value;
+            let unit = document.getElementById('prof-unit').value;
+            if(unit === 'Lainnya') unit = document.getElementById('prof-unit-lainnya').value;
+
+            const payload = {
+                action: 'updateProfile',
+                email: currentUser.email,
+                name: name,
+                phone: phone,
+                unit: unit
+            };
+
+            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+            .then(r => r.json())
+            .then(resp => {
+                setBtnLoading(btn, false);
+                if(resp.status === 'success') {
+                    // Update Local State
+                    currentUser.name = name;
+                    currentUser.phone = phone;
+                    currentUser.unit = unit;
+                    localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser));
+                    
+                    // Update Sidebar
+                    document.getElementById('sb-name').innerText = currentUser.name;
+                    
+                    Swal.fire('Sukses', 'Profil berhasil diperbarui.', 'success');
+                    loadProfile(); 
+                } else {
+                    Swal.fire('Gagal', resp.message, 'error');
+                }
+            })
+            .catch(err => {
+                setBtnLoading(btn, false);
+                Swal.fire('Error', 'Gagal menghubungi server.', 'error');
+            });
+        }
+
+        // ==========================================
         // FUNGSI PENGATURAN (SETTINGS) & MAINTENANCE
         // ==========================================
         function loadSettings() {
-            // Function formerly known as loadProfile, now streamlined
-            // Only used to check maintenance status visually
+            // Check Maintenance Status for Admin Toggle
             if(currentUser && currentUser.email === SUPER_ADMIN_EMAIL) {
+                document.getElementById('maintenance-control-group').classList.remove('hidden');
                 checkMaintenanceStatus();
+            } else {
+                 document.getElementById('maintenance-control-group').classList.add('hidden');
             }
         }
 
