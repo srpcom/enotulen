@@ -10,10 +10,6 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- ExcelJS & FileSaver (Wajib untuk fitur Download Excel) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
     <!-- SIGNATURE PAD -->
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 
@@ -425,6 +421,7 @@
 
         let allData = []; let filteredData = []; let currentPage = 1; const itemsPerPage = 15; let currentUser = null;
         let currentAttendanceData = []; let currentMeetingTitle = ""; let currentMeetingDate = ""; let currentKeptDocs = [];
+        let currentMeetingId = ""; // Tambahan variabel global untuk menyimpan ID rapat aktif di modal
 
         function handleCredentialResponse(response) {
             const payload = JSON.parse(decodeURIComponent(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
@@ -689,6 +686,7 @@
         function viewAttendance(id, title, date, time, btn) {
              setBtnLoading(btn, true);
              currentMeetingTitle = title;
+             currentMeetingId = id; // Update Global ID agar bisa diakses oleh fungsi download
              document.getElementById('modal-attendance').classList.remove('hidden');
              const tbody = document.getElementById('att-table-body'); tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center">Memuat...</td></tr>';
              fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getAttendance', meetingId: id }) })
@@ -717,60 +715,44 @@
         }
         function closeAttendanceModal() { document.getElementById('modal-attendance').classList.add('hidden'); }
 
-        async function downloadAttendanceWithImages() {
-            if(!currentAttendanceData || currentAttendanceData.length === 0) {
-                Swal.fire('Data Kosong', 'Tidak ada data absensi untuk diunduh.', 'warning');
+        // --- UPDATED: BACKEND GENERATION METHOD ---
+        function downloadAttendanceWithImages() {
+            const btn = document.getElementById('btn-download-att');
+            setBtnLoading(btn, true, '<i class="fa-solid fa-file-excel mr-2"></i> Download Excel');
+            
+            // Panggil Backend gas.gs: generateAttendanceExcel
+            // Pastikan currentMeetingId sudah terisi dari fungsi viewAttendance()
+            const id = currentMeetingId; 
+
+            if(!id) {
+                setBtnLoading(btn, false);
+                Swal.fire('Error', 'ID Rapat tidak ditemukan.', 'error');
                 return;
             }
 
-            const btn = document.getElementById('btn-download-att');
-            setBtnLoading(btn, true, '<i class="fa-solid fa-file-excel mr-2"></i> Download Excel');
-
-            try {
-                const workbook = new ExcelJS.Workbook();
-                const sheet = workbook.addWorksheet('Daftar Hadir');
-
-                sheet.columns = [
-                    { header: 'No', key: 'no', width: 5 },
-                    { header: 'Waktu Absen', key: 'waktu', width: 20 },
-                    { header: 'Nama Peserta', key: 'nama', width: 30 },
-                    { header: 'Nomor HP', key: 'hp', width: 15 },
-                    { header: 'Unit / Ruangan', key: 'unit', width: 25 },
-                    { header: 'Link Tanda Tangan', key: 'ttd', width: 40 }
-                ];
-
-                sheet.getRow(1).font = { bold: true };
-                sheet.getRow(1).fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FFD9E1F2' }
-                };
-
-                currentAttendanceData.forEach((row, index) => {
-                    sheet.addRow({
-                        no: index + 1,
-                        waktu: row.waktu,
-                        nama: row.nama,
-                        hp: row.hp,
-                        unit: row.unit,
-                        ttd: row.ttdUrl || '-'
-                    });
-                });
-
-                const buffer = await workbook.xlsx.writeBuffer();
-                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                
-                const filename = `Daftar_Hadir_${currentMeetingTitle || 'Rapat'}.xlsx`;
-                saveAs(blob, filename);
-
-                Toast.fire({ icon: 'success', title: 'File Excel berhasil diunduh' });
-
-            } catch (error) {
-                console.error(error);
-                Swal.fire('Gagal', 'Terjadi kesalahan saat membuat Excel.', 'error');
-            } finally {
+            fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    action: 'generateAttendanceExcel', // Memanggil fungsi di backend
+                    meetingId: id
+                }) 
+            })
+            .then(r => r.json())
+            .then(resp => {
                 setBtnLoading(btn, false);
-            }
+                if(resp.status === 'success') {
+                    // Buka link download yang diberikan Google Drive
+                    window.open(resp.downloadUrl, '_blank');
+                    Toast.fire({ icon: 'success', title: 'File Excel berhasil dibuat!' });
+                } else {
+                    Swal.fire('Gagal', resp.message, 'error');
+                }
+            })
+            .catch(err => {
+                setBtnLoading(btn, false);
+                console.error(err);
+                Swal.fire('Error', 'Gagal menghubungi server.', 'error');
+            });
         }
         
         function generateDoc(id, btn) {
