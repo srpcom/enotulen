@@ -687,6 +687,10 @@
              setBtnLoading(btn, true);
              currentMeetingTitle = title;
              currentMeetingId = id; // Update ID agar bisa diakses oleh fungsi download
+             
+             // FIX: Update judul modal dengan judul rapat
+             document.getElementById('att-modal-title').innerText = title + ' (' + date + ')';
+
              document.getElementById('modal-attendance').classList.remove('hidden');
              const tbody = document.getElementById('att-table-body'); tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center">Memuat...</td></tr>';
              fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getAttendance', meetingId: id }) })
