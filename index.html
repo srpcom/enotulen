@@ -747,35 +747,13 @@
                 };
 
                 currentAttendanceData.forEach((row, index) => {
-                    let ttdValue = row.ttdUrl || '-';
-
-                    // LOGIKA BARU: Convert URL ke Formula IMAGE secara Native di ExcelJS
-                    // Ini menghindari masalah @ di Excel karena kita mendefinisikan formula secara eksplisit
-                    if (row.ttdUrl && row.ttdUrl.includes('drive.google.com')) {
-                        try {
-                            const fileIdMatch = row.ttdUrl.match(/\/d\/(.+?)\/|id=(.+?)(&|$)/);
-                            const fileId = fileIdMatch ? (fileIdMatch[1] || fileIdMatch[2]) : null;
-                            
-                            if (fileId) {
-                                // Gunakan Direct Link Google Drive
-                                const directLink = `https://drive.google.com/uc?export=view&id=${fileId}`;
-                                
-                                // Set sebagai objek formula
-                                // ExcelJS akan menulisnya sebagai shared formula yang valid tanpa @
-                                ttdValue = { formula: `IMAGE("${directLink}",1)` }; 
-                            }
-                        } catch (e) {
-                            console.error("Gagal convert formula image", e);
-                        }
-                    }
-
                     sheet.addRow({
                         no: index + 1,
                         waktu: row.waktu,
                         nama: row.nama,
                         hp: row.hp,
                         unit: row.unit,
-                        ttd: ttdValue
+                        ttd: row.ttdUrl || '-'
                     });
                 });
 
