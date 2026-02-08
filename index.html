@@ -129,7 +129,7 @@
                 <div class="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 rounded-t-[2.5rem]"></div>
                 <div>
                     <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-28 h-28 object-contain mx-auto mb-6 drop-shadow-lg filter" alt="Logo">
-                    <h2 class="text-4xl font-extrabold text-slate-800 mb-2 tracking-tight">Selamat Datang</h2>
+                    <h2 class="text-4xl font-extrabold text-slate-800 mb-2 tracking-tight">E Notulen</h2>
                     <p class="text-slate-600 text-sm mb-10 leading-relaxed font-medium">Sistem Informasi Manajemen Notulen Rapat<br><span class="font-bold text-blue-600 text-base">RSUD dr. R. Koesma Tuban</span></p>
                     <div class="flex justify-center transform transition hover:scale-105 active:scale-95 duration-200">
                         <div id="g_id_onload" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
@@ -242,7 +242,7 @@
             <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 pb-32 md:pb-12 hidden scroll-smooth">
                 <!-- DASHBOARD -->
                 <div id="view-dashboard" class="page-view animate-fade-in max-w-6xl mx-auto space-y-6">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2"><div><h1 class="text-2xl md:text-3xl font-bold text-slate-800">Dashboard Overview</h1><p class="text-slate-500 text-sm">Selamat datang kembali, mari produktif hari ini.</p></div></div>
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2"><div><h1 class="text-2xl md:text-3xl font-bold text-slate-800">Dashboard Overview</h1><p class="text-slate-500 text-sm">Wellcome Back, mari produktif hari ini.</p></div></div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div onclick="navTo('create')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden bg-white"><div class="flex items-center gap-5 relative z-10"><div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-green-500/30"><i class="fa-solid fa-plus text-2xl"></i></div><div><h3 class="font-bold text-xl text-slate-800">Buat Jadwal</h3><p class="text-sm text-slate-500 mt-1">Undang peserta rapat.</p></div></div></div>
                         <div onclick="navTo('list')" class="glass-card p-6 rounded-2xl cursor-pointer group hover:scale-[1.02] transition duration-300 relative overflow-hidden bg-white"><div class="flex items-center gap-5 relative z-10"><div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30"><i class="fa-solid fa-folder-open text-2xl"></i></div><div><h3 class="font-bold text-xl text-slate-800">Arsip Notulen</h3><p class="text-sm text-slate-500 mt-1"><span id="dash-total-count" class="font-bold text-blue-500">...</span> dokumen.</p></div></div></div>
@@ -616,18 +616,38 @@
                 const canEdit = (isAdmin || isOwner);
                 let linkHtml = `<span class="text-slate-600 font-bold text-xs cursor-default" title="Belum Final">${item.agenda} <i class="fa-solid fa-lock ml-1 text-slate-300"></i></span>`;
                 let statusBadge = `<span class="bg-amber-100 text-amber-700 text-[10px] px-2 py-1 rounded font-bold border border-amber-200">Terjadwal</span>`;
-                if(item.linkFinal && item.linkFinal.length > 5) {
+                
+                // --- PDF LINK LOGIC ---
+                let pdfUrl = '#';
+                let pdfBtnClass = 'text-slate-200 cursor-not-allowed pointer-events-none';
+                let pdfTarget = '';
+                const hasFinal = item.linkFinal && item.linkFinal.length > 5;
+
+                if(hasFinal) {
                     linkHtml = `<a href="${item.linkFinal}" target="_blank" class="text-blue-600 font-bold hover:underline flex items-center gap-1 text-sm">${item.agenda} <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>`;
                     statusBadge = `<span class="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-1 rounded font-bold border border-indigo-200">Final (Doc)</span>`;
+                    
+                    // Construct PDF Link
+                    const match = item.linkFinal.match(/\/d\/(.+?)\/|id=(.+?)(&|$)/);
+                    const fileId = match ? (match[1] || match[2]) : null;
+                    if(fileId) {
+                        pdfUrl = `https://docs.google.com/document/d/${fileId}/export?format=pdf`;
+                        pdfBtnClass = 'text-slate-400 hover:text-red-600';
+                        pdfTarget = '_blank';
+                    }
                 }
+
                 let actions = '-';
                 if(canEdit) {
-                    const hasFinal = item.linkFinal && item.linkFinal.length > 5;
                     actions = `<div class="flex items-center justify-center gap-2 text-lg">
                         <button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-blue-500" title="Link Absen"><i class="fa-regular fa-copy"></i></button>
                         <button onclick="showQrCode('${item.id}')" class="text-slate-400 hover:text-slate-800" title="QR Absen"><i class="fa-solid fa-qrcode"></i></button>
                         <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}', this)" class="text-slate-400 hover:text-green-600" title="Hadir"><i class="fa-solid fa-users"></i></button>
                         <button onclick="generateDoc('${item.id}', this)" class="text-slate-400 hover:text-blue-800" title="Generate Doc"><i class="fa-solid fa-file-word"></i></button>
+                        
+                        <!-- PDF BUTTON ADDED HERE -->
+                        <a href="${pdfUrl}" target="${pdfTarget}" class="${pdfBtnClass}" title="Download PDF"><i class="fa-solid fa-file-pdf"></i></a>
+
                         <button onclick="showQrResult('${item.linkFinal}')" class="${hasFinal ? 'text-slate-400 hover:text-purple-600' : 'text-slate-200 cursor-not-allowed'}" ${!hasFinal ? 'disabled' : ''} title="QR Hasil"><i class="fa-solid fa-qrcode text-purple-600"></i></button>
                         <button onclick="broadcastResult('${item.id}', this)" class="text-slate-400 hover:text-green-600" title="Broadcast"><i class="fa-brands fa-whatsapp"></i></button>
                         <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 text-xs font-bold border border-blue-100 bg-blue-50 px-2 py-1 rounded ml-1">Edit</button>
@@ -647,11 +667,27 @@
                 const isAdmin = (currentUser.role === 'ADMIN');
                 const canEdit = (isAdmin || isOwner);
                 let title = item.agenda;
-                if(item.linkFinal && item.linkFinal.length > 5) title = `<a href="${item.linkFinal}" target="_blank" class="text-blue-600 underline">${item.agenda}</a>`;
-                let statusBadge = item.linkFinal && item.linkFinal.length > 5 ? `<span class="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-1 rounded font-bold">Final</span>` : `<span class="bg-amber-100 text-amber-700 text-[10px] px-2 py-1 rounded font-bold">Terjadwal</span>`;
+                
+                // Re-calculate PDF Logic for Mobile loop
+                let pdfUrl = '#';
+                let pdfBtnClass = 'text-slate-200 cursor-not-allowed pointer-events-none';
+                let pdfTarget = '';
+                const hasFinal = item.linkFinal && item.linkFinal.length > 5;
+
+                if(item.linkFinal && item.linkFinal.length > 5) {
+                    title = `<a href="${item.linkFinal}" target="_blank" class="text-blue-600 underline">${item.agenda}</a>`;
+                    const match = item.linkFinal.match(/\/d\/(.+?)\/|id=(.+?)(&|$)/);
+                    const fileId = match ? (match[1] || match[2]) : null;
+                    if(fileId) {
+                        pdfUrl = `https://docs.google.com/document/d/${fileId}/export?format=pdf`;
+                        pdfBtnClass = 'text-red-500'; // Red specific for mobile to stand out or match icons
+                        pdfTarget = '_blank';
+                    }
+                }
+
+                let statusBadge = hasFinal ? `<span class="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-1 rounded font-bold">Final</span>` : `<span class="bg-amber-100 text-amber-700 text-[10px] px-2 py-1 rounded font-bold">Terjadwal</span>`;
                 let mobileActions = '';
                 if(canEdit) {
-                    const hasFinal = item.linkFinal && item.linkFinal.length > 5;
                     mobileActions = `<div class="flex flex-col gap-2 border-t pt-3 mt-3">
                          <div class="flex justify-between items-center">
                              <div class="flex gap-3 text-lg text-slate-400">
@@ -659,6 +695,10 @@
                                 <button onclick="showQrCode('${item.id}')"><i class="fa-solid fa-qrcode"></i></button>
                                 <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}', this)"><i class="fa-solid fa-users"></i></button>
                                 <button onclick="generateDoc('${item.id}', this)"><i class="fa-solid fa-file-word"></i></button>
+                                
+                                <!-- PDF Mobile -->
+                                <a href="${pdfUrl}" target="${pdfTarget}" class="${pdfBtnClass}"><i class="fa-solid fa-file-pdf"></i></a>
+
                                 <button onclick="showQrResult('${item.linkFinal}')" ${!hasFinal ? 'disabled class="text-slate-200"' : 'class="text-purple-600"'}><i class="fa-solid fa-qrcode"></i></button>
                                 <button onclick="broadcastResult('${item.id}', this)" class="text-green-600"><i class="fa-brands fa-whatsapp"></i></button>
                              </div>
