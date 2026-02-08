@@ -747,14 +747,36 @@
                 };
 
                 currentAttendanceData.forEach((row, index) => {
-                    sheet.addRow({
+                    // 1. Tambahkan baris data
+                    const newRow = sheet.addRow({
                         no: index + 1,
                         waktu: row.waktu,
                         nama: row.nama,
                         hp: row.hp,
-                        unit: row.unit,
-                        ttd: row.ttdUrl || '-'
+                        unit: row.unit
                     });
+
+                    // 2. Handle Kolom TTD (Formula) Secara Spesifik
+                    // Untuk menghindari @ (Implicit Intersection) di ExcelJS, kita harus set cell.value sebagai object formula
+                    const ttdCell = newRow.getCell('ttd');
+
+                    if (row.ttdUrl && row.ttdUrl.length > 5) {
+                        let directUrl = row.ttdUrl;
+                        
+                        // Pastikan URL Google Drive diubah ke format direct link
+                        if(directUrl.includes('drive.google.com')) {
+                            const idMatch = directUrl.match(/\/d\/(.+?)\/|id=(.+?)(&|$)/);
+                            const fileId = idMatch ? (idMatch[1] || idMatch[2]) : null;
+                            if(fileId) {
+                                directUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+                            }
+                        }
+
+                        // THE FIX: Gunakan object { formula: ... } agar tidak ada @ di depan
+                        ttdCell.value = { formula: `IMAGE("${directUrl}", 1)` };
+                    } else {
+                        ttdCell.value = '-';
+                    }
                 });
 
                 const buffer = await workbook.xlsx.writeBuffer();
