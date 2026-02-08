@@ -421,7 +421,7 @@
 
         let allData = []; let filteredData = []; let currentPage = 1; const itemsPerPage = 15; let currentUser = null;
         let currentAttendanceData = []; let currentMeetingTitle = ""; let currentMeetingDate = ""; let currentKeptDocs = [];
-        let currentMeetingId = ""; // Tambahan variabel global untuk menyimpan ID rapat aktif di modal
+        let currentMeetingId = ""; // Variabel global untuk menyimpan ID rapat saat ini
 
         function handleCredentialResponse(response) {
             const payload = JSON.parse(decodeURIComponent(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
@@ -686,7 +686,7 @@
         function viewAttendance(id, title, date, time, btn) {
              setBtnLoading(btn, true);
              currentMeetingTitle = title;
-             currentMeetingId = id; // Update Global ID agar bisa diakses oleh fungsi download
+             currentMeetingId = id; // Update ID agar bisa diakses oleh fungsi download
              document.getElementById('modal-attendance').classList.remove('hidden');
              const tbody = document.getElementById('att-table-body'); tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center">Memuat...</td></tr>';
              fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getAttendance', meetingId: id }) })
@@ -718,22 +718,20 @@
         // --- UPDATED: BACKEND GENERATION METHOD ---
         function downloadAttendanceWithImages() {
             const btn = document.getElementById('btn-download-att');
-            setBtnLoading(btn, true, '<i class="fa-solid fa-file-excel mr-2"></i> Download Excel');
-            
-            // Panggil Backend gas.gs: generateAttendanceExcel
             // Pastikan currentMeetingId sudah terisi dari fungsi viewAttendance()
             const id = currentMeetingId; 
 
             if(!id) {
-                setBtnLoading(btn, false);
-                Swal.fire('Error', 'ID Rapat tidak ditemukan.', 'error');
+                Swal.fire('Error', 'ID Rapat tidak ditemukan. Silakan buka ulang daftar hadir.', 'error');
                 return;
             }
+
+            setBtnLoading(btn, true, '<i class="fa-solid fa-file-excel mr-2"></i> Download Excel');
 
             fetch(API_URL, { 
                 method: 'POST', 
                 body: JSON.stringify({ 
-                    action: 'generateAttendanceExcel', // Memanggil fungsi di backend
+                    action: 'generateAttendanceExcel', // Memanggil fungsi di backend gas.gs
                     meetingId: id
                 }) 
             })
@@ -743,7 +741,7 @@
                 if(resp.status === 'success') {
                     // Buka link download yang diberikan Google Drive
                     window.open(resp.downloadUrl, '_blank');
-                    Toast.fire({ icon: 'success', title: 'File Excel berhasil dibuat!' });
+                    Toast.fire({ icon: 'success', title: 'File Excel sedang didownload...' });
                 } else {
                     Swal.fire('Gagal', resp.message, 'error');
                 }
