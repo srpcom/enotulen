@@ -747,36 +747,36 @@
                 };
 
                 currentAttendanceData.forEach((row, index) => {
-                    // 1. Tambahkan baris data
-                    const newRow = sheet.addRow({
+                    let ttdValue = row.ttdUrl || '-';
+
+                    // LOGIKA BARU: Convert URL ke Formula IMAGE secara Native di ExcelJS
+                    // Ini menghindari masalah @ di Excel karena kita mendefinisikan formula secara eksplisit
+                    if (row.ttdUrl && row.ttdUrl.includes('drive.google.com')) {
+                        try {
+                            const fileIdMatch = row.ttdUrl.match(/\/d\/(.+?)\/|id=(.+?)(&|$)/);
+                            const fileId = fileIdMatch ? (fileIdMatch[1] || fileIdMatch[2]) : null;
+                            
+                            if (fileId) {
+                                // Gunakan Direct Link Google Drive
+                                const directLink = `https://drive.google.com/uc?export=view&id=${fileId}`;
+                                
+                                // Set sebagai objek formula
+                                // ExcelJS akan menulisnya sebagai shared formula yang valid tanpa @
+                                ttdValue = { formula: `IMAGE("${directLink}",1)` }; 
+                            }
+                        } catch (e) {
+                            console.error("Gagal convert formula image", e);
+                        }
+                    }
+
+                    sheet.addRow({
                         no: index + 1,
                         waktu: row.waktu,
                         nama: row.nama,
                         hp: row.hp,
-                        unit: row.unit
+                        unit: row.unit,
+                        ttd: ttdValue
                     });
-
-                    // 2. Handle Kolom TTD (Formula) Secara Spesifik
-                    // Untuk menghindari @ (Implicit Intersection) di ExcelJS, kita harus set cell.value sebagai object formula
-                    const ttdCell = newRow.getCell('ttd');
-
-                    if (row.ttdUrl && row.ttdUrl.length > 5) {
-                        let directUrl = row.ttdUrl;
-                        
-                        // Pastikan URL Google Drive diubah ke format direct link
-                        if(directUrl.includes('drive.google.com')) {
-                            const idMatch = directUrl.match(/\/d\/(.+?)\/|id=(.+?)(&|$)/);
-                            const fileId = idMatch ? (idMatch[1] || idMatch[2]) : null;
-                            if(fileId) {
-                                directUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
-                            }
-                        }
-
-                        // THE FIX: Gunakan object { formula: ... } agar tidak ada @ di depan
-                        ttdCell.value = { formula: `IMAGE("${directUrl}", 1)` };
-                    } else {
-                        ttdCell.value = '-';
-                    }
                 });
 
                 const buffer = await workbook.xlsx.writeBuffer();
