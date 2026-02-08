@@ -335,7 +335,7 @@
 
                 <!-- LIST: ARSIP -->
                 <div id="view-list" class="page-view hidden animate-fade-in max-w-7xl mx-auto">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6"><h1 class="text-2xl font-bold text-slate-800">Daftar Notulen</h1><div class="flex flex-col md:flex-row gap-3 w-full md:w-auto"><div class="relative w-full md:w-64"><i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-400 text-xs"></i><input type="text" id="search-input" oninput="handleFilter()" placeholder="Cari agenda, unit..." class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition"></div><button id="btn-refresh-data" onclick="loadData()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 text-sm font-medium hover:bg-slate-50 transition shadow-sm"><i class="fa-solid fa-rotate"></i></button></div></div>
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6"><h1 class="text-2xl font-bold text-slate-800">Daftar Notulen</h1><div class="flex flex-col md:flex-row gap-3 w-full md:w-auto"><div class="relative w-full md:w-64"><i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-400 text-xs"></i><input type="text" id="search-input" oninput="handleFilter()" placeholder="Cari agenda, unit..." class="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition"></div><button id="btn-refresh-data" onclick="loadData(1)" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 text-sm font-medium hover:bg-slate-50 transition shadow-sm"><i class="fa-solid fa-rotate"></i></button></div></div>
                     <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col w-full min-h-[400px]">
                         <div class="hidden md:block overflow-x-auto w-full flex-1">
                             <table class="w-full text-left text-sm">
@@ -424,9 +424,15 @@
         }
         function clearSignature() { if(signaturePad) signaturePad.clear(); }
 
-        let allData = []; let filteredData = []; let currentPage = 1; const itemsPerPage = 15; let currentUser = null;
+        let allData = []; 
+        let currentPage = 1; 
+        const itemsPerPage = 15; 
+        let totalItems = 0; 
+        let totalPages = 1;
+        let currentUser = null;
         let currentAttendanceData = []; let currentMeetingTitle = ""; let currentMeetingDate = ""; let currentKeptDocs = [];
         let currentMeetingId = ""; // Variabel global untuk menyimpan ID rapat saat ini
+        let searchTimeout;
 
         function handleCredentialResponse(response) {
             const payload = JSON.parse(decodeURIComponent(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
@@ -478,10 +484,7 @@
             if(navBtn) navBtn.classList.add('active');
             if(window.innerWidth < 768) toggleSidebar(false);
             if(page === 'list' || page === 'dashboard' || page === 'write') {
-                if(allData.length === 0) loadData();
-                else if(page === 'list') { handleFilter(); renderPaginatedTable(); }
-                else if(page === 'write') renderWriteTable();
-                else renderDashboard();
+                loadData(1); // Always reset to page 1 on nav change
             } else if (page === 'create') resetForm();
             else if (page === 'users') loadUsers();
             else if (page === 'profile') loadProfile();
@@ -531,40 +534,61 @@
             }
         }
 
-        function loadData() {
+        function loadData(page = 1) {
             if(!currentUser) return;
             const btnRefresh = document.getElementById('btn-refresh-data');
+            const tbody = document.getElementById('table-body');
+            const writeTbody = document.getElementById('write-table-body');
+            const searchValue = document.getElementById('search-input') ? document.getElementById('search-input').value : "";
+            
+            currentPage = page;
+            
             if(btnRefresh) { btnRefresh.disabled = true; btnRefresh.querySelector('i').classList.add('fa-spin'); }
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'read', email: currentUser.email }) })
+            if(tbody) tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat Data (Halaman ${page})...</td></tr>`;
+            if(writeTbody) writeTbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat Data...</td></tr>`;
+
+            fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    action: 'read', 
+                    email: currentUser.email,
+                    page: page,
+                    limit: itemsPerPage,
+                    search: searchValue
+                }) 
+            })
             .then(res => res.json()).then(resp => {
                 if(btnRefresh) { btnRefresh.disabled = false; btnRefresh.querySelector('i').classList.remove('fa-spin'); }
                 if(resp.status === 'success') {
-                    allData = resp.data;
-                    handleFilter(); renderDashboard(); renderWriteTable();
+                    allData = resp.data; // Data is now only the current page chunk
+                    // Pagination info from server
+                    if(resp.pagination) {
+                        totalItems = resp.pagination.totalItems;
+                        totalPages = resp.pagination.totalPages;
+                        currentPage = resp.pagination.currentPage;
+                    }
+                    
+                    renderPaginatedTable();
+                    renderWriteTable(); // Reuse data for write table (simplification)
+                    renderDashboard(totalItems); // Use totalItems for dashboard count
                 } else if(resp.status === 'maintenance') {
                     document.getElementById('view-login').style.display = 'none';
                     document.getElementById('app-admin').classList.add('hidden');
                     document.getElementById('view-maintenance').classList.remove('hidden');
                 } else {
-                    document.getElementById('table-body').innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500 font-bold">Gagal: ${resp.message}</td></tr>`;
+                    if(tbody) tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500 font-bold">Gagal: ${resp.message}</td></tr>`;
                 }
             }).catch(e => {
                 if(btnRefresh) { btnRefresh.disabled = false; btnRefresh.querySelector('i').classList.remove('fa-spin'); }
-                document.getElementById('table-body').innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500">Error Koneksi Server</td></tr>`;
+                if(tbody) tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500">Error Koneksi Server</td></tr>`;
             });
         }
 
         function handleFilter() {
-            const searchVal = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : "";
-            let temp = allData.filter(item => {
-                const agenda = item.agenda ? item.agenda.toLowerCase() : "";
-                const unit = item.unit ? item.unit.toLowerCase() : "";
-                return agenda.includes(searchVal) || unit.includes(searchVal);
-            });
-            temp.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-            filteredData = temp;
-            currentPage = 1;
-            renderPaginatedTable();
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                loadData(1); // Reload from page 1 with new search term
+            }, 500); // Debounce 500ms
         }
 
         function renderPaginatedTable() {
@@ -572,17 +596,20 @@
             const mobileContainer = document.getElementById('mobile-list-container');
             const footer = document.getElementById('pagination-footer');
             if (!tbody) return;
-            if (filteredData.length === 0 && allData.length > 0 && !document.getElementById('search-input').value) { filteredData = [...allData]; }
-            if (filteredData.length === 0) {
+            
+            // filteredData logic removed because filtering happens on server now
+            
+            if (allData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">Data tidak ditemukan.</td></tr>`;
                 if(mobileContainer) mobileContainer.innerHTML = `<div class="p-8 text-center text-slate-400">Data tidak ditemukan.</div>`;
                 if(footer) footer.classList.add('hidden');
                 return;
             }
             if(footer) footer.classList.remove('hidden');
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageData = filteredData.slice(start, end);
+            
+            // No slicing needed, allData IS the page data
+            const pageData = allData;
+            
             const tableRows = pageData.map(item => {
                 const isOwner = (item.pencatatEmail === currentUser.email);
                 const isAdmin = (currentUser.role === 'ADMIN');
@@ -648,9 +675,9 @@
             }).join('');
             tbody.innerHTML = tableRows;
             if(mobileContainer) mobileContainer.innerHTML = cardRows;
-            document.getElementById('page-info').innerText = `Halaman ${currentPage}`;
+            document.getElementById('page-info').innerText = `Halaman ${currentPage} dari ${totalPages} (${totalItems} Data)`;
             document.getElementById('btn-prev').disabled = (currentPage === 1);
-            document.getElementById('btn-next').disabled = (currentPage * itemsPerPage >= filteredData.length);
+            document.getElementById('btn-next').disabled = (currentPage >= totalPages);
         }
 
         function renderWriteTable() {
@@ -668,9 +695,20 @@
             });
         }
         
-        function renderDashboard() { document.getElementById('dash-total-count').innerText = allData.length; }
-        function nextPage() { if(currentPage * itemsPerPage < filteredData.length) { currentPage++; renderPaginatedTable(); } }
-        function prevPage() { if(currentPage > 1) { currentPage--; renderPaginatedTable(); } }
+        function renderDashboard(count) { 
+            document.getElementById('dash-total-count').innerText = count || "..."; 
+        }
+        
+        function nextPage() { 
+            if(currentPage < totalPages) { 
+                loadData(currentPage + 1); 
+            } 
+        }
+        function prevPage() { 
+            if(currentPage > 1) { 
+                loadData(currentPage - 1); 
+            } 
+        }
 
         function copyAbsensiLink(id) { const url = `${window.location.origin}${window.location.pathname}?v=absensi&id=${id}`; navigator.clipboard.writeText(url).then(() => Toast.fire({icon:'success', title:'Link Absensi Disalin'})); }
         
@@ -769,7 +807,7 @@
                     fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'generateResmiDoc', id: id, requesterEmail: currentUser.email }) })
                     .then(r=>r.json()).then(resp => {
                         setBtnLoading(btn, false);
-                        if(resp.status === 'success') { Swal.fire('Sukses', 'Dokumen dibuat.', 'success'); loadData(); }
+                        if(resp.status === 'success') { Swal.fire('Sukses', 'Dokumen dibuat.', 'success'); loadData(currentPage); }
                         else Swal.fire('Gagal', resp.message, 'error');
                     }).catch(() => setBtnLoading(btn, false));
                 }
@@ -790,7 +828,7 @@
                 if(r.isConfirmed) {
                     setBtnLoading(btn, true);
                     fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id, requesterEmail: currentUser.email }) }).then(r=>r.json()).then(resp => {
-                        setBtnLoading(btn, false); if(resp.status === 'success') { Toast.fire({icon:'success', title:'Terhapus'}); loadData(); } else Swal.fire('Gagal', resp.message, 'error');
+                        setBtnLoading(btn, false); if(resp.status === 'success') { Toast.fire({icon:'success', title:'Terhapus'}); loadData(currentPage); } else Swal.fire('Gagal', resp.message, 'error');
                     }).catch(() => setBtnLoading(btn, false));
                 }
             });
@@ -941,7 +979,7 @@
             };
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(r=>r.json()).then(resp => { 
                 setBtnLoading(submitBtn, false);
-                if(resp.status==='success') { Swal.fire('Sukses','Data tersimpan','success').then(()=>navTo('list')); loadData(); } 
+                if(resp.status==='success') { Swal.fire('Sukses','Data tersimpan','success').then(()=>navTo('list')); loadData(1); } 
                 else Swal.fire('Gagal',resp.message,'error'); 
             }).catch(() => setBtnLoading(submitBtn, false));
         }
