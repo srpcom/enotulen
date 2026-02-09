@@ -1446,8 +1446,18 @@
             // 1. Cek PDF Final
             if (currentPublicMeeting && currentPublicMeeting.linkFinal && currentPublicMeeting.linkFinal.length > 5) {
                 hasResult = true;
+                
+                // --- NEW LOGIC START: DIRECT PDF EXPORT ---
+                let finalUrl = currentPublicMeeting.linkFinal;
+                const match = finalUrl.match(/\/d\/(.+?)\/|id=(.+?)(&|$)/);
+                const fileId = match ? (match[1] || match[2]) : null;
+                if(fileId) {
+                    finalUrl = `https://docs.google.com/document/d/${fileId}/export?format=pdf`;
+                }
+                // --- NEW LOGIC END ---
+
                 const pdfHtml = `
-                    <a href="${currentPublicMeeting.linkFinal}" target="_blank" class="block w-full p-4 bg-white border border-indigo-100 hover:border-indigo-300 rounded-xl shadow-sm hover:shadow-md transition flex items-center gap-4 group">
+                    <a href="${finalUrl}" target="_blank" class="block w-full p-4 bg-white border border-indigo-100 hover:border-indigo-300 rounded-xl shadow-sm hover:shadow-md transition flex items-center gap-4 group">
                         <div class="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition"><i class="fa-solid fa-file-pdf"></i></div>
                         <div class="text-left overflow-hidden">
                             <h4 class="font-bold text-slate-800 truncate">Notulen Resmi (PDF)</h4>
