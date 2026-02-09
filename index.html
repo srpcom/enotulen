@@ -19,6 +19,15 @@
     <!-- TSPARTICLES (Efek Partikel) -->
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
 
+    <!-- FONT AWESOME -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GOOGLE FONTS -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- GOOGLE SIGN IN API -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <!-- ERROR HANDLER -->
     <script>
         window.onerror = function(msg, url, line) {
@@ -43,10 +52,6 @@
             }
         }
     </script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-image 0.5s ease, background-color 0.5s ease, color 0.5s ease; }
@@ -105,8 +110,10 @@
 <body class="h-screen flex overflow-hidden text-slate-800 relative">
 
     <script>
-        // GANTI URL INI DENGAN URL DEPLOYMENT TERBARU ANDA
+        // --- KONFIGURASI FRONTEND ---
+        // GANTI URL INI DENGAN URL DEPLOYMENT TERBARU ANDA (exec)
         const API_URL = "https://script.google.com/macros/s/AKfycbzj1mWjE3EC2KmtKbaHoz8yNEcnNFffDKXJ2xQg0mAKsSBB9QWGtIfwDw65z0OnnHWV/exec"; 
+        
         const CLIENT_ID = "783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com";
         const SUPER_ADMIN_EMAIL = "syamsul18782@gmail.com";
 
@@ -125,7 +132,7 @@
         initTheme();
     </script>
 
-    <!-- 1. VIEW LOGIN -->
+    <!-- 1. VIEW LOGIN UTAMA -->
     <div id="view-login" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 transition-opacity duration-300 overflow-hidden">
         <div id="tsparticles"></div>
         <div class="z-10 w-full max-w-md">
@@ -163,7 +170,7 @@
          <div class="glass-card max-w-md w-full p-6 rounded-3xl shadow-xl border-t border-white/60 animate-fade-in my-auto bg-white/80">
             <div class="text-center mb-6">
                 <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-20 h-20 object-contain mx-auto mb-3" alt="Logo">
-                <h2 class="text-2xl font-bold text-slate-800">E NOTULEN</h2>
+                <h2 class="text-2xl font-bold text-slate-800">Portal Rapat Digital</h2>
                 <p class="text-slate-500 text-xs">RSUD dr. R. Koesma Tuban</p>
             </div>
             
@@ -200,10 +207,21 @@
                 <!-- FORM ABSENSI (Hidden by default) -->
                 <div id="absensi-form-container" class="hidden animate-slide-up">
                     <button onclick="showAbsensiMenu()" class="mb-4 text-xs font-bold text-slate-500 hover:text-blue-600 flex items-center gap-1"><i class="fa-solid fa-arrow-left"></i> Kembali ke Menu</button>
+                    
+                    <!-- TOMBOL AUTO-FILL GOOGLE (NEW) -->
+                    <!-- Gunakan data-context 'use' agar tidak bentrok dengan login utama -->
+                    <div id="g_id_onload_absensi" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="use" data-ux_mode="popup" data-callback="handleAbsensiAutoFill" data-auto_prompt="false"></div>
+                    
+                    <div class="mb-5 flex justify-center">
+                        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="continue_with" data-size="large" data-logo_alignment="left" data-width="320"></div>
+                    </div>
+                    
+                    <div class="relative flex py-2 items-center mb-4"><div class="flex-grow border-t border-slate-200"></div><span class="flex-shrink-0 mx-4 text-slate-400 text-xs">Atau isi manual</span><div class="flex-grow border-t border-slate-200"></div></div>
+
                     <form id="formAbsensi" onsubmit="submitAbsensi(event)" class="space-y-4">
                         <input type="hidden" id="abs-meeting-id">
                         <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Lengkap</label><input type="text" id="abs-nama" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Nama beserta gelar..."></div>
-                        <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email</label><input type="email" id="abs-email" class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500" placeholder="user@contoh.com"></div>
+                        <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email</label><input type="email" id="abs-email" class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 bg-slate-50" placeholder="user@contoh.com" readonly></div>
                         <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nomor HP / WhatsApp</label><input type="tel" id="abs-phone" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500" placeholder="08xx / 628xx"></div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Unit / Ruangan</label>
@@ -225,26 +243,31 @@
                 <!-- RESULT CONTAINER (Hidden by default) -->
                 <div id="absensi-result-container" class="hidden animate-slide-up text-center space-y-4">
                     <button onclick="showAbsensiMenu()" class="mb-2 text-xs font-bold text-slate-500 hover:text-blue-600 flex items-center gap-1"><i class="fa-solid fa-arrow-left"></i> Kembali ke Menu</button>
-                    <div id="result-links-area" class="space-y-3"></div>
+                    
+                    <div id="result-links-area" class="space-y-3">
+                        <!-- Links injected via JS -->
+                    </div>
+                    
                     <div id="no-result-msg" class="hidden p-6 bg-slate-50 border border-slate-200 rounded-2xl text-slate-500 text-sm">
                         <i class="fa-solid fa-clock-rotate-left text-2xl mb-2 block text-slate-300"></i>
                         Hasil rapat belum tersedia atau belum difinalisasi oleh notulis.
                     </div>
                 </div>
+
             </div>
             
             <!-- SUCCESS STATE -->
             <div id="absensi-success" class="hidden text-center py-8 animate-fade-in">
                 <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce"><i class="fa-solid fa-check text-4xl text-green-600"></i></div>
                 <h3 class="text-xl font-bold text-slate-800">Terima Kasih!</h3>
-                <p class="text-slate-500 text-sm mb-6">Kehadiran Anda telah tercatat.</p>
+                <p class="text-slate-500 text-sm mb-6">Kehadiran Anda telah tercatat.<br>Email konfirmasi & link portal telah dikirim.</p>
                 <button onclick="showAbsensiMenu(); document.getElementById('absensi-success').classList.add('hidden'); document.getElementById('absensi-content').classList.remove('hidden');" class="text-sm text-blue-600 hover:underline font-bold">Kembali ke Menu</button>
             </div>
         </div>
         <p class="mt-8 text-[10px] text-slate-400">© 2026 Bagian Administrasi dan Umum</p>
     </div>
 
-    <!-- 3. ADMIN APP -->
+    <!-- 3. ADMIN APP (DASHBOARD) -->
     <div id="app-admin" class="hidden flex w-full h-full overflow-hidden absolute inset-0 z-0">
         <!-- SIDEBAR -->
         <aside id="sidebar" class="hidden md:flex flex-col w-72 h-full glass-card border-r border-white/20 shadow-2xl z-30 transition-transform duration-300 md:translate-x-0 -translate-x-full fixed md:relative bg-white/80 backdrop-blur-md">
@@ -450,7 +473,6 @@
         const mode = urlParams.get('v');
         const meetingId = urlParams.get('id');
 
-        // VARIABLE BARU UNTUK MICROSITE
         let currentPublicMeeting = null;
 
         let signaturePad = null;
@@ -479,7 +501,7 @@
         let totalPages = 1;
         let currentUser = null;
         let currentAttendanceData = []; let currentMeetingTitle = ""; let currentMeetingDate = ""; let currentKeptDocs = [];
-        let currentMeetingId = ""; // Variabel global untuk menyimpan ID rapat saat ini
+        let currentMeetingId = ""; 
         let searchTimeout;
 
         function handleCredentialResponse(response) {
@@ -532,7 +554,7 @@
             if(navBtn) navBtn.classList.add('active');
             if(window.innerWidth < 768) toggleSidebar(false);
             if(page === 'list' || page === 'dashboard' || page === 'write') {
-                loadData(1); // Always reset to page 1 on nav change
+                loadData(1); 
             } else if (page === 'create') resetForm();
             else if (page === 'users') loadUsers();
             else if (page === 'profile') loadProfile();
@@ -608,8 +630,7 @@
             .then(res => res.json()).then(resp => {
                 if(btnRefresh) { btnRefresh.disabled = false; btnRefresh.querySelector('i').classList.remove('fa-spin'); }
                 if(resp.status === 'success') {
-                    allData = resp.data; // Data is now only the current page chunk
-                    // Pagination info from server
+                    allData = resp.data; 
                     if(resp.pagination) {
                         totalItems = resp.pagination.totalItems;
                         totalPages = resp.pagination.totalPages;
@@ -617,8 +638,8 @@
                     }
                     
                     renderPaginatedTable();
-                    renderWriteTable(); // Reuse data for write table (simplification)
-                    renderDashboard(totalItems); // Use totalItems for dashboard count
+                    renderWriteTable(); 
+                    renderDashboard(totalItems); 
                 } else if(resp.status === 'maintenance') {
                     document.getElementById('view-login').style.display = 'none';
                     document.getElementById('app-admin').classList.add('hidden');
@@ -635,8 +656,8 @@
         function handleFilter() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                loadData(1); // Reload from page 1 with new search term
-            }, 500); // Debounce 500ms
+                loadData(1); 
+            }, 500); 
         }
 
         function renderPaginatedTable() {
@@ -662,7 +683,6 @@
                 let linkHtml = `<span class="text-slate-600 font-bold text-xs cursor-default" title="Belum Final">${item.agenda} <i class="fa-solid fa-lock ml-1 text-slate-300"></i></span>`;
                 let statusBadge = `<span class="bg-amber-100 text-amber-700 text-[10px] px-2 py-1 rounded font-bold border border-amber-200">Terjadwal</span>`;
                 
-                // --- PDF LINK LOGIC ---
                 let pdfUrl = '#';
                 let pdfBtnClass = 'text-slate-200 cursor-not-allowed pointer-events-none';
                 let pdfTarget = '';
@@ -672,7 +692,6 @@
                     linkHtml = `<a href="${item.linkFinal}" target="_blank" class="text-blue-600 font-bold hover:underline flex items-center gap-1 text-sm">${item.agenda} <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>`;
                     statusBadge = `<span class="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-1 rounded font-bold border border-indigo-200">Final (Doc)</span>`;
                     
-                    // Construct PDF Link
                     const match = item.linkFinal.match(/\/d\/(.+?)\/|id=(.+?)(&|$)/);
                     const fileId = match ? (match[1] || match[2]) : null;
                     if(fileId) {
@@ -686,16 +705,14 @@
                 if(canEdit) {
                     actions = `<div class="flex items-center justify-center gap-2 text-lg">
                         <button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-blue-500" title="Link Absen"><i class="fa-regular fa-copy"></i></button>
-                        <button onclick="showQrCode('${item.id}')" class="text-slate-400 hover:text-slate-800" title="QR Absen Untuk peserta rapat"><i class="fa-solid fa-qrcode"></i></button>
+                        <button onclick="showQrCode('${item.id}')" class="text-slate-400 hover:text-slate-800" title="QR Absen"><i class="fa-solid fa-qrcode"></i></button>
                         <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}', this)" class="text-slate-400 hover:text-green-600" title="Hadir"><i class="fa-solid fa-users"></i></button>
                         <button onclick="generateDoc('${item.id}', this)" class="text-slate-400 hover:text-blue-800" title="Generate Doc"><i class="fa-solid fa-file-word"></i></button>
                         
-                        <!-- PDF BUTTON ADDED HERE -->
                         <a href="${pdfUrl}" target="${pdfTarget}" class="${pdfBtnClass}" title="Download PDF"><i class="fa-solid fa-file-pdf"></i></a>
 
                         <button onclick="showQrResult('${item.linkFinal}')" class="${hasFinal ? 'text-slate-400 hover:text-purple-600' : 'text-slate-200 cursor-not-allowed'}" ${!hasFinal ? 'disabled' : ''} title="QR Hasil"><i class="fa-solid fa-qrcode text-purple-600"></i></button>
                         
-                        <!-- BUTTON BROADCAST (NEW - EMAIL & WA) -->
                         <button onclick="broadcastResult('${item.id}', this)" class="${hasFinal ? 'text-slate-400 hover:text-blue-600' : 'text-slate-200 cursor-not-allowed'}" ${!hasFinal ? 'disabled' : ''} title="Broadcast Email"><i class="fa-solid fa-paper-plane"></i></button>
                         
                         <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 text-xs font-bold border border-blue-100 bg-blue-50 px-2 py-1 rounded ml-1">Edit</button>
@@ -716,7 +733,6 @@
                 const canEdit = (isAdmin || isOwner);
                 let title = item.agenda;
                 
-                // Re-calculate PDF Logic for Mobile loop
                 let pdfUrl = '#';
                 let pdfBtnClass = 'text-slate-200 cursor-not-allowed pointer-events-none';
                 let pdfTarget = '';
@@ -728,7 +744,7 @@
                     const fileId = match ? (match[1] || match[2]) : null;
                     if(fileId) {
                         pdfUrl = `https://docs.google.com/document/d/${fileId}/export?format=pdf`;
-                        pdfBtnClass = 'text-red-500'; // Red specific for mobile to stand out or match icons
+                        pdfBtnClass = 'text-red-500'; 
                         pdfTarget = '_blank';
                     }
                 }
@@ -744,7 +760,6 @@
                                 <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}', this)"><i class="fa-solid fa-users"></i></button>
                                 <button onclick="generateDoc('${item.id}', this)"><i class="fa-solid fa-file-word"></i></button>
                                 
-                                <!-- PDF Mobile -->
                                 <a href="${pdfUrl}" target="${pdfTarget}" class="${pdfBtnClass}"><i class="fa-solid fa-file-pdf"></i></a>
 
                                 <button onclick="showQrResult('${item.linkFinal}')" ${!hasFinal ? 'disabled class="text-slate-200"' : 'class="text-purple-600"'}><i class="fa-solid fa-qrcode"></i></button>
@@ -802,7 +817,7 @@
         
         function showQrCode(id) { 
             document.getElementById('modal-qrcode').classList.remove('hidden'); 
-            document.getElementById('qr-modal-title').innerText = "QR Absensi dan Hasil rapat";
+            document.getElementById('qr-modal-title').innerText = "QR Absensi";
             document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(window.location.origin + window.location.pathname + '?v=absensi&id=' + id)}`; 
         }
         
@@ -815,13 +830,12 @@
 
         function closeQrModal() { document.getElementById('modal-qrcode').classList.add('hidden'); }
         
-        // --- UPDATED: VIEW ATTENDANCE FUNCTION ---
+        // --- VIEW ATTENDANCE FUNCTION ---
         function viewAttendance(id, title, date, time, btn) {
              setBtnLoading(btn, true);
              currentMeetingTitle = title;
-             currentMeetingId = id; // Update ID agar bisa diakses oleh fungsi download
+             currentMeetingId = id; 
              
-             // Update judul modal dengan judul rapat
              const modalTitle = document.getElementById('att-modal-title');
              if(modalTitle) modalTitle.innerText = title + ' (' + date + ')';
 
@@ -829,7 +843,6 @@
              const tbody = document.getElementById('att-table-body'); 
              tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500"><div class="flex flex-col items-center justify-center gap-2"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-blue-500"></i><span>Sedang memuat data kehadiran...</span></div></td></tr>';
              
-             // Sembunyikan tombol download saat loading
              document.getElementById('btn-download-att').classList.add('hidden');
 
              fetch(API_URL, { 
@@ -878,7 +891,7 @@
 
         function closeAttendanceModal() { document.getElementById('modal-attendance').classList.add('hidden'); }
 
-        // --- UPDATED: BACKEND GENERATION METHOD ---
+        // --- BACKEND GENERATION METHOD ---
         function downloadAttendanceWithImages() {
             const btn = document.getElementById('btn-download-att');
             const id = currentMeetingId; 
@@ -893,7 +906,7 @@
             fetch(API_URL, { 
                 method: 'POST', 
                 body: JSON.stringify({ 
-                    action: 'generateAttendanceExcel', // Memanggil fungsi di backend gas.gs
+                    action: 'generateAttendanceExcel', 
                     meetingId: id
                 }) 
             })
@@ -901,7 +914,6 @@
             .then(resp => {
                 setBtnLoading(btn, false);
                 if(resp.status === 'success') {
-                    // Buka link download yang diberikan Google Drive
                     window.open(resp.downloadUrl, '_blank');
                     Toast.fire({ icon: 'success', title: 'File Excel sedang didownload...' });
                 } else {
@@ -1507,6 +1519,98 @@
             }
         }
 
+        // --- GOOGLE AUTO-FILL HANDLER (ABSENSI) ---
+        function handleAbsensiAutoFill(response) {
+            const payload = parseJwt(response.credential);
+            const email = payload.email;
+            const name = payload.name;
+
+            // Isi Data Dasar dari Google
+            document.getElementById('abs-nama').value = name;
+            document.getElementById('abs-email').value = email;
+
+            // Show Loading di Button/Form
+            Swal.fire({ title: 'Mengecek Data...', text: 'Mencari riwayat kehadiran Anda.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            // Cek Database untuk Unit & HP
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'checkParticipantData', email: email })
+            })
+            .then(r => r.json())
+            .then(resp => {
+                Swal.close();
+                if (resp.status === 'success' && resp.found) {
+                    const d = resp.data;
+                    document.getElementById('abs-phone').value = d.phone || "";
+                    
+                    const unitSelect = document.getElementById('abs-unit');
+                    const unitLainnya = document.getElementById('abs-unit-lainnya');
+                    const unitVal = d.unit || "";
+                    
+                    // Set Unit Dropdown
+                    let foundUnit = false;
+                    for (let i=0; i<unitSelect.options.length; i++) {
+                        if (unitSelect.options[i].value === unitVal) {
+                            unitSelect.selectedIndex = i;
+                            foundUnit = true;
+                            unitLainnya.classList.add('hidden');
+                            break;
+                        }
+                    }
+                    if (!foundUnit && unitVal !== "") {
+                        unitSelect.value = "Lainnya";
+                        unitLainnya.classList.remove('hidden');
+                        unitLainnya.value = unitVal;
+                    }
+
+                    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+                    Toast.fire({ icon: 'success', title: 'Data ditemukan & diisi otomatis' });
+                } else {
+                    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+                    Toast.fire({ icon: 'info', title: 'Silakan lengkapi Unit & No HP' });
+                }
+            })
+            .catch(err => {
+                Swal.close();
+                console.error(err);
+            });
+        }
+
+        // --- GOOGLE LOGIN HANDLER (ADMIN) ---
+        function handleCredentialResponse(response) {
+            const payload = parseJwt(response.credential);
+            loginBackend(payload);
+        }
+        function parseJwt(token) { return JSON.parse(decodeURIComponent(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''))); }
+        
+        function loginBackend(user) {
+            toggleLoader(true);
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', email: user.email, name: user.name }) })
+            .then(res=>res.json()).then(resp => {
+                toggleLoader(false);
+                if(resp.status === 'success') {
+                    currentUser = resp.user;
+                    localStorage.setItem('rsud_user_pro_v2', JSON.stringify(currentUser));
+                    if(resp.maintenance && currentUser.role !== 'ADMIN') {
+                        document.getElementById('view-login').style.display = 'none';
+                        document.getElementById('view-maintenance').classList.remove('hidden');
+                    } else {
+                        initApp();
+                    }
+                } else if(resp.status === 'maintenance') {
+                     document.getElementById('view-login').style.display = 'none';
+                     document.getElementById('view-maintenance').classList.remove('hidden');
+                } else Swal.fire('Gagal', resp.message, 'error');
+            });
+        }
+
+        function handleAbsensiUnitChange(sel) {
+            const unitLainnya = document.getElementById('abs-unit-lainnya');
+            if (sel.value === 'Lainnya') unitLainnya.classList.remove('hidden');
+            else unitLainnya.classList.add('hidden');
+        }
+
         async function submitAbsensi(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
@@ -1574,27 +1678,17 @@
         document.addEventListener('DOMContentLoaded', () => {
              const savedUser = localStorage.getItem('rsud_user_pro_v2');
              if(mode === 'absensi' && meetingId) {
-                document.getElementById('view-login').style.display = 'none'; 
                 document.getElementById('view-login').classList.add('hidden');
                 document.getElementById('app-absensi').classList.remove('hidden');
                 loadMeetingInfo(meetingId);
-             } 
-             else if(savedUser) { 
-                try { currentUser = JSON.parse(savedUser); initApp(); } 
-                catch(e) { localStorage.removeItem('rsud_user_pro_v2'); }
-             }
-             if(window.tsParticles) {
-                 tsParticles.load("tsparticles", {
-                    fpsLimit: 60,
-                    interactivity: { events: { onHover: { enable: true, mode: "grab" }, onClick: { enable: true, mode: "push" }, resize: true }, modes: { grab: { distance: 140, links: { opacity: 1 } }, push: { quantity: 4 } } },
-                    particles: { color: { value: "#ffffff" }, links: { color: "#ffffff", distance: 150, enable: true, opacity: 0.2, width: 1 }, collisions: { enable: true }, move: { direction: "none", enable: true, outMode: "bounce", random: false, speed: 1, straight: false }, number: { density: { enable: true, area: 800 }, value: 60 }, opacity: { value: 0.3 }, shape: { type: "circle" }, size: { random: true, value: 3 } },
-                    detectRetina: true, background: { color: "transparent" }
-                 });
+             } else if(savedUser) { 
+                 try { currentUser = JSON.parse(savedUser); initApp(); } 
+                 catch(e) { localStorage.removeItem('rsud_user_pro_v2'); }
+             } else {
+                 document.getElementById('view-login').classList.remove('hidden');
              }
              if(window.VanillaTilt) { VanillaTilt.init(document.querySelector("#login-card"), { max: 10, speed: 400, glare: true, "max-glare": 0.3, scale: 1.02 }); }
         });
     </script>
 </body>
 </html>
-
-
