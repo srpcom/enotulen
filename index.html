@@ -136,7 +136,7 @@
                     <h2 class="text-4xl font-extrabold text-slate-800 mb-2 tracking-tight">E Notulen</h2>
                     <p class="text-slate-600 text-sm mb-10 leading-relaxed font-medium">Sistem Informasi Manajemen Notulen Rapat<br><span class="font-bold text-blue-600 text-base">RSUD dr. R. Koesma Tuban</span></p>
                     
-                    <!-- CONTAINER TOMBOL GOOGLE LOGIN (RENDER VIA JS) -->
+                    <!-- CONTAINER TOMBOL GOOGLE LOGIN ADMIN (RENDER VIA JS) -->
                     <div class="flex justify-center transform transition hover:scale-105 active:scale-95 duration-200">
                         <div id="google-login-btn"></div>
                     </div>
@@ -205,7 +205,7 @@
                     
                     <!-- TOMBOL AUTO FILL GOOGLE (RENDER VIA JS) -->
                     <div id="visitor-google-btn-container" class="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-xl text-center">
-                        <p class="text-xs text-slate-500 mb-3">Sudah pernah mengisi sebelumnya?</p>
+                        <p class="text-xs text-slate-500 mb-3">Isi otomatis dengan Akun Google?</p>
                         <div class="flex justify-center">
                             <div id="google-visitor-btn"></div>
                         </div>
@@ -544,14 +544,16 @@
             });
         }
         
-        // --- NEW: VISITOR AUTO FILL HANDLER ---
+        // --- NEW: VISITOR AUTO FILL HANDLER (LOGIKA BARU) ---
         // Fungsi ini HANYA mengisi form, TIDAK melakukan login admin/app
         function handleVisitorCredentialResponse(response) {
             const payload = JSON.parse(decodeURIComponent(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
             
-            // 1. Fill Name & Email
-            document.getElementById('abs-nama').value = payload.name;
-            document.getElementById('abs-email').value = payload.email;
+            // Simpan Email sementara, jangan isi Nama dulu sebelum cek DB
+            const email = payload.email;
+            const googleName = payload.name;
+            
+            document.getElementById('abs-email').value = email;
             
             const msgEl = document.getElementById('visitor-msg');
             msgEl.classList.remove('hidden');
@@ -560,12 +562,16 @@
             // 2. Fetch History from Backend (Cari data sebelumnya di database)
             fetch(API_URL, { 
                 method: 'POST', 
-                body: JSON.stringify({ action: 'checkVisitorHistory', email: payload.email }) 
+                body: JSON.stringify({ action: 'checkVisitorHistory', email: email }) 
             })
             .then(res => res.json())
             .then(resp => {
                 if(resp.status === 'success' && resp.data) {
                     const h = resp.data;
+                    
+                    // PRIORITAS 1: NAMA DARI DATABASE
+                    document.getElementById('abs-nama').value = h.nama || googleName;
+                    
                     document.getElementById('abs-phone').value = h.hp || "";
                     
                     const unitSel = document.getElementById('abs-unit');
@@ -588,14 +594,19 @@
                         unitLain.value = h.unit;
                     }
 
-                    msgEl.innerText = "Data otomatis terisi!";
+                    msgEl.innerText = "Data otomatis terisi dari Database!";
                     setTimeout(() => msgEl.classList.add('hidden'), 3000);
                 } else {
+                    // PRIORITAS 2: DATA BARU (DB KOSONG) -> PAKAI NAMA GOOGLE
+                    document.getElementById('abs-nama').value = googleName;
+                    
                     msgEl.innerText = "Data baru. Silakan lengkapi form.";
                     setTimeout(() => msgEl.classList.add('hidden'), 3000);
                 }
             })
             .catch(() => {
+                // Fallback jika error -> Pakai Nama Google
+                document.getElementById('abs-nama').value = googleName;
                 msgEl.innerText = "Gagal mengambil history.";
             });
         }
