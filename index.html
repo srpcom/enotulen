@@ -125,7 +125,7 @@
         initTheme();
     </script>
 
-    <!-- 1. VIEW LOGIN -->
+    <!-- 1. VIEW LOGIN (ADMIN) -->
     <div id="view-login" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 transition-opacity duration-300 overflow-hidden">
         <div id="tsparticles"></div>
         <div class="z-10 w-full max-w-md">
@@ -200,16 +200,63 @@
                 <!-- FORM ABSENSI (Hidden by default) -->
                 <div id="absensi-form-container" class="hidden animate-slide-up">
                     <button onclick="showAbsensiMenu()" class="mb-4 text-xs font-bold text-slate-500 hover:text-blue-600 flex items-center gap-1"><i class="fa-solid fa-arrow-left"></i> Kembali ke Menu</button>
+                    
+                    <!-- TOMBOL AUTO FILL GOOGLE -->
+                    <div id="visitor-google-btn-container" class="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-xl text-center">
+                        <p class="text-xs text-slate-500 mb-3">Sudah pernah mengisi sebelumnya?</p>
+                        <div id="g_id_onload_visitor"
+                             data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com"
+                             data-context="use"
+                             data-ux_mode="popup"
+                             data-callback="handleVisitorCredentialResponse"
+                             data-auto_prompt="false">
+                        </div>
+                        <div class="g_id_signin"
+                             data-type="standard"
+                             data-shape="pill"
+                             data-theme="outline"
+                             data-text="continue_with"
+                             data-size="medium"
+                             data-logo_alignment="left"
+                             data-width="250">
+                        </div>
+                        <p id="visitor-msg" class="text-[10px] text-blue-600 font-bold mt-2 hidden animate-pulse"></p>
+                    </div>
+
                     <form id="formAbsensi" onsubmit="submitAbsensi(event)" class="space-y-4">
                         <input type="hidden" id="abs-meeting-id">
-                        <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Lengkap</label><input type="text" id="abs-nama" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Nama beserta gelar..."></div>
-                        <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email</label><input type="email" id="abs-email" class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500" placeholder="user@contoh.com"></div>
-                        <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nomor HP / WhatsApp</label><input type="tel" id="abs-phone" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500" placeholder="08xx / 628xx"></div>
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Lengkap</label>
+                            <input type="text" id="abs-nama" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Nama beserta gelar...">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email <span class="text-slate-400 font-normal lowercase">(opsional)</span></label>
+                            <input type="email" id="abs-email" class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Untuk menerima bukti kehadiran...">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nomor HP / WhatsApp</label>
+                            <input type="tel" id="abs-phone" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500" placeholder="08xx / 628xx">
+                        </div>
+                        
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Unit / Ruangan</label>
-                            <select id="abs-unit" onchange="handleAbsensiUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500"><option value="">-- Pilih Unit --</option><option value="Direksi">Direksi</option><option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option><option value="Bagian Keuangan">Bagian Keuangan</option><option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option><option value="Bidang Keperawatan">Bidang Keperawatan</option><option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option><option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option><option value="Lainnya">Lainnya</option></select>
+                            <select id="abs-unit" onchange="handleAbsensiUnitChange(this)" required class="glass-input w-full rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500">
+                                <option value="">-- Pilih Unit --</option>
+                                <option value="Direksi">Direksi</option>
+                                <option value="Bagian Administrasi dan Umum">Bagian Administrasi dan Umum</option>
+                                <option value="Bagian Keuangan">Bagian Keuangan</option>
+                                <option value="Bagian Program dan Pelaporan">Bagian Program dan Pelaporan</option>
+                                <option value="Bidang Keperawatan">Bidang Keperawatan</option>
+                                <option value="Bidang Pelayanan Medik">Bidang Pelayanan Medik</option>
+                                <option value="Bidang Pelayanan Penunjang">Bidang Pelayanan Penunjang</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
                             <input type="text" id="abs-unit-lainnya" class="glass-input w-full rounded-xl px-4 py-3 text-sm mt-3 hidden animate-fade-in" placeholder="Tulis nama unit...">
                         </div>
+                        
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Tanda Tangan Digital</label>
                             <div class="relative border-2 border-dashed border-slate-300 rounded-xl overflow-hidden bg-white touch-none h-40 w-full">
@@ -218,6 +265,7 @@
                                 <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none text-slate-300 text-sm font-bold opacity-50 select-none">Area Tanda Tangan</div>
                             </div>
                         </div>
+                        
                         <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-blue-500/30 transform active:scale-95 transition"><i class="fa-solid fa-check-circle mr-2"></i> Konfirmasi Kehadiran</button>
                     </form>
                 </div>
@@ -237,7 +285,7 @@
             <div id="absensi-success" class="hidden text-center py-8 animate-fade-in">
                 <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce"><i class="fa-solid fa-check text-4xl text-green-600"></i></div>
                 <h3 class="text-xl font-bold text-slate-800">Terima Kasih!</h3>
-                <p class="text-slate-500 text-sm mb-6">Kehadiran Anda telah tercatat.</p>
+                <p class="text-slate-500 text-sm mb-6">Kehadiran Anda telah tercatat.<br>Bukti kehadiran telah dikirim ke email Anda (jika diisi).</p>
                 <button onclick="showAbsensiMenu(); document.getElementById('absensi-success').classList.add('hidden'); document.getElementById('absensi-content').classList.remove('hidden');" class="text-sm text-blue-600 hover:underline font-bold">Kembali ke Menu</button>
             </div>
         </div>
@@ -504,6 +552,58 @@
                      document.getElementById('view-login').style.display = 'none';
                      document.getElementById('view-maintenance').classList.remove('hidden');
                 } else Swal.fire('Gagal', resp.message, 'error');
+            });
+        }
+        
+        // --- NEW: VISITOR AUTO FILL HANDLER ---
+        function handleVisitorCredentialResponse(response) {
+            const payload = JSON.parse(decodeURIComponent(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+            
+            // 1. Fill Name & Email
+            document.getElementById('abs-nama').value = payload.name;
+            document.getElementById('abs-email').value = payload.email;
+            
+            const msgEl = document.getElementById('visitor-msg');
+            msgEl.classList.remove('hidden');
+            msgEl.innerText = "Mencari data history...";
+
+            // 2. Fetch History from Backend
+            fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'checkVisitorHistory', email: payload.email }) 
+            })
+            .then(res => res.json())
+            .then(resp => {
+                if(resp.status === 'success' && resp.data) {
+                    const h = resp.data;
+                    document.getElementById('abs-phone').value = h.hp || "";
+                    
+                    const unitSel = document.getElementById('abs-unit');
+                    const unitLain = document.getElementById('abs-unit-lainnya');
+                    let found = false;
+                    for(let i=0; i<unitSel.options.length; i++) {
+                        if(unitSel.options[i].value === h.unit) {
+                            unitSel.selectedIndex = i;
+                            found = true;
+                            unitLain.classList.add('hidden');
+                            break;
+                        }
+                    }
+                    if(!found && h.unit) {
+                        unitSel.value = "Lainnya";
+                        unitLain.classList.remove('hidden');
+                        unitLain.value = h.unit;
+                    }
+
+                    msgEl.innerText = "Data otomatis terisi!";
+                    setTimeout(() => msgEl.classList.add('hidden'), 3000);
+                } else {
+                    msgEl.innerText = "Data baru. Silakan lengkapi form.";
+                    setTimeout(() => msgEl.classList.add('hidden'), 3000);
+                }
+            })
+            .catch(() => {
+                msgEl.innerText = "Gagal mengambil history.";
             });
         }
 
@@ -1596,5 +1696,3 @@
     </script>
 </body>
 </html>
-
-
