@@ -556,6 +556,7 @@
         }
         
         // --- NEW: VISITOR AUTO FILL HANDLER ---
+        // Fungsi ini HANYA mengisi form, TIDAK melakukan login admin/app
         function handleVisitorCredentialResponse(response) {
             const payload = JSON.parse(decodeURIComponent(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
             
@@ -567,7 +568,7 @@
             msgEl.classList.remove('hidden');
             msgEl.innerText = "Mencari data history...";
 
-            // 2. Fetch History from Backend
+            // 2. Fetch History from Backend (Cari data sebelumnya di database)
             fetch(API_URL, { 
                 method: 'POST', 
                 body: JSON.stringify({ action: 'checkVisitorHistory', email: payload.email }) 
@@ -581,6 +582,8 @@
                     const unitSel = document.getElementById('abs-unit');
                     const unitLain = document.getElementById('abs-unit-lainnya');
                     let found = false;
+                    
+                    // Coba cocokkan unit dengan opsi select
                     for(let i=0; i<unitSel.options.length; i++) {
                         if(unitSel.options[i].value === h.unit) {
                             unitSel.selectedIndex = i;
@@ -589,6 +592,7 @@
                             break;
                         }
                     }
+                    // Jika unit tidak ada di opsi (custom), pilih 'Lainnya' dan isi text input
                     if(!found && h.unit) {
                         unitSel.value = "Lainnya";
                         unitLain.classList.remove('hidden');
