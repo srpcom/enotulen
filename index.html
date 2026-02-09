@@ -34,8 +34,11 @@
                 extend: {
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
                     colors: { glass: { light: 'rgba(255, 255, 255, 0.85)', dark: 'rgba(30, 41, 59, 0.85)' } },
-                    animation: { 'fade-in': 'fadeIn 0.5s ease-out' },
-                    keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
+                    animation: { 'fade-in': 'fadeIn 0.5s ease-out', 'slide-up': 'slideUp 0.5s ease-out' },
+                    keyframes: { 
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                    }
                 }
             }
         }
@@ -102,6 +105,7 @@
 <body class="h-screen flex overflow-hidden text-slate-800 relative">
 
     <script>
+        // GANTI URL INI DENGAN URL DEPLOYMENT TERBARU ANDA
         const API_URL = "https://script.google.com/macros/s/AKfycbzj1mWjE3EC2KmtKbaHoz8yNEcnNFffDKXJ2xQg0mAKsSBB9QWGtIfwDw65z0OnnHWV/exec"; 
         const CLIENT_ID = "783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com";
         const SUPER_ADMIN_EMAIL = "syamsul18782@gmail.com";
@@ -154,7 +158,7 @@
         <button onclick="logout()" class="mt-8 text-blue-600 hover:underline font-bold text-sm">Logout / Kembali</button>
     </div>
 
-    <!-- 2. VIEW ABSENSI (PUBLIC MICROSITE) -->
+    <!-- 2. VIEW ABSENSI (PORTAL/MICROSITE) -->
     <div id="app-absensi" class="hidden absolute inset-0 z-40 w-full h-full overflow-y-auto p-4 flex flex-col items-center bg-slate-50/50 backdrop-blur-sm">
          <div class="glass-card max-w-md w-full p-6 rounded-3xl shadow-xl border-t border-white/60 animate-fade-in my-auto bg-white/80">
             <div class="text-center mb-6">
@@ -166,13 +170,13 @@
             <div id="absensi-loading" class="text-center py-4"><i class="fa-solid fa-circle-notch fa-spin text-blue-600"></i> Memuat Info Rapat...</div>
             
             <div id="absensi-content" class="hidden">
-                <!-- HEADER INFO -->
+                <!-- HEADER INFO RAPAT -->
                 <div class="bg-blue-50/50 p-4 rounded-xl mb-6 border border-blue-100 text-center">
                     <h3 id="abs-agenda" class="font-bold text-lg text-slate-800 leading-tight mb-1">...</h3>
                     <p class="text-xs text-slate-500"><i class="fa-regular fa-calendar mr-1"></i> <span id="abs-tanggal">...</span> &bull; <i class="fa-regular fa-clock mr-1"></i> <span id="abs-waktu">...</span></p>
                 </div>
 
-                <!-- MENU UTAMA (Pilihan) -->
+                <!-- MENU UTAMA -->
                 <div id="absensi-menu" class="grid grid-cols-1 gap-4 animate-fade-in">
                     <button onclick="openAbsensiForm()" class="group relative overflow-hidden bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all text-left flex items-center gap-4">
                         <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition"><i class="fa-solid fa-user-pen"></i></div>
@@ -187,7 +191,7 @@
                         <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition"><i class="fa-solid fa-folder-open"></i></div>
                         <div>
                             <h4 class="font-bold text-slate-800 group-hover:text-emerald-700 transition">Lihat Hasil Rapat</h4>
-                            <p class="text-xs text-slate-500">Notulen PDF & Materi Dokumen.</p>
+                            <p class="text-xs text-slate-500">Unduh Notulen & Materi.</p>
                         </div>
                         <i class="fa-solid fa-chevron-right ml-auto text-slate-300"></i>
                     </button>
@@ -221,17 +225,12 @@
                 <!-- RESULT CONTAINER (Hidden by default) -->
                 <div id="absensi-result-container" class="hidden animate-slide-up text-center space-y-4">
                     <button onclick="showAbsensiMenu()" class="mb-2 text-xs font-bold text-slate-500 hover:text-blue-600 flex items-center gap-1"><i class="fa-solid fa-arrow-left"></i> Kembali ke Menu</button>
-                    
-                    <div id="result-links-area" class="space-y-3">
-                        <!-- Links injected via JS -->
-                    </div>
-                    
+                    <div id="result-links-area" class="space-y-3"></div>
                     <div id="no-result-msg" class="hidden p-6 bg-slate-50 border border-slate-200 rounded-2xl text-slate-500 text-sm">
                         <i class="fa-solid fa-clock-rotate-left text-2xl mb-2 block text-slate-300"></i>
                         Hasil rapat belum tersedia atau belum difinalisasi oleh notulis.
                     </div>
                 </div>
-
             </div>
             
             <!-- SUCCESS STATE -->
@@ -246,7 +245,6 @@
     </div>
 
     <!-- 3. ADMIN APP -->
-    <!-- ... (Sama seperti sebelumnya) ... -->
     <div id="app-admin" class="hidden flex w-full h-full overflow-hidden absolute inset-0 z-0">
         <!-- SIDEBAR -->
         <aside id="sidebar" class="hidden md:flex flex-col w-72 h-full glass-card border-r border-white/20 shadow-2xl z-30 transition-transform duration-300 md:translate-x-0 -translate-x-full fixed md:relative bg-white/80 backdrop-blur-md">
@@ -696,7 +694,10 @@
                         <a href="${pdfUrl}" target="${pdfTarget}" class="${pdfBtnClass}" title="Download PDF"><i class="fa-solid fa-file-pdf"></i></a>
 
                         <button onclick="showQrResult('${item.linkFinal}')" class="${hasFinal ? 'text-slate-400 hover:text-purple-600' : 'text-slate-200 cursor-not-allowed'}" ${!hasFinal ? 'disabled' : ''} title="QR Hasil"><i class="fa-solid fa-qrcode text-purple-600"></i></button>
-                        <button onclick="broadcastResult('${item.id}', this)" class="text-slate-400 hover:text-green-600" title="Broadcast"><i class="fa-brands fa-whatsapp"></i></button>
+                        
+                        <!-- BUTTON BROADCAST (NEW - EMAIL & WA) -->
+                        <button onclick="broadcastResult('${item.id}', this)" class="${hasFinal ? 'text-slate-400 hover:text-blue-600' : 'text-slate-200 cursor-not-allowed'}" ${!hasFinal ? 'disabled' : ''} title="Broadcast Email"><i class="fa-solid fa-paper-plane"></i></button>
+                        
                         <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 text-xs font-bold border border-blue-100 bg-blue-50 px-2 py-1 rounded ml-1">Edit</button>
                         ${isAdmin ? `<button onclick="deleteNotulen('${item.id}', this)" class="text-red-500 hover:text-red-700 ml-1"><i class="fa-solid fa-trash"></i></button>` : ''}
                     </div>`;
@@ -747,7 +748,7 @@
                                 <a href="${pdfUrl}" target="${pdfTarget}" class="${pdfBtnClass}"><i class="fa-solid fa-file-pdf"></i></a>
 
                                 <button onclick="showQrResult('${item.linkFinal}')" ${!hasFinal ? 'disabled class="text-slate-200"' : 'class="text-purple-600"'}><i class="fa-solid fa-qrcode"></i></button>
-                                <button onclick="broadcastResult('${item.id}', this)" class="text-green-600"><i class="fa-brands fa-whatsapp"></i></button>
+                                <button onclick="broadcastResult('${item.id}', this)" ${!hasFinal ? 'disabled class="text-slate-200"' : 'class="text-blue-600"'}><i class="fa-solid fa-paper-plane"></i></button>
                              </div>
                              <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-xs font-bold text-blue-600 border px-3 py-1 rounded">Edit</button>
                          </div>
@@ -928,13 +929,42 @@
             });
         }
         
+        // FUNGSI BROADCAST RESULT (SEND EMAIL)
         function broadcastResult(id, btn) {
             const item = allData.find(x => x.id === id);
             if (!item) return;
             if (!item.linkFinal || item.linkFinal.length < 5) { Swal.fire('Belum Ada Dokumen', 'Harap generate dokumen laporan resmi terlebih dahulu.', 'warning'); return; }
-            const absensiLink = `${window.location.origin}${window.location.pathname}?v=absensi&id=${id}`;
-            const message = `*NOTULA*\n` + `Rapat          : ${item.agenda}\n` + `Hari/Tanggal   : ${item.displayTanggal}\n` + `Waktu Rapat    : ${item.waktu}\n` + `Hasil Rapat    : ${item.linkFinal}\n` + `Link Absensi   : ${absensiLink}`;
-            const url = `https://wa.me/?text=${encodeURIComponent(message)}`; window.open(url, '_blank');
+            
+            Swal.fire({
+                title: 'Kirim Broadcast Email?',
+                text: "Sistem akan mengirimkan Link Portal Hasil Rapat (bukan file langsung) ke email seluruh peserta yang hadir.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Kirim Email'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    setBtnLoading(btn, true);
+                    fetch(API_URL, { 
+                        method: 'POST', 
+                        body: JSON.stringify({ action: 'broadcast', meetingId: id }) 
+                    })
+                    .then(r => r.json())
+                    .then(resp => {
+                        setBtnLoading(btn, false);
+                        if(resp.status === 'success') {
+                            Swal.fire('Terkirim!', resp.message, 'success');
+                        } else {
+                            Swal.fire('Gagal', resp.message, 'error');
+                        }
+                    })
+                    .catch(() => {
+                        setBtnLoading(btn, false);
+                        Swal.fire('Error', 'Gagal koneksi ke server.', 'error');
+                    });
+                }
+            })
         }
 
         function deleteNotulen(id, btn) {
@@ -1556,4 +1586,3 @@
     </script>
 </body>
 </html>
-
