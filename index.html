@@ -914,7 +914,15 @@
                     meetingId: id
                 }) 
             })
-            .then(r => r.json())
+            .then(r => {
+                return r.text().then(text => {
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        throw new Error("Respon server bukan JSON: " + text.substring(0, 100) + "...");
+                    }
+                });
+            })
             .then(resp => {
                 setBtnLoading(btn, false);
                 if(resp.status === 'success') {
