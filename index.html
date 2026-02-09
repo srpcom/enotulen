@@ -143,8 +143,8 @@
                     <h2 class="text-4xl font-extrabold text-slate-800 mb-2 tracking-tight">E Notulen</h2>
                     <p class="text-slate-600 text-sm mb-10 leading-relaxed font-medium">Sistem Informasi Manajemen Notulen Rapat<br><span class="font-bold text-blue-600 text-base">RSUD dr. R. Koesma Tuban</span></p>
                     <div class="flex justify-center transform transition hover:scale-105 active:scale-95 duration-200">
-                        <div id="g_id_onload" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-                        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_blue" data-text="sign_in_with" data-shape="pill" data-logo_alignment="left" data-width="280"></div>
+                        <!-- CONTAINER TOMBOL LOGIN ADMIN (RENDER VIA JS) -->
+                        <div id="google-btn-main"></div>
                     </div>
                     <div class="mt-8 flex items-center justify-center gap-2 opacity-80">
                         <a href="help.html" class="text-xs text-blue-600 hover:underline flex items-center gap-1 font-bold bg-white/50 px-3 py-1 rounded-full shadow-sm border border-blue-100"><i class="fa-solid fa-circle-question"></i> Panduan Penggunaan</a>
@@ -208,12 +208,9 @@
                 <div id="absensi-form-container" class="hidden animate-slide-up">
                     <button onclick="showAbsensiMenu()" class="mb-4 text-xs font-bold text-slate-500 hover:text-blue-600 flex items-center gap-1"><i class="fa-solid fa-arrow-left"></i> Kembali ke Menu</button>
                     
-                    <!-- TOMBOL AUTO-FILL GOOGLE (NEW) -->
-                    <!-- Gunakan data-context 'use' agar tidak bentrok dengan login utama -->
-                    <div id="g_id_onload_absensi" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="use" data-ux_mode="popup" data-callback="handleAbsensiAutoFill" data-auto_prompt="false"></div>
-                    
+                    <!-- TOMBOL AUTO-FILL GOOGLE (NEW: Render Via JS agar terpisah dari Login System) -->
                     <div class="mb-5 flex justify-center">
-                        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="continue_with" data-size="large" data-logo_alignment="left" data-width="320"></div>
+                        <div id="google-btn-absensi"></div>
                     </div>
                     
                     <div class="relative flex py-2 items-center mb-4"><div class="flex-grow border-t border-slate-200"></div><span class="flex-shrink-0 mx-4 text-slate-400 text-xs">Atau isi manual</span><div class="flex-grow border-t border-slate-200"></div></div>
@@ -501,7 +498,7 @@
         let totalPages = 1;
         let currentUser = null;
         let currentAttendanceData = []; let currentMeetingTitle = ""; let currentMeetingDate = ""; let currentKeptDocs = [];
-        let currentMeetingId = ""; 
+        let currentMeetingId = ""; // Variabel global untuk menyimpan ID rapat saat ini
         let searchTimeout;
 
         function handleCredentialResponse(response) {
@@ -554,7 +551,7 @@
             if(navBtn) navBtn.classList.add('active');
             if(window.innerWidth < 768) toggleSidebar(false);
             if(page === 'list' || page === 'dashboard' || page === 'write') {
-                loadData(1); 
+                loadData(1); // Always reset to page 1 on nav change
             } else if (page === 'create') resetForm();
             else if (page === 'users') loadUsers();
             else if (page === 'profile') loadProfile();
@@ -630,7 +627,8 @@
             .then(res => res.json()).then(resp => {
                 if(btnRefresh) { btnRefresh.disabled = false; btnRefresh.querySelector('i').classList.remove('fa-spin'); }
                 if(resp.status === 'success') {
-                    allData = resp.data; 
+                    allData = resp.data; // Data is now only the current page chunk
+                    // Pagination info from server
                     if(resp.pagination) {
                         totalItems = resp.pagination.totalItems;
                         totalPages = resp.pagination.totalPages;
@@ -638,8 +636,8 @@
                     }
                     
                     renderPaginatedTable();
-                    renderWriteTable(); 
-                    renderDashboard(totalItems); 
+                    renderWriteTable(); // Reuse data for write table (simplification)
+                    renderDashboard(totalItems); // Use totalItems for dashboard count
                 } else if(resp.status === 'maintenance') {
                     document.getElementById('view-login').style.display = 'none';
                     document.getElementById('app-admin').classList.add('hidden');
@@ -656,8 +654,8 @@
         function handleFilter() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                loadData(1); 
-            }, 500); 
+                loadData(1); // Reload from page 1 with new search term
+            }, 500); // Debounce 500ms
         }
 
         function renderPaginatedTable() {
@@ -683,6 +681,7 @@
                 let linkHtml = `<span class="text-slate-600 font-bold text-xs cursor-default" title="Belum Final">${item.agenda} <i class="fa-solid fa-lock ml-1 text-slate-300"></i></span>`;
                 let statusBadge = `<span class="bg-amber-100 text-amber-700 text-[10px] px-2 py-1 rounded font-bold border border-amber-200">Terjadwal</span>`;
                 
+                // --- PDF LINK LOGIC ---
                 let pdfUrl = '#';
                 let pdfBtnClass = 'text-slate-200 cursor-not-allowed pointer-events-none';
                 let pdfTarget = '';
@@ -692,6 +691,7 @@
                     linkHtml = `<a href="${item.linkFinal}" target="_blank" class="text-blue-600 font-bold hover:underline flex items-center gap-1 text-sm">${item.agenda} <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>`;
                     statusBadge = `<span class="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-1 rounded font-bold border border-indigo-200">Final (Doc)</span>`;
                     
+                    // Construct PDF Link
                     const match = item.linkFinal.match(/\/d\/(.+?)\/|id=(.+?)(&|$)/);
                     const fileId = match ? (match[1] || match[2]) : null;
                     if(fileId) {
@@ -709,10 +709,12 @@
                         <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}', this)" class="text-slate-400 hover:text-green-600" title="Hadir"><i class="fa-solid fa-users"></i></button>
                         <button onclick="generateDoc('${item.id}', this)" class="text-slate-400 hover:text-blue-800" title="Generate Doc"><i class="fa-solid fa-file-word"></i></button>
                         
+                        <!-- PDF BUTTON ADDED HERE -->
                         <a href="${pdfUrl}" target="${pdfTarget}" class="${pdfBtnClass}" title="Download PDF"><i class="fa-solid fa-file-pdf"></i></a>
 
                         <button onclick="showQrResult('${item.linkFinal}')" class="${hasFinal ? 'text-slate-400 hover:text-purple-600' : 'text-slate-200 cursor-not-allowed'}" ${!hasFinal ? 'disabled' : ''} title="QR Hasil"><i class="fa-solid fa-qrcode text-purple-600"></i></button>
                         
+                        <!-- BUTTON BROADCAST (NEW - EMAIL & WA) -->
                         <button onclick="broadcastResult('${item.id}', this)" class="${hasFinal ? 'text-slate-400 hover:text-blue-600' : 'text-slate-200 cursor-not-allowed'}" ${!hasFinal ? 'disabled' : ''} title="Broadcast Email"><i class="fa-solid fa-paper-plane"></i></button>
                         
                         <button onclick="editNotulen('${encodeURIComponent(JSON.stringify(item))}')" class="text-blue-600 text-xs font-bold border border-blue-100 bg-blue-50 px-2 py-1 rounded ml-1">Edit</button>
@@ -733,6 +735,7 @@
                 const canEdit = (isAdmin || isOwner);
                 let title = item.agenda;
                 
+                // Re-calculate PDF Logic for Mobile loop
                 let pdfUrl = '#';
                 let pdfBtnClass = 'text-slate-200 cursor-not-allowed pointer-events-none';
                 let pdfTarget = '';
@@ -744,7 +747,7 @@
                     const fileId = match ? (match[1] || match[2]) : null;
                     if(fileId) {
                         pdfUrl = `https://docs.google.com/document/d/${fileId}/export?format=pdf`;
-                        pdfBtnClass = 'text-red-500'; 
+                        pdfBtnClass = 'text-red-500'; // Red specific for mobile to stand out or match icons
                         pdfTarget = '_blank';
                     }
                 }
@@ -760,6 +763,7 @@
                                 <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}', this)"><i class="fa-solid fa-users"></i></button>
                                 <button onclick="generateDoc('${item.id}', this)"><i class="fa-solid fa-file-word"></i></button>
                                 
+                                <!-- PDF Mobile -->
                                 <a href="${pdfUrl}" target="${pdfTarget}" class="${pdfBtnClass}"><i class="fa-solid fa-file-pdf"></i></a>
 
                                 <button onclick="showQrResult('${item.linkFinal}')" ${!hasFinal ? 'disabled class="text-slate-200"' : 'class="text-purple-600"'}><i class="fa-solid fa-qrcode"></i></button>
@@ -1442,7 +1446,8 @@
         function openAbsensiForm() {
             document.getElementById('absensi-menu').classList.add('hidden');
             document.getElementById('absensi-form-container').classList.remove('hidden');
-            setTimeout(resizeCanvas, 100); // Pastikan signature pad ter-resize
+            renderGoogleAbsensiBtn(); // Render tombol Google saat form dibuka
+            setTimeout(resizeCanvas, 100);
         }
 
         function openResult() {
@@ -1605,6 +1610,38 @@
             });
         }
 
+        // --- RENDER GOOGLE BUTTONS DYNAMICALLY ---
+        function renderGoogleLoginBtn() {
+            const container = document.getElementById('google-btn-main');
+            if(container) {
+                container.innerHTML = '';
+                google.accounts.id.initialize({
+                    client_id: CLIENT_ID,
+                    callback: handleCredentialResponse
+                });
+                google.accounts.id.renderButton(
+                    container,
+                    { theme: "filled_blue", size: "large", shape: "pill", width: 280 }
+                );
+            }
+        }
+
+        function renderGoogleAbsensiBtn() {
+            const container = document.getElementById('google-btn-absensi');
+            if(container) {
+                container.innerHTML = '';
+                google.accounts.id.initialize({
+                    client_id: CLIENT_ID,
+                    callback: handleAbsensiAutoFill,
+                    context: "use" // Penting agar textnya "Continue as..." bukan "Sign in"
+                });
+                google.accounts.id.renderButton(
+                    container,
+                    { theme: "outline", size: "large", shape: "pill", width: 320, text: "continue_with" }
+                );
+            }
+        }
+
         function handleAbsensiUnitChange(sel) {
             const unitLainnya = document.getElementById('abs-unit-lainnya');
             if (sel.value === 'Lainnya') unitLainnya.classList.remove('hidden');
@@ -1678,6 +1715,7 @@
         document.addEventListener('DOMContentLoaded', () => {
              const savedUser = localStorage.getItem('rsud_user_pro_v2');
              if(mode === 'absensi' && meetingId) {
+                // MODE ABSENSI: LOAD PORTAL & TOMBOL GOOGLE KHUSUS ABSEN
                 document.getElementById('view-login').classList.add('hidden');
                 document.getElementById('app-absensi').classList.remove('hidden');
                 loadMeetingInfo(meetingId);
@@ -1685,7 +1723,9 @@
                  try { currentUser = JSON.parse(savedUser); initApp(); } 
                  catch(e) { localStorage.removeItem('rsud_user_pro_v2'); }
              } else {
+                 // MODE LOGIN UTAMA: LOAD TOMBOL LOGIN ADMIN
                  document.getElementById('view-login').classList.remove('hidden');
+                 renderGoogleLoginBtn();
              }
              if(window.VanillaTilt) { VanillaTilt.init(document.querySelector("#login-card"), { max: 10, speed: 400, glare: true, "max-glare": 0.3, scale: 1.02 }); }
         });
