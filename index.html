@@ -686,7 +686,7 @@
                 if(canEdit) {
                     actions = `<div class="flex items-center justify-center gap-2 text-lg">
                         <button onclick="copyAbsensiLink('${item.id}')" class="text-slate-400 hover:text-blue-500" title="Link Absen"><i class="fa-regular fa-copy"></i></button>
-                        <button onclick="showQrCode('${item.id}')" class="text-slate-400 hover:text-slate-800" title="QR Absen"><i class="fa-solid fa-qrcode"></i></button>
+                        <button onclick="showQrCode('${item.id}')" class="text-slate-400 hover:text-slate-800" title="QR Absen Untuk peserta rapat"><i class="fa-solid fa-qrcode"></i></button>
                         <button onclick="viewAttendance('${item.id}', '${item.agenda}', '${item.displayTanggal}', '${item.waktu}', this)" class="text-slate-400 hover:text-green-600" title="Hadir"><i class="fa-solid fa-users"></i></button>
                         <button onclick="generateDoc('${item.id}', this)" class="text-slate-400 hover:text-blue-800" title="Generate Doc"><i class="fa-solid fa-file-word"></i></button>
                         
@@ -1596,4 +1596,5 @@
     </script>
 </body>
 </html>
+
 
