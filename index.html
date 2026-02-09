@@ -135,10 +135,12 @@
                     <img src="https://raw.githubusercontent.com/srpcom/enotulen/refs/heads/main/new%20logo%20rsud%202025%20kecil.png" class="w-28 h-28 object-contain mx-auto mb-6 drop-shadow-lg filter" alt="Logo">
                     <h2 class="text-4xl font-extrabold text-slate-800 mb-2 tracking-tight">E Notulen</h2>
                     <p class="text-slate-600 text-sm mb-10 leading-relaxed font-medium">Sistem Informasi Manajemen Notulen Rapat<br><span class="font-bold text-blue-600 text-base">RSUD dr. R. Koesma Tuban</span></p>
+                    
+                    <!-- CONTAINER TOMBOL GOOGLE LOGIN (RENDER VIA JS) -->
                     <div class="flex justify-center transform transition hover:scale-105 active:scale-95 duration-200">
-                        <div id="g_id_onload" data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-                        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_blue" data-text="sign_in_with" data-shape="pill" data-logo_alignment="left" data-width="280"></div>
+                        <div id="google-login-btn"></div>
                     </div>
+
                     <div class="mt-8 flex items-center justify-center gap-2 opacity-80">
                         <a href="help.html" class="text-xs text-blue-600 hover:underline flex items-center gap-1 font-bold bg-white/50 px-3 py-1 rounded-full shadow-sm border border-blue-100"><i class="fa-solid fa-circle-question"></i> Panduan Penggunaan</a>
                     </div>
@@ -201,24 +203,11 @@
                 <div id="absensi-form-container" class="hidden animate-slide-up">
                     <button onclick="showAbsensiMenu()" class="mb-4 text-xs font-bold text-slate-500 hover:text-blue-600 flex items-center gap-1"><i class="fa-solid fa-arrow-left"></i> Kembali ke Menu</button>
                     
-                    <!-- TOMBOL AUTO FILL GOOGLE -->
+                    <!-- TOMBOL AUTO FILL GOOGLE (RENDER VIA JS) -->
                     <div id="visitor-google-btn-container" class="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-xl text-center">
                         <p class="text-xs text-slate-500 mb-3">Sudah pernah mengisi sebelumnya?</p>
-                        <div id="g_id_onload_visitor"
-                             data-client_id="783459415718-mp0vsmd2lopajf2ut0aqc6drjrs95pu8.apps.googleusercontent.com"
-                             data-context="use"
-                             data-ux_mode="popup"
-                             data-callback="handleVisitorCredentialResponse"
-                             data-auto_prompt="false">
-                        </div>
-                        <div class="g_id_signin"
-                             data-type="standard"
-                             data-shape="pill"
-                             data-theme="outline"
-                             data-text="continue_with"
-                             data-size="medium"
-                             data-logo_alignment="left"
-                             data-width="250">
+                        <div class="flex justify-center">
+                            <div id="google-visitor-btn"></div>
                         </div>
                         <p id="visitor-msg" class="text-[10px] text-blue-600 font-bold mt-2 hidden animate-pulse"></p>
                     </div>
@@ -609,6 +598,38 @@
             .catch(() => {
                 msgEl.innerText = "Gagal mengambil history.";
             });
+        }
+
+        // --- GOOGLE SIGN-IN INITIALIZATION ---
+        
+        function renderLoginButton() {
+            // Render Login Button (Admin/User Access)
+            google.accounts.id.initialize({
+                client_id: CLIENT_ID,
+                callback: handleCredentialResponse,
+                auto_select: false,
+                cancel_on_tap_outside: false
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("google-login-btn"),
+                { theme: "filled_blue", size: "large", shape: "pill", width: 280, text: "sign_in_with", logo_alignment: "left" }
+            );
+        }
+
+        function renderVisitorButton() {
+            // Render Visitor Button (Autofill Only)
+            // Use distinct 'context' to separate session
+            google.accounts.id.initialize({
+                client_id: CLIENT_ID,
+                callback: handleVisitorCredentialResponse,
+                auto_select: false,
+                cancel_on_tap_outside: false,
+                context: "use" 
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("google-visitor-btn"),
+                { theme: "outline", size: "medium", shape: "pill", width: 250, text: "continue_with", logo_alignment: "left" }
+            );
         }
 
         function initApp() {
@@ -1534,6 +1555,10 @@
         function openAbsensiForm() {
             document.getElementById('absensi-menu').classList.add('hidden');
             document.getElementById('absensi-form-container').classList.remove('hidden');
+            
+            // --- RENDER TOMBOL KHUSUS VISITOR (Mencegah Login) ---
+            renderVisitorButton();
+            
             setTimeout(resizeCanvas, 100); // Pastikan signature pad ter-resize
         }
 
@@ -1677,16 +1702,24 @@
 
         document.addEventListener('DOMContentLoaded', () => {
              const savedUser = localStorage.getItem('rsud_user_pro_v2');
+             
+             // --- LOGIKA INISIALISASI HALAMAN ---
              if(mode === 'absensi' && meetingId) {
+                // Mode Absensi (Portal Peserta)
                 document.getElementById('view-login').style.display = 'none'; 
                 document.getElementById('view-login').classList.add('hidden');
                 document.getElementById('app-absensi').classList.remove('hidden');
                 loadMeetingInfo(meetingId);
              } 
-             else if(savedUser) { 
-                try { currentUser = JSON.parse(savedUser); initApp(); } 
-                catch(e) { localStorage.removeItem('rsud_user_pro_v2'); }
+             else { 
+                // Mode Login (Admin)
+                renderLoginButton(); // Render Tombol Login Admin
+                if(savedUser) { 
+                    try { currentUser = JSON.parse(savedUser); initApp(); } 
+                    catch(e) { localStorage.removeItem('rsud_user_pro_v2'); }
+                }
              }
+
              if(window.tsParticles) {
                  tsParticles.load("tsparticles", {
                     fpsLimit: 60,
