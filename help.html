@@ -244,20 +244,26 @@
 
         <div class="space-y-4">
             
-            <!-- FAQ 1 -->
+            <!-- FAQ 1 (UPDATED: ALUR PENGGUNAAN) -->
             <div class="faq-item glass-card rounded-xl overflow-hidden group">
                 <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left flex justify-between items-center focus:outline-none">
-                    <span class="font-bold text-white group-hover:text-cyan-300 transition">1. Saya tidak bisa login, apa yang harus dilakukan?</span>
+                    <span class="font-bold text-white group-hover:text-cyan-300 transition">1. Bagaimana alur singkat penggunaan aplikasi E-Notulen ini?</span>
                     <i class="fa-solid fa-chevron-down faq-icon text-blue-300 transition-transform duration-300"></i>
                 </button>
                 <div class="faq-content bg-white/5 px-6">
-                    <p class="py-4 text-sm text-blue-100/80 leading-relaxed border-t border-white/10">
-                        Pastikan Anda memiliki koneksi internet yang stabil dan menggunakan akun Google yang valid. Jika ini pertama kali login, sistem akan otomatis mendaftarkan akun Anda. Jika muncul pesan <em>"Maintenance Mode"</em>, berarti Admin sedang melakukan perbaikan dan hanya Super Admin yang bisa masuk.
-                    </p>
+                    <div class="py-4 text-sm text-blue-100/80 leading-relaxed border-t border-white/10">
+                        <p class="mb-2">Secara garis besar, siklus penggunaan aplikasi terdiri dari 4 tahapan utama:</p>
+                        <ul class="list-decimal list-inside space-y-2 ml-1">
+                            <li><strong>Buat Jadwal:</strong> Notulis mendaftarkan rapat baru untuk mendapatkan Link Absensi & QR Code.</li>
+                            <li><strong>Pelaksanaan & Absensi:</strong> Saat rapat berlangsung, peserta melakukan absensi digital (QR/Link).</li>
+                            <li><strong>Pencatatan:</strong> Notulis mencatat poin pembahasan pada menu "Tulis Notulen" (Matriks Masalah & Dokumentasi).</li>
+                            <li><strong>Finalisasi:</strong> Notulis melakukan <strong>Generate Laporan Resmi</strong> (Doc) dan mengunduh <strong>Daftar Hadir</strong> (Excel) pada menu "Arsip Notulen" untuk didistribusikan.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
-            <!-- FAQ 2 (REPLACED) -->
+            <!-- FAQ 2 (REPLACED: WHO CAN USE) -->
             <div class="faq-item glass-card rounded-xl overflow-hidden group">
                 <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left flex justify-between items-center focus:outline-none">
                     <span class="font-bold text-white group-hover:text-cyan-300 transition">2. Siapa saja yang dapat memanfaatkan aplikasi E-Notulen ini?</span>
